@@ -35,7 +35,7 @@ func main() {
 //system TEXT NOT NULL,
 //username TEXT NOT NULL,
 //room INT NOT NULL,
-//timestamp timestamp NOT NULL DEFAULT now(),
+//timestamp BIGINT NOT NULL,
 //session BIGINT NOT NULL,
 //handle BIGINT NOT NULL,
 //rfid BIGINT NOT NULL,

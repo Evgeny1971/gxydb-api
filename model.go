@@ -18,25 +18,25 @@ type rooms struct {
 }
 
 type users struct {
-	ID        string    `json:"id"`
-	Display   string    `json:"display"`
-	Email     string    `json:"email"`
-	Group     string    `json:"group"`
-	IP        string    `json:"ip"`
-	Janus     string    `json:"janus"`
-	Name      string    `json:"name"`
-	Role      string    `json:"role"`
-	System    string    `json:"system"`
-	Username  string    `json:"username"`
-	Room      int       `json:"room"`
-	Timestamp time.Time `json:"timestamp"`
-	Session   int       `json:"session"`
-	Handle    int       `json:"handle"`
-	Rfid      int       `json:"rfid"`
-	Camera    bool      `json:"camera"`
-	Question  bool      `json:"question"`
-	Selftest  bool      `json:"self_test"`
-	Soundtest bool      `json:"sound_test"`
+	ID        string `json:"id"`
+	Display   string `json:"display"`
+	Email     string `json:"email"`
+	Group     string `json:"group"`
+	IP        string `json:"ip"`
+	Janus     string `json:"janus"`
+	Name      string `json:"name"`
+	Role      string `json:"role"`
+	System    string `json:"system"`
+	Username  string `json:"username"`
+	Room      int    `json:"room"`
+	Timestamp int    `json:"timestamp"`
+	Session   int    `json:"session"`
+	Handle    int    `json:"handle"`
+	Rfid      int    `json:"rfid"`
+	Camera    bool   `json:"camera"`
+	Question  bool   `json:"question"`
+	Selftest  bool   `json:"self_test"`
+	Soundtest bool   `json:"sound_test"`
 }
 
 func getRooms(db *sql.DB) ([]rooms, error) {
@@ -162,12 +162,13 @@ func (i *rooms) postRoom(db *sql.DB) error {
 
 func (i *users) postUser(db *sql.DB) error {
 
+	i.Timestamp = int(time.Now().UnixNano() / int64(time.Millisecond))
 	err := db.QueryRow(
 		"INSERT INTO users("+
-			"id, display, email, \"group\", ip, janus, name, role, system, username, room, session, handle, rfid, camera, question, self_test, sound_test"+
-			") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) ON CONFLICT (id) DO UPDATE SET ("+
-			"id, display, email, \"group\", ip, janus, name, role, system, username, room, session, handle, rfid, camera, question, self_test, sound_test"+
-			") = ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) WHERE users.id = $1 RETURNING id",
+			"id, display, email, \"group\", ip, janus, name, role, system, username, room, timestamp, session, handle, rfid, camera, question, self_test, sound_test"+
+			") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) ON CONFLICT (id) DO UPDATE SET ("+
+			"id, display, email, \"group\", ip, janus, name, role, system, username, room, timestamp, session, handle, rfid, camera, question, self_test, sound_test"+
+			") = ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) WHERE users.id = $1 RETURNING id",
 		&i.ID,
 		&i.Display,
 		&i.Email,
@@ -179,6 +180,7 @@ func (i *users) postUser(db *sql.DB) error {
 		&i.System,
 		&i.Username,
 		&i.Room,
+		&i.Timestamp,
 		&i.Session,
 		&i.Handle,
 		&i.Rfid,
