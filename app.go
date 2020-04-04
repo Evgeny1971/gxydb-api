@@ -58,9 +58,13 @@ func (a *App) Run(addr string) {
 func (a *App) initializeRoutes() {
 	//a.Router.Use(a.loggingMiddleware)
 	a.Router.HandleFunc("/rooms", a.getRooms).Methods("GET")
+	a.Router.HandleFunc("/users", a.getUsers).Methods("GET")
 	a.Router.HandleFunc("/room/{id}", a.getRoom).Methods("GET")
+	a.Router.HandleFunc("/user/{id}", a.getUser).Methods("GET")
 	a.Router.HandleFunc("/room/{id}", a.postRoom).Methods("PUT")
+	a.Router.HandleFunc("/user", a.postUser).Methods("PUT")
 	a.Router.HandleFunc("/room/{id}", a.deleteRoom).Methods("DELETE")
+	a.Router.HandleFunc("/user/{id}", a.deleteUser).Methods("DELETE")
 }
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
