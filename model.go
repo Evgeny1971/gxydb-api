@@ -61,7 +61,7 @@ func getRooms(db *sql.DB) ([]rooms, error) {
 	return ar, nil
 }
 
-func getUsers(db *sql.DB) ([]users, error) {
+func getUsers(db *sql.DB) (map[string]interface{}, error) {
 	rows, err := db.Query("SELECT * FROM users")
 
 	if err != nil {
@@ -70,7 +70,7 @@ func getUsers(db *sql.DB) ([]users, error) {
 
 	defer rows.Close()
 
-	ar := []users{}
+	json := make(map[string]interface{})
 
 	for rows.Next() {
 		var i users
@@ -96,11 +96,52 @@ func getUsers(db *sql.DB) ([]users, error) {
 			&i.Soundtest); err != nil {
 			return nil, err
 		}
-		ar = append(ar, i)
+		json[i.ID] = i
 	}
 
-	return ar, nil
+	return json, nil
 }
+
+//func getUsers(db *sql.DB) ([]users, error) {
+//	rows, err := db.Query("SELECT * FROM users")
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	defer rows.Close()
+//
+//	ar := []users{}
+//
+//	for rows.Next() {
+//		var i users
+//		if err := rows.Scan(
+//			&i.ID,
+//			&i.Display,
+//			&i.Email,
+//			&i.Group,
+//			&i.IP,
+//			&i.Janus,
+//			&i.Name,
+//			&i.Role,
+//			&i.System,
+//			&i.Username,
+//			&i.Room,
+//			&i.Timestamp,
+//			&i.Session,
+//			&i.Handle,
+//			&i.Rfid,
+//			&i.Camera,
+//			&i.Question,
+//			&i.Selftest,
+//			&i.Soundtest); err != nil {
+//			return nil, err
+//		}
+//		ar = append(ar, i)
+//	}
+//
+//	return ar, nil
+//}
 
 func (i *rooms) getRoom(db *sql.DB) error {
 	var obj []byte
