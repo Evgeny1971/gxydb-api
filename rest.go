@@ -12,6 +12,15 @@ import (
 	_ "github.com/lib/pq"
 )
 
+func (a *App) getGroups(w http.ResponseWriter, r *http.Request) {
+	files, err := getGroups(a.DB)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	respondWithJSON(w, http.StatusOK, files)
+}
+
 func (a *App) getRooms(w http.ResponseWriter, r *http.Request) {
 	files, err := getRooms(a.DB)
 	if err != nil {

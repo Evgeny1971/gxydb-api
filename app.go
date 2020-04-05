@@ -57,6 +57,7 @@ func (a *App) Run(addr string) {
 
 func (a *App) initializeRoutes() {
 	//a.Router.Use(a.loggingMiddleware)
+	a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")
 	a.Router.HandleFunc("/rooms", a.getRooms).Methods("GET")
 	a.Router.HandleFunc("/users", a.getUsers).Methods("GET")
 	a.Router.HandleFunc("/room/{id}", a.getRoom).Methods("GET")

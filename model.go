@@ -9,12 +9,12 @@ import (
 )
 
 type rooms struct {
-	Room        int                    `json:"room"`
-	Janus       string                 `json:"janus"`
-	Questions   bool                   `json:"questions"`
-	Description string                 `json:"description"`
-	Num         int                    `json:"num_users"`
-	Users       map[string]interface{} `json:"users"`
+	Room        int         `json:"room"`
+	Janus       string      `json:"janus"`
+	Questions   bool        `json:"questions"`
+	Description string      `json:"description"`
+	Num         int         `json:"num_users"`
+	Users       interface{} `json:"users"`
 }
 
 type users struct {
@@ -37,6 +37,69 @@ type users struct {
 	Question  bool   `json:"question"`
 	Selftest  bool   `json:"self_test"`
 	Soundtest bool   `json:"sound_test"`
+}
+
+func getGroups(db *sql.DB) ([]rooms, error) {
+	rows, err := db.Query("SELECT * FROM rooms ORDER BY description")
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	ar := []rooms{}
+
+	for rows.Next() {
+		var r rooms
+
+		if err := rows.Scan(&r.Room, &r.Janus, &r.Description); err != nil {
+			return nil, err
+		}
+
+		rows, err := db.Query("SELECT * FROM users WHERE room = $1", r.Room)
+		if err != nil {
+			return nil, err
+		}
+
+		defer rows.Close()
+
+		ur := []users{}
+
+		for rows.Next() {
+			var i users
+			if err := rows.Scan(
+				&i.ID,
+				&i.Display,
+				&i.Email,
+				&i.Group,
+				&i.IP,
+				&i.Janus,
+				&i.Name,
+				&i.Role,
+				&i.System,
+				&i.Username,
+				&i.Room,
+				&i.Timestamp,
+				&i.Session,
+				&i.Handle,
+				&i.Rfid,
+				&i.Camera,
+				&i.Question,
+				&i.Selftest,
+				&i.Soundtest); err != nil {
+				return nil, err
+			}
+			ur = append(ur, i)
+		}
+
+		r.Users = ur
+		r.Num = len(ur)
+
+		ar = append(ar, r)
+	}
+
+	return ar, nil
 }
 
 func getRooms(db *sql.DB) ([]rooms, error) {
@@ -101,47 +164,6 @@ func getUsers(db *sql.DB) (map[string]interface{}, error) {
 
 	return json, nil
 }
-
-//func getUsers(db *sql.DB) ([]users, error) {
-//	rows, err := db.Query("SELECT * FROM users")
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	defer rows.Close()
-//
-//	ar := []users{}
-//
-//	for rows.Next() {
-//		var i users
-//		if err := rows.Scan(
-//			&i.ID,
-//			&i.Display,
-//			&i.Email,
-//			&i.Group,
-//			&i.IP,
-//			&i.Janus,
-//			&i.Name,
-//			&i.Role,
-//			&i.System,
-//			&i.Username,
-//			&i.Room,
-//			&i.Timestamp,
-//			&i.Session,
-//			&i.Handle,
-//			&i.Rfid,
-//			&i.Camera,
-//			&i.Question,
-//			&i.Selftest,
-//			&i.Soundtest); err != nil {
-//			return nil, err
-//		}
-//		ar = append(ar, i)
-//	}
-//
-//	return ar, nil
-//}
 
 func (i *rooms) getRoom(db *sql.DB) error {
 	var obj []byte
@@ -247,28 +269,4 @@ func (i *users) deleteUser(db *sql.DB) error {
 	_, err := db.Exec("DELETE FROM users WHERE id=$1", i.ID)
 
 	return err
-}
-
-func getGroups(db *sql.DB) ([]rooms, error) {
-	rows, err := db.Query("SELECT * FROM rooms ORDER BY description")
-
-	if err != nil {
-		return nil, err
-	}
-
-	defer rows.Close()
-
-	ar := []rooms{}
-
-	for rows.Next() {
-		var i rooms
-		var obj []byte
-		if err := rows.Scan(&i.Room, &i.Janus, &i.Questions, &i.Description, &i.Num, &obj); err != nil {
-			return nil, err
-		}
-		json.Unmarshal(obj, &i.Users)
-		ar = append(ar, i)
-	}
-
-	return ar, nil
 }
