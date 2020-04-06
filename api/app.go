@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/handlers"
@@ -16,8 +17,9 @@ import (
 
 type App struct {
 	tokenVerifier *oidc.IDTokenVerifier
-	Router        *mux.Router
 	DB            *sql.DB
+	Router        *mux.Router
+	Handler       http.Handler
 }
 
 func (a *App) initOidc(issuer string) {
@@ -32,32 +34,42 @@ func (a *App) initOidc(issuer string) {
 }
 
 func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth bool) {
-	var err error
-	a.DB, err = sql.Open("postgres", dbUrl)
+	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	a.InitializeWithDB(db, accountsUrl, skipAuth)
+}
+
+func (a *App) InitializeWithDB(db *sql.DB, accountsUrl string, skipAuth bool) {
+	a.DB = db
+
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
+
 	if !skipAuth {
 		a.initOidc(accountsUrl)
 		a.Router.Use(auth.Middleware(a.tokenVerifier))
 	}
-}
 
-func (a *App) Run(listenAddr string) {
 	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Content-Length", "Accept-Encoding", "Content-Range", "Content-Disposition", "Authorization"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT", "OPTIONS"})
 	cors := handlers.CORS(originsOk, headersOk, methodsOk)
 
+	recovery := handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))
+
+	a.Handler = handlers.LoggingHandler(os.Stdout, recovery(cors(a.Router)))
+}
+
+func (a *App) Run(listenAddr string) {
 	addr := listenAddr
 	if addr == "" {
 		addr = ":8080"
 	}
 
-	log.Fatal(http.ListenAndServe(addr, cors(a.Router)))
+	log.Fatal(http.ListenAndServe(addr, a.Handler))
 }
 
 func (a *App) initializeRoutes() {
