@@ -1,19 +1,17 @@
-// app.go
-
-package main
+package api
 
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"fmt"
-	"github.com/coreos/go-oidc"
 	"log"
 	"net/http"
 
+	"github.com/coreos/go-oidc"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+
+	"github.com/Bnei-Baruch/gxydb-api/pkg/auth"
 )
 
 type App struct {
@@ -22,41 +20,47 @@ type App struct {
 	DB            *sql.DB
 }
 
-func (a *App) initOidc(acc string) {
-	var oidcIDTokenVerifier *oidc.IDTokenVerifier
-	oidcProvider, err := oidc.NewProvider(context.TODO(), acc)
+func (a *App) initOidc(issuer string) {
+	oidcProvider, err := oidc.NewProvider(context.TODO(), issuer)
 	if err != nil {
-		panic("Login failed:" + err.Error())
+		log.Fatalf("Error initializing auth %v", err)
 	}
-	oidcIDTokenVerifier = oidcProvider.Verifier(&oidc.Config{
+
+	a.tokenVerifier = oidcProvider.Verifier(&oidc.Config{
 		SkipClientIDCheck: true,
 	})
-	a.tokenVerifier = oidcIDTokenVerifier
 }
 
-func (a *App) Initialize(user string, password string, dbname string) {
-	connectionString := fmt.Sprintf("postgres://%s:%s@localhost/%s?sslmode=disable", user, password, dbname)
-
+func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth bool) {
 	var err error
-	a.DB, err = sql.Open("postgres", connectionString)
+	a.DB, err = sql.Open("postgres", dbUrl)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
+	if !skipAuth {
+		a.initOidc(accountsUrl)
+		a.Router.Use(auth.Middleware(a.tokenVerifier))
+	}
 }
 
-func (a *App) Run(addr string) {
+func (a *App) Run(listenAddr string) {
 	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Content-Length", "Accept-Encoding", "Content-Range", "Content-Disposition", "Authorization"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT", "OPTIONS"})
+	cors := handlers.CORS(originsOk, headersOk, methodsOk)
 
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(originsOk, headersOk, methodsOk)(a.Router)))
+	addr := listenAddr
+	if addr == "" {
+		addr = ":8080"
+	}
+
+	log.Fatal(http.ListenAndServe(addr, cors(a.Router)))
 }
 
 func (a *App) initializeRoutes() {
-	//a.Router.Use(a.loggingMiddleware)
 	a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")
 	a.Router.HandleFunc("/rooms", a.getRooms).Methods("GET")
 	a.Router.HandleFunc("/users", a.getUsers).Methods("GET")
@@ -66,17 +70,4 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/user", a.postUser).Methods("PUT")
 	a.Router.HandleFunc("/room/{id}", a.deleteRoom).Methods("DELETE")
 	a.Router.HandleFunc("/user/{id}", a.deleteUser).Methods("DELETE")
-}
-
-func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
-}
-
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.WriteHeader(code)
-	w.Write(response)
 }
