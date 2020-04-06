@@ -1,0 +1,19 @@
+version: "3.7"
+
+services:
+  db:
+    image: postgres:12
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+      POSTGRES_DB: galaxy
+    ports:
+      - 5432:5432
+
+  app:
+    build: .
+    environment:
+      DB_URL: postgres://user:password@db/galaxy?sslmode=disable
+    ports:
+      - 8080:8080

@@ -1,6 +1,4 @@
-// model.go
-
-package main
+package api
 
 import (
 	"database/sql"

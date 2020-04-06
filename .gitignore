@@ -1,0 +1,6 @@
+.idea/
+
+*.swp
+*.log
+
+gxydb-api
