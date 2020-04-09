@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null"
@@ -46,6 +47,37 @@ func (s *ApiTestSuite) SetupTest() {
 func (s *ApiTestSuite) TearDownTest() {
 	err := s.tx.Rollback()
 	s.Require().Nil(err)
+}
+
+func (s *ApiTestSuite) TestGetRoomMalformedID() {
+	req, _ := http.NewRequest("GET", "/room/id", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestGetRoomNotFound() {
+	req, _ := http.NewRequest("GET", "/room/1", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// disabled room
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	room.Disabled = true
+	_, err := room.Update(s.tx, boil.Whitelist(models.RoomColumns.Disabled))
+	s.Require().NoError(err)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// removed room
+	room.Disabled = false
+	room.RemovedAt = null.TimeFrom(time.Now().UTC())
+	_, err = room.Update(s.tx, boil.Whitelist(models.RoomColumns.Disabled, models.RoomColumns.RemovedAt))
+	s.Require().NoError(err)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
 }
 
 func (s *ApiTestSuite) TestGetRoom() {
@@ -99,18 +131,6 @@ func (s *ApiTestSuite) TestGetRoom() {
 	s.False(body["questions"].(bool), "questions false again")
 }
 
-func (s *ApiTestSuite) TestGetRoomNotFound() {
-	req, _ := http.NewRequest("GET", "/room/1", nil)
-	resp := s.request(req)
-	s.Require().Equal(http.StatusNotFound, resp.Code)
-}
-
-func (s *ApiTestSuite) TestGetRoomMalformedID() {
-	req, _ := http.NewRequest("GET", "/room/id", nil)
-	resp := s.request(req)
-	s.Require().Equal(http.StatusBadRequest, resp.Code)
-}
-
 func (s *ApiTestSuite) TestGetRooms() {
 	boil.DebugMode = false
 	counts := struct {
@@ -119,8 +139,8 @@ func (s *ApiTestSuite) TestGetRooms() {
 		sessionsPerRoom int
 	}{
 		gateways:        3,
-		roomPerGateway:  10,
-		sessionsPerRoom: 10,
+		roomPerGateway:  3,
+		sessionsPerRoom: 5,
 	}
 	gateways := make(map[int64]*models.Gateway, counts.gateways)
 	rooms := make(map[int]*models.Room, counts.gateways*counts.roomPerGateway)
@@ -167,6 +187,110 @@ func (s *ApiTestSuite) TestGetRooms() {
 			s.Require().True(ok, "unknown session [%d] %v", j, data["id"])
 			s.assertV1User(session, data)
 		}
+	}
+}
+
+func (s *ApiTestSuite) TestGetUserMalformedID() {
+	req, _ := http.NewRequest("GET", "/users/1234567890123456789012345678901234567890", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestGetUserNotFound() {
+	req, _ := http.NewRequest("GET", "/users/1", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// existing user without active session
+	user := s.createUser()
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// disabled user
+	user.Disabled = true
+	_, err := user.Update(s.tx, boil.Whitelist(models.UserColumns.Disabled))
+	s.Require().NoError(err)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// removed user
+	user.Disabled = false
+	user.RemovedAt = null.TimeFrom(time.Now().UTC())
+	_, err = user.Update(s.tx, boil.Whitelist(models.UserColumns.Disabled, models.UserColumns.RemovedAt))
+	s.Require().NoError(err)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+}
+
+func (s *ApiTestSuite) TestGetUser() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.tx))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(session, body)
+
+	// turn camera off
+	session.Camera = false
+	_, err := session.Update(s.tx, boil.Whitelist(models.SessionColumns.Camera))
+	s.Require().NoError(err)
+	body = s.request200json(req)
+	s.False(body["camera"].(bool), "camera false")
+
+	// turn camera on again
+	session.Camera = true
+	_, err = session.Update(s.tx, boil.Whitelist(models.SessionColumns.Camera))
+	s.Require().NoError(err)
+	body = s.request200json(req)
+	s.True(body["camera"].(bool), "camera true")
+}
+
+func (s *ApiTestSuite) TestGetUsers() {
+	counts := struct {
+		gateways        int
+		roomPerGateway  int
+		sessionsPerRoom int
+	}{
+		gateways:        2,
+		roomPerGateway:  3,
+		sessionsPerRoom: 5,
+	}
+	gateways := make(map[int64]*models.Gateway, counts.gateways)
+	rooms := make(map[int]*models.Room, counts.gateways*counts.roomPerGateway)
+	sessions := make(map[string]*models.Session, counts.gateways*counts.roomPerGateway*counts.sessionsPerRoom)
+	for i := 0; i < counts.gateways; i++ {
+		gateway := s.createGateway()
+		gateways[gateway.ID] = gateway
+		for j := 0; j < counts.roomPerGateway; j++ {
+			room := s.createRoom(gateway)
+			rooms[room.GatewayUID] = room
+			for k := 0; k < counts.sessionsPerRoom; k++ {
+				user := s.createUser()
+				sessions[user.AccountsID] = s.createSession(user, gateway, room)
+			}
+		}
+	}
+	s.Require().NoError(s.app.cache.Reload(s.tx))
+
+	// create some inactive users
+	for i := 0; i < counts.sessionsPerRoom; i++ {
+		s.createUser()
+	}
+
+	req, _ := http.NewRequest("GET", "/users", nil)
+	body := s.request200json(req)
+
+	s.Equal(counts.gateways*counts.roomPerGateway*counts.sessionsPerRoom, len(body), "user count")
+
+	for id, respSession := range body {
+		data := respSession.(map[string]interface{})
+		session, ok := sessions[data["id"].(string)]
+		s.Require().True(ok, "unknown session [%s] %v", id, data["room"])
+		s.assertV1User(session, data)
 	}
 }
 

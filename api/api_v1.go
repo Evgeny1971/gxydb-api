@@ -131,20 +131,47 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) V1GetUsers(w http.ResponseWriter, r *http.Request) {
-	files, err := getUsers(a.DB)
+	sessions, err := models.Sessions(
+		models.SessionWhere.RemovedAt.IsNull(),
+		qm.Load(models.SessionRels.User),
+		qm.Load(models.SessionRels.Room),
+	).All(a.DB)
+
 	if err != nil {
+		fmt.Printf("fetch sessions from db %+v", err)
 		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	httputil.RespondWithJSON(w, http.StatusOK, files)
+
+	respSessions := make(map[string]*V1User, len(sessions))
+	for i := range sessions {
+		session := sessions[i]
+		respSessions[session.R.User.AccountsID] = a.makeV1User(session.R.Room, session)
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, respSessions)
 }
 
 func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
-	var i users
 	vars := mux.Vars(r)
-	i.ID = vars["id"]
+	id, ok := vars["id"]
+	if !ok || len(id) == 0 {
+		httputil.RespondWithError(w, http.StatusBadRequest, "no id given")
+		return
+	}
+	if len(id) > 36 {
+		httputil.RespondWithError(w, http.StatusBadRequest, "malformed id")
+		return
+	}
 
-	if err := i.getUser(a.DB); err != nil {
+	var userID int64
+	err := models.Users(
+		qm.Select(models.UserColumns.ID),
+		models.UserWhere.AccountsID.EQ(id),
+		models.UserWhere.Disabled.EQ(false),
+		models.UserWhere.RemovedAt.IsNull(),
+	).QueryRow(a.DB).Scan(&userID)
+	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
@@ -153,7 +180,25 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	httputil.RespondWithJSON(w, http.StatusOK, i)
+
+	session, err := models.Sessions(
+		models.SessionWhere.UserID.EQ(userID),
+		models.SessionWhere.RemovedAt.IsNull(),
+		qm.Load(models.SessionRels.User),
+		qm.Load(models.SessionRels.Room),
+	).One(a.DB)
+
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
+		default:
+			httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		}
+		return
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, a.makeV1User(session.R.Room, session))
 }
 
 func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
