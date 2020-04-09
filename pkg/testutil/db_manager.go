@@ -9,8 +9,8 @@ import (
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
 	"github.com/lib/pq"
+	"github.com/volatiletech/sqlboiler/boil"
 
-	_ "github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
 	_ "github.com/stretchr/testify"
 
@@ -23,6 +23,8 @@ type TestDBManager struct {
 }
 
 func (m *TestDBManager) InitTestDB() error {
+	boil.DebugMode = true
+
 	m.testDB = fmt.Sprintf("test_%s", strings.ToLower(stringutil.GenerateName(5)))
 	fmt.Println("Initializing test DB: ", m.testDB)
 

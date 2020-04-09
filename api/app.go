@@ -11,13 +11,14 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/Bnei-Baruch/gxydb-api/pkg/auth"
 )
 
 type App struct {
 	tokenVerifier *oidc.IDTokenVerifier
-	DB            *sql.DB
+	DB            boil.Executor
 	Router        *mux.Router
 	Handler       http.Handler
 }
@@ -42,7 +43,7 @@ func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth bool) {
 	a.InitializeWithDB(db, accountsUrl, skipAuth)
 }
 
-func (a *App) InitializeWithDB(db *sql.DB, accountsUrl string, skipAuth bool) {
+func (a *App) InitializeWithDB(db boil.Executor, accountsUrl string, skipAuth bool) {
 	a.DB = db
 
 	a.Router = mux.NewRouter()
@@ -73,13 +74,24 @@ func (a *App) Run(listenAddr string) {
 }
 
 func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")
-	a.Router.HandleFunc("/rooms", a.getRooms).Methods("GET")
-	a.Router.HandleFunc("/users", a.getUsers).Methods("GET")
-	a.Router.HandleFunc("/room/{id}", a.getRoom).Methods("GET")
-	a.Router.HandleFunc("/user/{id}", a.getUser).Methods("GET")
-	a.Router.HandleFunc("/room/{id}", a.postRoom).Methods("PUT")
-	a.Router.HandleFunc("/user", a.postUser).Methods("PUT")
-	a.Router.HandleFunc("/room/{id}", a.deleteRoom).Methods("DELETE")
-	a.Router.HandleFunc("/user/{id}", a.deleteUser).Methods("DELETE")
+	// api v1 (current)
+	a.Router.HandleFunc("/rooms", a.V1GetRooms).Methods("GET")     // Current
+	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")  // Current
+	a.Router.HandleFunc("/users", a.V1GetUsers).Methods("GET")     // Current
+	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET") // Current
+	//a.Router.HandleFunc("/qids/{id}", a.getQuad).Methods("GET")							// Current
+	//a.Router.HandleFunc("/qids/{id}", a.putQuad).Methods("PUT")							// Current
+
+	// api v2
+	//a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")
+	//a.Router.HandleFunc("/rooms", a.getRooms).Methods("GET") 	 			// Current
+	//a.Router.HandleFunc("/room/{id}", a.getRoom).Methods("GET")			// Current
+	//a.Router.HandleFunc("/room/{id}", a.postRoom).Methods("PUT")
+	//a.Router.HandleFunc("/room/{id}", a.deleteRoom).Methods("DELETE")
+	//a.Router.HandleFunc("/users", a.getUsers).Methods("GET")				// Current
+	//a.Router.HandleFunc("/user", a.postUser).Methods("PUT")
+	//a.Router.HandleFunc("/user/{id}", a.getUser).Methods("GET")
+	//a.Router.HandleFunc("/user/{id}", a.deleteUser).Methods("DELETE")
+	//a.Router.HandleFunc("/qids/{id}", a.getQuad).Methods("GET")							// Current
+	//a.Router.HandleFunc("/qids/{id}", a.putQuad).Methods("PUT")							// Current
 }

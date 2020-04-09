@@ -1,9 +1,9 @@
 package api
 
 import (
-	"database/sql"
-	"encoding/json"
 	"time"
+
+	"github.com/volatiletech/sqlboiler/boil"
 )
 
 type rooms struct {
@@ -37,8 +37,8 @@ type users struct {
 	Soundtest bool   `json:"sound_test"`
 }
 
-func getGroups(db *sql.DB) ([]rooms, error) {
-	rows, err := db.Query("SELECT * FROM rooms ORDER BY description")
+func getGroups(exec boil.Executor) ([]rooms, error) {
+	rows, err := exec.Query("SELECT * FROM rooms ORDER BY description")
 
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func getGroups(db *sql.DB) ([]rooms, error) {
 			return nil, err
 		}
 
-		rows, err := db.Query("SELECT * FROM users WHERE room = $1", r.Room)
+		rows, err := exec.Query("SELECT * FROM users WHERE room = $1", r.Room)
 		if err != nil {
 			return nil, err
 		}
@@ -100,8 +100,8 @@ func getGroups(db *sql.DB) ([]rooms, error) {
 	return ar, nil
 }
 
-func getRooms(db *sql.DB) ([]rooms, error) {
-	rows, err := db.Query("SELECT * FROM rooms ORDER BY description")
+func getRooms(exec boil.Executor) ([]rooms, error) {
+	rows, err := exec.Query("SELECT * FROM rooms ORDER BY description")
 
 	if err != nil {
 		return nil, err
@@ -122,8 +122,8 @@ func getRooms(db *sql.DB) ([]rooms, error) {
 	return ar, nil
 }
 
-func getUsers(db *sql.DB) (map[string]interface{}, error) {
-	rows, err := db.Query("SELECT * FROM users")
+func getUsers(exec boil.Executor) (map[string]interface{}, error) {
+	rows, err := exec.Query("SELECT * FROM users")
 
 	if err != nil {
 		return nil, err
@@ -163,23 +163,14 @@ func getUsers(db *sql.DB) (map[string]interface{}, error) {
 	return json, nil
 }
 
-func (i *rooms) getRoom(db *sql.DB) error {
-	var obj []byte
-
-	err := db.QueryRow("SELECT * FROM rooms WHERE room = $1",
-		i.Room).Scan(&i.Room, &i.Janus, &i.Questions, &i.Description, &i.Num, &obj)
-
-	if err != nil {
-		return err
-	}
-	err = json.Unmarshal(obj, &i.Users)
-
-	return err
+func (i *rooms) getRoom(exec boil.Executor) error {
+	return exec.QueryRow("SELECT janus, description FROM rooms WHERE room = $1", i.Room).
+		Scan(&i.Janus, &i.Description)
 }
 
-func (i *users) getUser(db *sql.DB) error {
+func (i *users) getUser(exec boil.Executor) error {
 
-	err := db.QueryRow("SELECT * FROM users WHERE id = $1",
+	err := exec.QueryRow("SELECT * FROM users WHERE id = $1",
 		i.ID).Scan(
 		&i.ID,
 		&i.Display,
@@ -208,11 +199,11 @@ func (i *users) getUser(db *sql.DB) error {
 	return err
 }
 
-func (i *rooms) postRoom(db *sql.DB) error {
+func (i *rooms) postRoom(exec boil.Executor) error {
 
-	err := db.QueryRow(
+	err := exec.QueryRow(
 		"INSERT INTO rooms(room, janus, description) VALUES($1, $2, $3) ON CONFLICT (room) DO UPDATE SET (room, janus, description) = ($1, $2, $3) WHERE rooms.room = $1 RETURNING room",
-		i.Room, i.Janus, i.Questions).Scan(&i.Room)
+		i.Room, i.Janus, i.Description).Scan(&i.Room)
 
 	if err != nil {
 		return err
@@ -221,10 +212,10 @@ func (i *rooms) postRoom(db *sql.DB) error {
 	return nil
 }
 
-func (i *users) postUser(db *sql.DB) error {
+func (i *users) postUser(exec boil.Executor) error {
 
 	i.Timestamp = int(time.Now().UnixNano() / int64(time.Millisecond))
-	err := db.QueryRow(
+	err := exec.QueryRow(
 		"INSERT INTO users("+
 			"id, display, email, \"group\", ip, janus, name, role, system, username, room, timestamp, session, handle, rfid, camera, question, self_test, sound_test"+
 			") VALUES($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19) ON CONFLICT (id) DO UPDATE SET ("+
@@ -257,14 +248,14 @@ func (i *users) postUser(db *sql.DB) error {
 	return nil
 }
 
-func (i *rooms) deleteRoom(db *sql.DB) error {
-	_, err := db.Exec("DELETE FROM rooms WHERE room=$1", i.Room)
+func (i *rooms) deleteRoom(exec boil.Executor) error {
+	_, err := exec.Exec("DELETE FROM rooms WHERE room=$1", i.Room)
 
 	return err
 }
 
-func (i *users) deleteUser(db *sql.DB) error {
-	_, err := db.Exec("DELETE FROM users WHERE id=$1", i.ID)
+func (i *users) deleteUser(exec boil.Executor) error {
+	_, err := exec.Exec("DELETE FROM users WHERE id=$1", i.ID)
 
 	return err
 }

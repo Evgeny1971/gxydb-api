@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
 )
 
@@ -39,16 +40,15 @@ func (a *App) getUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) getRoom(w http.ResponseWriter, r *http.Request) {
-	var i rooms
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		httputil.RespondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
-	i.Room = id
 
-	if err := i.getRoom(a.DB); err != nil {
+	room, err := models.FindRoom(a.DB, int64(id))
+	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
@@ -57,7 +57,8 @@ func (a *App) getRoom(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	httputil.RespondWithJSON(w, http.StatusOK, i)
+
+	httputil.RespondWithJSON(w, http.StatusOK, room)
 }
 
 func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
