@@ -45,28 +45,49 @@ type V1Room struct {
 }
 
 func (a *App) V1GetRooms(w http.ResponseWriter, r *http.Request) {
-	files, err := getRooms(a.DB)
-	if err != nil {
-		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	httputil.RespondWithJSON(w, http.StatusOK, files)
-}
+	rooms, err := models.Rooms(
+		models.RoomWhere.Disabled.EQ(false),
+		models.RoomWhere.RemovedAt.IsNull(),
+		qm.Load(models.RoomRels.Sessions, models.SessionWhere.RemovedAt.IsNull()),
+		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.User)),
+	).All(a.DB)
 
-func (a *App) V1GetUsers(w http.ResponseWriter, r *http.Request) {
-	files, err := getUsers(a.DB)
 	if err != nil {
+		fmt.Printf("fetch rooms from db %+v", err)
 		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	httputil.RespondWithJSON(w, http.StatusOK, files)
+
+	respRooms := make([]*V1Room, len(rooms))
+	for i := range rooms {
+		room := rooms[i]
+
+		respRoom := &V1Room{
+			Room:        room.GatewayUID,
+			Janus:       a.cache.gateways[room.DefaultGatewayID].Name,
+			Description: room.Name,
+			NumUsers:    len(room.R.Sessions),
+			Users:       make([]*V1User, len(room.R.Sessions)),
+		}
+
+		for i, session := range room.R.Sessions {
+			if session.Question {
+				respRoom.Questions = true
+			}
+			respRoom.Users[i] = a.makeV1User(room, session)
+		}
+
+		respRooms[i] = respRoom
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, respRooms)
 }
 
 func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		httputil.RespondWithError(w, http.StatusBadRequest, err.Error())
+		httputil.RespondWithError(w, http.StatusBadRequest, "id is expected to be an integer")
 		return
 	}
 
@@ -75,7 +96,7 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
 		qm.Load(models.RoomRels.DefaultGateway),
-		qm.Load(models.RoomRels.Sessions, models.SessionWhere.RemovedAt.IsNull()),
+		qm.Load(models.RoomRels.Sessions, models.SessionWhere.RemovedAt.IsNull(), qm.OrderBy(models.SessionColumns.CreatedAt)),
 		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.User)),
 		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.Gateway)),
 	).One(a.DB)
@@ -91,10 +112,9 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respRoom := V1Room{
+	respRoom := &V1Room{
 		Room:        room.GatewayUID,
 		Janus:       room.R.DefaultGateway.Name,
-		Questions:   false,
 		Description: room.Name,
 		NumUsers:    len(room.R.Sessions),
 		Users:       make([]*V1User, len(room.R.Sessions)),
@@ -104,30 +124,19 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 		if session.Question {
 			respRoom.Questions = true
 		}
-		respRoom.Users[i] = &V1User{
-			ID:        session.R.User.AccountsID,
-			Display:   session.Display.String,
-			Email:     session.R.User.Email.String,
-			Group:     room.Name,
-			IP:        session.IPAddress.String,
-			Janus:     session.R.Gateway.Name,
-			Name:      "",     // Useless. Shouldn't be used on the client side.
-			Role:      "user", // fixed. No more "groups" only "users"
-			System:    session.UserAgent.String,
-			Username:  "", // Useless. Never seen a value here
-			Room:      room.GatewayUID,
-			Timestamp: session.CreatedAt.Unix(), // Not sure we really need this
-			Session:   session.GatewaySession.Int64,
-			Handle:    session.GatewayHandle.Int64,
-			RFID:      session.GatewayFeed.Int64,
-			Camera:    session.Camera,
-			Question:  session.Question,
-			SelfTest:  session.SelfTest,  // Not sure we really need this
-			SoundTest: session.SoundTest, // Not sure we really need this
-		}
+		respRoom.Users[i] = a.makeV1User(room, session)
 	}
 
 	httputil.RespondWithJSON(w, http.StatusOK, respRoom)
+}
+
+func (a *App) V1GetUsers(w http.ResponseWriter, r *http.Request) {
+	files, err := getUsers(a.DB)
+	if err != nil {
+		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	httputil.RespondWithJSON(w, http.StatusOK, files)
 }
 
 func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
@@ -179,4 +188,33 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	httputil.RespondWithJSON(w, http.StatusOK, i)
+}
+
+func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
+	user := &V1User{
+		ID:        session.R.User.AccountsID,
+		Display:   session.Display.String,
+		Email:     session.R.User.Email.String,
+		Group:     room.Name,
+		IP:        session.IPAddress.String,
+		Name:      "",     // Useless. Shouldn't be used on the client side.
+		Role:      "user", // fixed. No more "groups" only "users"
+		System:    session.UserAgent.String,
+		Username:  "", // Useless. Never seen a value here
+		Room:      room.GatewayUID,
+		Timestamp: session.CreatedAt.Unix(), // Not sure we really need this
+		Session:   session.GatewaySession.Int64,
+		Handle:    session.GatewayHandle.Int64,
+		RFID:      session.GatewayFeed.Int64,
+		Camera:    session.Camera,
+		Question:  session.Question,
+		SelfTest:  session.SelfTest,  // Not sure we really need this
+		SoundTest: session.SoundTest, // Not sure we really need this
+	}
+
+	if session.GatewayID.Valid {
+		user.Janus = a.cache.gateways[session.GatewayID.Int64].Name
+	}
+
+	return user
 }

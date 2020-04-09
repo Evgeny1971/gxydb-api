@@ -114,6 +114,5 @@ CREATE TABLE IF NOT EXISTS composites_rooms
 -------------
 
 CREATE INDEX IF NOT EXISTS sessions_room_id_idx
-    ON sessions USING BTREE (room_id);
-
+    ON sessions USING BTREE (room_id, created_at);
 

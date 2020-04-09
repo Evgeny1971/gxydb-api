@@ -17,10 +17,11 @@ import (
 )
 
 type App struct {
-	tokenVerifier *oidc.IDTokenVerifier
-	DB            boil.Executor
 	Router        *mux.Router
 	Handler       http.Handler
+	tokenVerifier *oidc.IDTokenVerifier
+	DB            boil.Executor
+	cache         *AppCache
 }
 
 func (a *App) initOidc(issuer string) {
@@ -62,6 +63,12 @@ func (a *App) InitializeWithDB(db boil.Executor, accountsUrl string, skipAuth bo
 	recovery := handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))
 
 	a.Handler = handlers.LoggingHandler(os.Stdout, recovery(cors(a.Router)))
+
+	a.cache = new(AppCache)
+	err := a.cache.Init(db)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (a *App) Run(listenAddr string) {
