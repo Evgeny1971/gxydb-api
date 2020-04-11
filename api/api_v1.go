@@ -2,11 +2,13 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
@@ -44,7 +46,16 @@ type V1Room struct {
 	Users       []*V1User `json:"users"`
 }
 
-func (a *App) V1GetRooms(w http.ResponseWriter, r *http.Request) {
+type V1Composite struct {
+	VQuad []*V1CompositeRoom `json:"vquad"`
+}
+
+type V1CompositeRoom struct {
+	V1Room
+	Position int `json:"queue"`
+}
+
+func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := models.Rooms(
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
@@ -64,7 +75,7 @@ func (a *App) V1GetRooms(w http.ResponseWriter, r *http.Request) {
 
 		respRoom := &V1Room{
 			Room:        room.GatewayUID,
-			Janus:       a.cache.gateways[room.DefaultGatewayID].Name,
+			Janus:       a.cache.gateways.ByID[room.DefaultGatewayID].Name,
 			Description: room.Name,
 			NumUsers:    len(room.R.Sessions),
 			Users:       make([]*V1User, len(room.R.Sessions)),
@@ -130,7 +141,7 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondWithJSON(w, http.StatusOK, respRoom)
 }
 
-func (a *App) V1GetUsers(w http.ResponseWriter, r *http.Request) {
+func (a *App) V1ListUsers(w http.ResponseWriter, r *http.Request) {
 	sessions, err := models.Sessions(
 		models.SessionWhere.RemovedAt.IsNull(),
 		qm.Load(models.SessionRels.User),
@@ -154,11 +165,7 @@ func (a *App) V1GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok || len(id) == 0 {
-		httputil.RespondWithError(w, http.StatusBadRequest, "no id given")
-		return
-	}
+	id := vars["id"]
 	if len(id) > 36 {
 		httputil.RespondWithError(w, http.StatusBadRequest, "malformed id")
 		return
@@ -201,38 +208,151 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondWithJSON(w, http.StatusOK, a.makeV1User(session.R.Room, session))
 }
 
-func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
-	var i users
-	vars := mux.Vars(r)
-	i.ID = vars["id"]
+func (a *App) V1ListComposites(w http.ResponseWriter, r *http.Request) {
+	composites, err := models.Composites(
+		qm.Load(models.CompositeRels.CompositesRooms, qm.OrderBy(models.CompositesRoomColumns.Position)),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room),
+			models.RoomWhere.Disabled.EQ(false),
+			models.RoomWhere.RemovedAt.IsNull()),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions),
+			models.SessionWhere.RemovedAt.IsNull()),
+	).All(a.DB)
 
-	if err := i.getUser(a.DB); err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
-		default:
-			httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+	if err != nil {
+		httputil.NewInternalError(err).Abort(w)
+		return
+	}
+
+	respComposites := make(map[string]*V1Composite, len(composites))
+	for _, composite := range composites {
+		respComposites[composite.Name] = a.makeV1Composite(composite)
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, respComposites)
+}
+
+func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	if len(id) > 16 {
+		httputil.RespondWithError(w, http.StatusBadRequest, "malformed id")
+		return
+	}
+
+	composite, err := models.Composites(
+		models.CompositeWhere.Name.EQ(id),
+		qm.Load(models.CompositeRels.CompositesRooms),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room),
+			models.RoomWhere.Disabled.EQ(false),
+			models.RoomWhere.RemovedAt.IsNull()),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions),
+			models.SessionWhere.RemovedAt.IsNull(), qm.OrderBy(models.SessionColumns.CreatedAt)),
+	).One(a.DB)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w)
+		} else {
+			httputil.NewInternalError(err).Abort(w)
 		}
 		return
 	}
-	httputil.RespondWithJSON(w, http.StatusOK, i)
+
+	respComposite := a.makeV1Composite(composite)
+	httputil.RespondWithJSON(w, http.StatusOK, respComposite)
 }
 
 func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
-	var i users
 	vars := mux.Vars(r)
-	i.ID = vars["id"]
+	id := vars["id"]
+	if len(id) > 16 {
+		httputil.NewBadRequestError(errors.New("malformed id")).Abort(w)
+		return
+	}
 
-	if err := i.getUser(a.DB); err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
-		default:
-			httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+	var data V1Composite
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w)
+		return
+	}
+
+	composite, err := models.Composites(
+		models.CompositeWhere.Name.EQ(id),
+	).One(a.DB)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w)
+		} else {
+			httputil.NewInternalError(err).Abort(w)
 		}
 		return
 	}
-	httputil.RespondWithJSON(w, http.StatusOK, i)
+
+	hErr := a.inTx(func(tx boil.Transactor) *httputil.HttpError {
+		cRooms := make(models.CompositesRoomSlice, len(data.VQuad))
+		for i, item := range data.VQuad {
+			gateway, ok := a.cache.gateways.ByName[item.Janus]
+			if !ok {
+				return httputil.NewBadRequestError(fmt.Errorf("unknown gateway %s", item.Janus))
+			}
+			room, ok := a.cache.rooms.ByGatewayUID[item.Room]
+			if !ok {
+				return httputil.NewBadRequestError(fmt.Errorf("unknown room %d", item.Room))
+			}
+
+			cRooms[i] = &models.CompositesRoom{
+				RoomID:    room.ID,
+				GatewayID: gateway.ID,
+				Position:  item.Position,
+			}
+		}
+
+		if _, err := composite.CompositesRooms().DeleteAll(tx); err != nil {
+			return httputil.NewInternalError(err)
+		}
+		if err := composite.AddCompositesRooms(tx, true, cRooms...); err != nil {
+			return httputil.NewInternalError(err)
+		}
+
+		httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+
+		return nil
+	})
+	if hErr != nil {
+		hErr.Abort(w)
+		return
+	}
+}
+
+func (a *App) inTx(f func(boil.Transactor) *httputil.HttpError) *httputil.HttpError {
+	tx, err := a.DB.Begin()
+	if err != nil {
+		return httputil.NewInternalError(err)
+	}
+
+	// rollback on panics
+	defer func() {
+		if p := recover(); p != nil {
+			if ex := tx.Rollback(); ex != nil {
+				fmt.Printf("rollback error %+v\n", err)
+			}
+			panic(p) // re-throw panic after Rollback
+		}
+	}()
+
+	if err := f(tx); err != nil {
+		if ex := tx.Rollback(); ex != nil {
+			return httputil.NewInternalError(err)
+		}
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return httputil.NewInternalError(err)
+	}
+
+	return nil
 }
 
 func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
@@ -258,8 +378,38 @@ func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 	}
 
 	if session.GatewayID.Valid {
-		user.Janus = a.cache.gateways[session.GatewayID.Int64].Name
+		user.Janus = a.cache.gateways.ByID[session.GatewayID.Int64].Name
 	}
 
 	return user
+}
+
+func (a *App) makeV1Composite(composite *models.Composite) *V1Composite {
+	respComposite := &V1Composite{
+		VQuad: make([]*V1CompositeRoom, len(composite.R.CompositesRooms)),
+	}
+
+	for j, cRoom := range composite.R.CompositesRooms {
+		room := cRoom.R.Room
+		respRoom := &V1CompositeRoom{
+			V1Room: V1Room{
+				Room:        room.GatewayUID,
+				Janus:       a.cache.gateways.ByID[cRoom.GatewayID].Name,
+				Description: room.Name,
+				NumUsers:    len(room.R.Sessions),
+			},
+			Position: cRoom.Position,
+		}
+
+		for _, session := range room.R.Sessions {
+			if session.Question {
+				respRoom.Questions = true
+				break
+			}
+		}
+
+		respComposite.VQuad[j] = respRoom
+	}
+
+	return respComposite
 }

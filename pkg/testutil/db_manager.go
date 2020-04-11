@@ -4,26 +4,29 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/postgres"
-	"github.com/lib/pq"
-	"github.com/volatiletech/sqlboiler/boil"
-
 	_ "github.com/golang-migrate/migrate/source/file"
+	"github.com/lib/pq"
 	_ "github.com/stretchr/testify"
+	"gopkg.in/khaiql/dbcleaner.v2"
+	"gopkg.in/khaiql/dbcleaner.v2/engine"
 
+	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
 )
 
 type TestDBManager struct {
-	DB     *sql.DB
-	testDB string
+	DB        *sql.DB
+	DBCleaner dbcleaner.DbCleaner
+	testDB    string
 }
 
 func (m *TestDBManager) InitTestDB() error {
-	boil.DebugMode = true
+	//boil.DebugMode = true
 
 	m.testDB = fmt.Sprintf("test_%s", strings.ToLower(stringutil.GenerateName(5)))
 	fmt.Println("Initializing test DB: ", m.testDB)
@@ -44,20 +47,24 @@ func (m *TestDBManager) InitTestDB() error {
 		return err
 	}
 
-	// Connect to temp database
+	// Connect to temp database and run migrations
 	dsn, err := m.replaceDBName(m.testDB)
 	if err != nil {
 		return err
 	}
-
 	if err := m.runMigrations(dsn); err != nil {
 		return err
 	}
 
+	// Re-connect to test DB since migrator closes his connection
 	m.DB, err = sql.Open("postgres", dsn)
 	if err != nil {
 		return err
 	}
+
+	// Initialize DB cleaner
+	m.DBCleaner = dbcleaner.New()
+	m.DBCleaner.SetEngine(engine.NewPostgresEngine(dsn))
 
 	return nil
 }
@@ -65,13 +72,17 @@ func (m *TestDBManager) InitTestDB() error {
 func (m *TestDBManager) DestroyTestDB() error {
 	fmt.Println("Destroying testDB: ", m.testDB)
 
-	// Close temp DB
-	err := m.DB.Close()
-	if err != nil {
+	// Close DB cleaner
+	if err := m.DBCleaner.Close(); err != nil {
 		return err
 	}
 
-	// Connect to DB
+	// Close temp DB
+	if err := m.DB.Close(); err != nil {
+		return err
+	}
+
+	// Connect to main dev DB
 	db, err := sql.Open("postgres", os.Getenv("DB_URL"))
 	if err != nil {
 		return err
@@ -84,6 +95,20 @@ func (m *TestDBManager) DestroyTestDB() error {
 	}
 
 	return nil
+}
+
+func (m *TestDBManager) AllTables() []string {
+	v := reflect.ValueOf(models.TableNames)
+	t := v.Type()
+	tables := make([]string, 0)
+	for i := 0; i < t.NumField(); i++ {
+		name := t.Field(i).Name
+		value := v.FieldByName(name).Interface()
+		if value.(string) != models.TableNames.SchemaMigrations {
+			tables = append(tables, value.(string))
+		}
+	}
+	return tables
 }
 
 func (m *TestDBManager) runMigrations(dsn string) error {

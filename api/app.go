@@ -16,11 +16,16 @@ import (
 	"github.com/Bnei-Baruch/gxydb-api/pkg/auth"
 )
 
+type DBInterface interface {
+	boil.Executor
+	boil.Beginner
+}
+
 type App struct {
 	Router        *mux.Router
 	Handler       http.Handler
+	DB            DBInterface
 	tokenVerifier *oidc.IDTokenVerifier
-	DB            boil.Executor
 	cache         *AppCache
 }
 
@@ -44,7 +49,7 @@ func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth bool) {
 	a.InitializeWithDB(db, accountsUrl, skipAuth)
 }
 
-func (a *App) InitializeWithDB(db boil.Executor, accountsUrl string, skipAuth bool) {
+func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool) {
 	a.DB = db
 
 	a.Router = mux.NewRouter()
@@ -82,12 +87,13 @@ func (a *App) Run(listenAddr string) {
 
 func (a *App) initializeRoutes() {
 	// api v1 (current)
-	a.Router.HandleFunc("/rooms", a.V1GetRooms).Methods("GET")     // Current
-	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")  // Current
-	a.Router.HandleFunc("/users", a.V1GetUsers).Methods("GET")     // Current
-	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET") // Current
-	//a.Router.HandleFunc("/qids/{id}", a.getQuad).Methods("GET")							// Current
-	//a.Router.HandleFunc("/qids/{id}", a.putQuad).Methods("PUT")							// Current
+	a.Router.HandleFunc("/rooms", a.V1ListRooms).Methods("GET")
+	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")
+	a.Router.HandleFunc("/users", a.V1ListUsers).Methods("GET")
+	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET")
+	a.Router.HandleFunc("/qids", a.V1ListComposites).Methods("GET")
+	a.Router.HandleFunc("/qids/{id}", a.V1GetComposite).Methods("GET")
+	a.Router.HandleFunc("/qids/{id}", a.V1UpdateComposite).Methods("PUT")
 
 	// api v2
 	//a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")

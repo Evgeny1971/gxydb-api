@@ -1,7 +1,7 @@
 package api
 
 import (
-	"database/sql"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -23,30 +23,25 @@ import (
 type ApiTestSuite struct {
 	suite.Suite
 	testutil.TestDBManager
-	tx  *sql.Tx
 	app *App
 }
 
 func (s *ApiTestSuite) SetupSuite() {
-	s.Require().Nil(s.InitTestDB())
+	s.Require().NoError(s.InitTestDB())
 	s.app = new(App)
 	s.app.InitializeWithDB(s.DB, "", true)
 }
 
 func (s *ApiTestSuite) TearDownSuite() {
-	s.Require().Nil(s.DestroyTestDB())
+	s.Require().NoError(s.DestroyTestDB())
 }
 
 func (s *ApiTestSuite) SetupTest() {
-	var err error
-	s.tx, err = s.DB.Begin()
-	s.Require().Nil(err)
-	s.app.DB = s.tx
+	s.DBCleaner.Acquire(s.AllTables()...)
 }
 
 func (s *ApiTestSuite) TearDownTest() {
-	err := s.tx.Rollback()
-	s.Require().Nil(err)
+	s.DBCleaner.Clean(s.AllTables()...)
 }
 
 func (s *ApiTestSuite) TestGetRoomMalformedID() {
@@ -64,7 +59,7 @@ func (s *ApiTestSuite) TestGetRoomNotFound() {
 	gateway := s.createGateway()
 	room := s.createRoom(gateway)
 	room.Disabled = true
-	_, err := room.Update(s.tx, boil.Whitelist(models.RoomColumns.Disabled))
+	_, err := room.Update(s.DB, boil.Whitelist(models.RoomColumns.Disabled))
 	s.Require().NoError(err)
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
 	resp = s.request(req)
@@ -73,7 +68,7 @@ func (s *ApiTestSuite) TestGetRoomNotFound() {
 	// removed room
 	room.Disabled = false
 	room.RemovedAt = null.TimeFrom(time.Now().UTC())
-	_, err = room.Update(s.tx, boil.Whitelist(models.RoomColumns.Disabled, models.RoomColumns.RemovedAt))
+	_, err = room.Update(s.DB, boil.Whitelist(models.RoomColumns.Disabled, models.RoomColumns.RemovedAt))
 	s.Require().NoError(err)
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
 	resp = s.request(req)
@@ -89,7 +84,7 @@ func (s *ApiTestSuite) TestGetRoom() {
 		users[i] = s.createUser()
 		sessions[i] = s.createSession(users[i], gateway, room)
 	}
-	s.Require().NoError(s.app.cache.Reload(s.tx))
+	s.Require().NoError(s.app.cache.Reload(s.DB))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
 	body := s.request200json(req)
@@ -118,21 +113,21 @@ func (s *ApiTestSuite) TestGetRoom() {
 
 	// turn on question mark on some session
 	sessions[0].Question = true
-	_, err := sessions[0].Update(s.tx, boil.Whitelist(models.SessionColumns.Question))
+	_, err := sessions[0].Update(s.DB, boil.Whitelist(models.SessionColumns.Question))
 	s.Require().NoError(err)
 	body = s.request200json(req)
 	s.True(body["questions"].(bool), "questions true")
 
 	// now turn off question and check
 	sessions[0].Question = false
-	_, err = sessions[0].Update(s.tx, boil.Whitelist(models.SessionColumns.Question))
+	_, err = sessions[0].Update(s.DB, boil.Whitelist(models.SessionColumns.Question))
 	s.Require().NoError(err)
 	body = s.request200json(req)
 	s.False(body["questions"].(bool), "questions false again")
 }
 
-func (s *ApiTestSuite) TestGetRooms() {
-	boil.DebugMode = false
+func (s *ApiTestSuite) TestListRooms() {
+	//boil.DebugMode = false
 	counts := struct {
 		gateways        int
 		roomPerGateway  int
@@ -157,8 +152,8 @@ func (s *ApiTestSuite) TestGetRooms() {
 			}
 		}
 	}
-	s.Require().NoError(s.app.cache.Reload(s.tx))
-	boil.DebugMode = true
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+	//boil.DebugMode = true
 
 	req, _ := http.NewRequest("GET", "/rooms", nil)
 	resp := s.request(req)
@@ -209,7 +204,7 @@ func (s *ApiTestSuite) TestGetUserNotFound() {
 
 	// disabled user
 	user.Disabled = true
-	_, err := user.Update(s.tx, boil.Whitelist(models.UserColumns.Disabled))
+	_, err := user.Update(s.DB, boil.Whitelist(models.UserColumns.Disabled))
 	s.Require().NoError(err)
 	resp = s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
@@ -217,7 +212,7 @@ func (s *ApiTestSuite) TestGetUserNotFound() {
 	// removed user
 	user.Disabled = false
 	user.RemovedAt = null.TimeFrom(time.Now().UTC())
-	_, err = user.Update(s.tx, boil.Whitelist(models.UserColumns.Disabled, models.UserColumns.RemovedAt))
+	_, err = user.Update(s.DB, boil.Whitelist(models.UserColumns.Disabled, models.UserColumns.RemovedAt))
 	s.Require().NoError(err)
 	resp = s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
@@ -228,7 +223,7 @@ func (s *ApiTestSuite) TestGetUser() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.tx))
+	s.Require().NoError(s.app.cache.Reload(s.DB))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
 	body := s.request200json(req)
@@ -236,20 +231,20 @@ func (s *ApiTestSuite) TestGetUser() {
 
 	// turn camera off
 	session.Camera = false
-	_, err := session.Update(s.tx, boil.Whitelist(models.SessionColumns.Camera))
+	_, err := session.Update(s.DB, boil.Whitelist(models.SessionColumns.Camera))
 	s.Require().NoError(err)
 	body = s.request200json(req)
 	s.False(body["camera"].(bool), "camera false")
 
 	// turn camera on again
 	session.Camera = true
-	_, err = session.Update(s.tx, boil.Whitelist(models.SessionColumns.Camera))
+	_, err = session.Update(s.DB, boil.Whitelist(models.SessionColumns.Camera))
 	s.Require().NoError(err)
 	body = s.request200json(req)
 	s.True(body["camera"].(bool), "camera true")
 }
 
-func (s *ApiTestSuite) TestGetUsers() {
+func (s *ApiTestSuite) TestListUsers() {
 	counts := struct {
 		gateways        int
 		roomPerGateway  int
@@ -274,7 +269,7 @@ func (s *ApiTestSuite) TestGetUsers() {
 			}
 		}
 	}
-	s.Require().NoError(s.app.cache.Reload(s.tx))
+	s.Require().NoError(s.app.cache.Reload(s.DB))
 
 	// create some inactive users
 	for i := 0; i < counts.sessionsPerRoom; i++ {
@@ -294,6 +289,196 @@ func (s *ApiTestSuite) TestGetUsers() {
 	}
 }
 
+func (s *ApiTestSuite) TestGetCompositeMalformedID() {
+	req, _ := http.NewRequest("GET", "/qids/12345678901234567890", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestGetCompositeNotFound() {
+	req, _ := http.NewRequest("GET", "/qids/q1", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+}
+
+func (s *ApiTestSuite) TestGetComposite() {
+	gateway := s.createGateway()
+	rooms := make([]*models.Room, 4)
+	sessions := make([][]*models.Session, len(rooms))
+	for i := 0; i < 4; i++ {
+		rooms[i] = s.createRoom(gateway)
+		sessions[i] = make([]*models.Session, i+1)
+		for j := 0; j < i+1; j++ {
+			user := s.createUser()
+			sessions[i][j] = s.createSession(user, gateway, rooms[i])
+		}
+	}
+	composite := s.createComposite(rooms)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
+	body := s.request200json(req)
+	vquad, ok := body["vquad"]
+	s.Require().True(ok, "vquad")
+	vquadArr, ok := vquad.([]interface{})
+	s.Require().True(ok, "vquad array")
+
+	for i, respCRoom := range vquadArr {
+		croom, ok := respCRoom.(map[string]interface{})
+		s.Require().True(ok, "vquad array item")
+		s.Equal(rooms[i].GatewayUID, int(croom["room"].(float64)), "room")
+		s.Equal(gateway.Name, croom["janus"], "Janus")
+		s.Equal(rooms[i].Name, croom["description"], "description")
+		s.False(croom["questions"].(bool), "questions")
+		s.Equal(i+1, int(croom["num_users"].(float64)), "num_users")
+	}
+
+	// turn on question mark on some session
+	sessions[1][0].Question = true
+	_, err := sessions[1][0].Update(s.DB, boil.Whitelist(models.SessionColumns.Question))
+	s.Require().NoError(err)
+	body = s.request200json(req)
+	s.True(body["vquad"].([]interface{})[1].(map[string]interface{})["questions"].(bool), "questions true")
+
+	// now turn off question and check
+	sessions[1][0].Question = false
+	_, err = sessions[1][0].Update(s.DB, boil.Whitelist(models.SessionColumns.Question))
+	s.Require().NoError(err)
+	body = s.request200json(req)
+	s.False(body["vquad"].([]interface{})[1].(map[string]interface{})["questions"].(bool), "questions false again")
+}
+
+func (s *ApiTestSuite) TestListComposites() {
+	counts := struct {
+		gateways       int
+		roomPerGateway int
+	}{
+		gateways:       2,
+		roomPerGateway: 8,
+	}
+	gateways := make(map[int64]*models.Gateway, counts.gateways)
+	rooms := make([][]*models.Room, counts.gateways)
+	sessions := make([][][]*models.Session, counts.gateways)
+	for i := 0; i < counts.gateways; i++ {
+		gateway := s.createGateway()
+		gateways[gateway.ID] = gateway
+		rooms[i] = make([]*models.Room, counts.roomPerGateway)
+		sessions[i] = make([][]*models.Session, counts.roomPerGateway)
+		for j := 0; j < counts.roomPerGateway; j++ {
+			room := s.createRoom(gateway)
+			rooms[i][j] = room
+			sessions[i][j] = make([]*models.Session, j%4+1)
+			for k := 0; k < j%4+1; k++ {
+				user := s.createUser()
+				sessions[i][j][k] = s.createSession(user, gateway, room)
+			}
+		}
+	}
+
+	composites := make(map[string]*models.Composite, 4)
+	composite := s.createComposite(rooms[0][0:4])
+	composites[composite.Name] = composite
+	composite = s.createComposite(rooms[0][4:])
+	composites[composite.Name] = composite
+	composite = s.createComposite(rooms[1][0:4])
+	composites[composite.Name] = composite
+	composite = s.createComposite(rooms[1][4:])
+	composites[composite.Name] = composite
+
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	req, _ := http.NewRequest("GET", "/qids", nil)
+	body := s.request200json(req)
+
+	s.Equal(4, len(body), "composites count")
+
+	for name, respComposite := range body {
+		composite, ok := composites[name]
+		s.Require().True(ok, "unknown composite [%s] %v", name, respComposite)
+
+		data, ok := respComposite.(map[string]interface{})
+		s.Require().True(ok, "composite structure [%s] %v", name, respComposite)
+		vquad, ok := data["vquad"]
+		s.Require().True(ok, "vquad")
+		vquadArr, ok := vquad.([]interface{})
+		s.Require().True(ok, "vquad array")
+
+		for i, respCRoom := range vquadArr {
+			croom, ok := respCRoom.(map[string]interface{})
+			s.Require().True(ok, "vquad array item")
+
+			s.Require().NoError(composite.R.CompositesRooms[i].L.LoadRoom(s.DB, true, composite.R.CompositesRooms[i], nil))
+			s.Require().NoError(composite.R.CompositesRooms[i].L.LoadGateway(s.DB, true, composite.R.CompositesRooms[i], nil))
+			room := composite.R.CompositesRooms[i].R.Room
+			s.Equal(room.GatewayUID, int(croom["room"].(float64)), "room")
+			s.Equal(composite.R.CompositesRooms[i].R.Gateway.Name, croom["janus"], "Janus")
+			s.Equal(room.Name, croom["description"], "description")
+			s.False(croom["questions"].(bool), "questions")
+			s.Equal(i+1, int(croom["num_users"].(float64)), "num_users")
+		}
+	}
+}
+
+func (s *ApiTestSuite) TestUpdateCompositeMalformedID() {
+	req, _ := http.NewRequest("PUT", "/qids/12345678901234567890", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateCompositeNoBody() {
+	req, _ := http.NewRequest("PUT", "/qids/q1", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateCompositeNotFound() {
+	b, _ := json.Marshal(V1Composite{})
+	req, _ := http.NewRequest("PUT", "/qids/q1", bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateComposite() {
+	gateway := s.createGateway()
+	rooms := make([]*models.Room, 4)
+	for i := 0; i < 4; i++ {
+		rooms[i] = s.createRoom(gateway)
+	}
+	composite := s.createComposite(rooms)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
+	body := s.request200json(req)
+
+	rooms[0] = s.createRoom(gateway)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	body["vquad"].([]interface{})[0].(map[string]interface{})["room"] = rooms[0].GatewayUID
+	body["vquad"].([]interface{})[0].(map[string]interface{})["queue"] = 5
+	b, _ := json.Marshal(body)
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/qids/%s", composite.Name), bytes.NewBuffer(b))
+	body = s.request200json(req)
+	s.Equal("success", body["result"], "PUT result")
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
+	body = s.request200json(req)
+	vquad, ok := body["vquad"]
+	s.Require().True(ok, "vquad")
+	vquadArr, ok := vquad.([]interface{})
+	s.Require().True(ok, "vquad array")
+
+	for i, respCRoom := range vquadArr {
+		croom, ok := respCRoom.(map[string]interface{})
+		s.Require().True(ok, "vquad array item")
+		s.Equal(rooms[i].GatewayUID, int(croom["room"].(float64)), "room")
+		s.Equal(gateway.Name, croom["janus"], "Janus")
+		s.Equal(rooms[i].Name, croom["description"], "description")
+		s.False(croom["questions"].(bool), "questions")
+		s.Equal(0, int(croom["num_users"].(float64)), "num_users")
+	}
+
+}
+
 func (s *ApiTestSuite) request(req *http.Request) *httptest.ResponseRecorder {
 	rr := httptest.NewRecorder()
 	s.app.Handler.ServeHTTP(rr, req)
@@ -310,9 +495,9 @@ func (s *ApiTestSuite) request200json(req *http.Request) map[string]interface{} 
 
 func (s *ApiTestSuite) assertV1User(session *models.Session, actual map[string]interface{}) {
 	if session.R == nil {
-		s.Require().NoError(session.L.LoadUser(s.tx, true, session, nil))
-		s.Require().NoError(session.L.LoadRoom(s.tx, true, session, nil))
-		s.Require().NoError(session.L.LoadGateway(s.tx, true, session, nil))
+		s.Require().NoError(session.L.LoadUser(s.DB, true, session, nil))
+		s.Require().NoError(session.L.LoadRoom(s.DB, true, session, nil))
+		s.Require().NoError(session.L.LoadGateway(s.DB, true, session, nil))
 	}
 	s.Equal(session.R.User.AccountsID, actual["id"], "id")
 	s.Equal(session.Display.String, actual["display"], "display")
@@ -340,7 +525,7 @@ func (s *ApiTestSuite) createGateway() *models.Gateway {
 		AdminURL:      "admin_url",
 		AdminPassword: "admin_password",
 	}
-	s.Require().NoError(gateway.Insert(s.tx, boil.Infer()))
+	s.Require().NoError(gateway.Insert(s.DB, boil.Infer()))
 	return gateway
 }
 
@@ -352,7 +537,7 @@ func (s *ApiTestSuite) createUser() *models.User {
 		LastName:   null.StringFrom("last"),
 		Username:   null.StringFrom("username"),
 	}
-	s.Require().NoError(user.Insert(s.tx, boil.Infer()))
+	s.Require().NoError(user.Insert(s.DB, boil.Infer()))
 	return user
 }
 
@@ -362,7 +547,7 @@ func (s *ApiTestSuite) createRoom(gateway *models.Gateway) *models.Room {
 		DefaultGatewayID: gateway.ID,
 		GatewayUID:       rand.Intn(math.MaxInt32),
 	}
-	s.Require().NoError(room.Insert(s.tx, boil.Infer()))
+	s.Require().NoError(room.Insert(s.DB, boil.Infer()))
 	return room
 }
 
@@ -382,8 +567,27 @@ func (s *ApiTestSuite) createSession(user *models.User, gateway *models.Gateway,
 		UserAgent:      null.StringFrom("user-agent"),
 		IPAddress:      null.StringFrom("0.0.0.0"),
 	}
-	s.Require().NoError(session.Insert(s.tx, boil.Infer()))
+	s.Require().NoError(session.Insert(s.DB, boil.Infer()))
 	return session
+}
+
+func (s *ApiTestSuite) createComposite(rooms []*models.Room) *models.Composite {
+	composite := &models.Composite{
+		Name: fmt.Sprintf("q%d", rand.Intn(math.MaxInt16)),
+	}
+	s.Require().NoError(composite.Insert(s.DB, boil.Infer()))
+
+	cRooms := make([]*models.CompositesRoom, len(rooms))
+	for i, room := range rooms {
+		cRooms[i] = &models.CompositesRoom{
+			RoomID:    room.ID,
+			GatewayID: room.DefaultGatewayID,
+			Position:  i + 1,
+		}
+	}
+	s.Require().NoError(composite.AddCompositesRooms(s.DB, true, cRooms...))
+
+	return composite
 }
 
 func TestApiTestSuite(t *testing.T) {

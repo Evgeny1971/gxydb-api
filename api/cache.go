@@ -9,30 +9,71 @@ import (
 )
 
 type AppCache struct {
-	gateways map[int64]*models.Gateway
+	gateways *GatewayCache
+	rooms    *RoomCache
 }
 
 func (c *AppCache) Init(db boil.Executor) error {
+	c.gateways = new(GatewayCache)
+	c.rooms = new(RoomCache)
 	return c.Reload(db)
 }
 
 func (c *AppCache) Reload(db boil.Executor) error {
-	if err := c.loadGateways(db); err != nil {
-		return fmt.Errorf("initialize gateways: %w", err)
+	if err := c.gateways.Reload(db); err != nil {
+		return fmt.Errorf("reload gateways: %w", err)
+	}
+	if err := c.rooms.Reload(db); err != nil {
+		return fmt.Errorf("reload rooms: %w", err)
 	}
 
 	return nil
 }
 
-func (c *AppCache) loadGateways(db boil.Executor) error {
+type DBCache interface {
+	Reload(db boil.Executor) error
+}
+
+type GatewayCache struct {
+	ByID   map[int64]*models.Gateway
+	ByName map[string]*models.Gateway
+}
+
+func (c *GatewayCache) Reload(db boil.Executor) error {
 	gateways, err := models.Gateways().All(db)
 	if err != nil {
 		return fmt.Errorf("fetch from DB: %w", err)
 	}
 
-	c.gateways = make(map[int64]*models.Gateway, len(gateways))
+	c.ByID = make(map[int64]*models.Gateway, len(gateways))
+	c.ByName = make(map[string]*models.Gateway, len(gateways))
 	for i := range gateways {
-		c.gateways[gateways[i].ID] = gateways[i]
+		c.ByID[gateways[i].ID] = gateways[i]
+		c.ByName[gateways[i].Name] = gateways[i]
+	}
+
+	return nil
+}
+
+type RoomCache struct {
+	ByID         map[int64]*models.Room
+	ByGatewayUID map[int]*models.Room
+}
+
+func (c *RoomCache) Reload(db boil.Executor) error {
+	rooms, err := models.Rooms(
+		models.RoomWhere.Disabled.EQ(false),
+		models.RoomWhere.RemovedAt.IsNull(),
+	).All(db)
+	if err != nil {
+		return fmt.Errorf("fetch from DB: %w", err)
+	}
+
+	c.ByID = make(map[int64]*models.Room, len(rooms))
+	c.ByGatewayUID = make(map[int]*models.Room, len(rooms))
+	for i := range rooms {
+		c.ByID[rooms[i].ID] = rooms[i]
+		c.ByGatewayUID[rooms[i].GatewayUID] = rooms[i]
 	}
 
 	return nil
