@@ -15,14 +15,14 @@ import (
 
 func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) *HttpError {
 	if r.Body == nil {
-		return NewBadRequestError(errors.New("request body must not be empty"))
+		return NewBadRequestError(nil, "request body must not be empty")
 	}
 
 	defer func() {
 		if _, err := io.Copy(ioutil.Discard, r.Body); err != nil {
 			fmt.Printf("error draining request body: %+v", err)
 		}
-		r.Body.Close()
+		_ = r.Body.Close()
 	}()
 
 	mbReader := http.MaxBytesReader(w, r.Body, 1048576)
@@ -36,28 +36,28 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) *Ht
 		switch {
 		case errors.As(err, &syntaxError):
 			msg := fmt.Sprintf("request body contains badly-formed JSON (at position %d)", syntaxError.Offset)
-			return NewBadRequestError(fmt.Errorf("%s: %w", msg, err))
+			return NewBadRequestError(err, msg)
 
 		case errors.Is(err, io.ErrUnexpectedEOF):
 			msg := fmt.Sprintf("request body contains badly-formed JSON")
-			return NewBadRequestError(fmt.Errorf("%s: %w", msg, err))
+			return NewBadRequestError(err, msg)
 
 		case errors.As(err, &unmarshalTypeError):
 			msg := fmt.Sprintf("request body contains an invalid value for the %q field (at position %d)", unmarshalTypeError.Field, unmarshalTypeError.Offset)
-			return NewBadRequestError(fmt.Errorf("%s: %w", msg, err))
+			return NewBadRequestError(err, msg)
 
 		case strings.HasPrefix(err.Error(), "json: unknown field "):
 			fieldName := strings.TrimPrefix(err.Error(), "json: unknown field ")
 			msg := fmt.Sprintf("request body contains unknown field %s", fieldName)
-			return NewBadRequestError(fmt.Errorf("%s: %w", msg, err))
+			return NewBadRequestError(err, msg)
 
 		case errors.Is(err, io.EOF):
 			msg := "request body must not be empty"
-			return NewBadRequestError(fmt.Errorf("%s: %w", msg, err))
+			return NewBadRequestError(err, msg)
 
 		case err.Error() == "http: request body too large":
 			msg := "request body must not be larger than 1MB"
-			return NewRequestEntityTooLargeError(fmt.Errorf("%s: %w", msg, err))
+			return NewRequestEntityTooLargeError(err, msg)
 
 		default:
 			return NewInternalError(fmt.Errorf("error decoding JSON: %w", err))
@@ -66,7 +66,7 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) *Ht
 
 	if dec.More() {
 		msg := "request body must only contain a single JSON object"
-		return NewBadRequestError(fmt.Errorf("%s: %w", msg, err))
+		return NewBadRequestError(err, msg)
 	}
 
 	return nil

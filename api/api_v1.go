@@ -64,8 +64,7 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 	).All(a.DB)
 
 	if err != nil {
-		fmt.Printf("fetch rooms from db %+v", err)
-		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		httputil.NewInternalError(err).Abort(w)
 		return
 	}
 
@@ -98,7 +97,7 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		httputil.RespondWithError(w, http.StatusBadRequest, "id is expected to be an integer")
+		httputil.NewBadRequestError(err, "malformed id").Abort(w)
 		return
 	}
 
@@ -113,12 +112,10 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	).One(a.DB)
 
 	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
-		default:
-			fmt.Printf("Unexpected error %+v", err)
-			httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w)
+		} else {
+			httputil.NewInternalError(err).Abort(w)
 		}
 		return
 	}
@@ -149,8 +146,7 @@ func (a *App) V1ListUsers(w http.ResponseWriter, r *http.Request) {
 	).All(a.DB)
 
 	if err != nil {
-		fmt.Printf("fetch sessions from db %+v", err)
-		httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		httputil.NewInternalError(err).Abort(w)
 		return
 	}
 
@@ -167,7 +163,7 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 36 {
-		httputil.RespondWithError(w, http.StatusBadRequest, "malformed id")
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w)
 		return
 	}
 
@@ -178,12 +174,12 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 		models.UserWhere.Disabled.EQ(false),
 		models.UserWhere.RemovedAt.IsNull(),
 	).QueryRow(a.DB).Scan(&userID)
+
 	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
-		default:
-			httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w)
+		} else {
+			httputil.NewInternalError(err).Abort(w)
 		}
 		return
 	}
@@ -196,11 +192,10 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	).One(a.DB)
 
 	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			httputil.RespondWithError(w, http.StatusNotFound, "Not Found")
-		default:
-			httputil.RespondWithError(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w)
+		} else {
+			httputil.NewInternalError(err).Abort(w)
 		}
 		return
 	}
@@ -235,7 +230,7 @@ func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 16 {
-		httputil.RespondWithError(w, http.StatusBadRequest, "malformed id")
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w)
 		return
 	}
 
@@ -266,7 +261,7 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 16 {
-		httputil.NewBadRequestError(errors.New("malformed id")).Abort(w)
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w)
 		return
 	}
 
@@ -294,11 +289,11 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		for i, item := range data.VQuad {
 			gateway, ok := a.cache.gateways.ByName[item.Janus]
 			if !ok {
-				return httputil.NewBadRequestError(fmt.Errorf("unknown gateway %s", item.Janus))
+				return httputil.NewBadRequestError(nil, fmt.Sprintf("unknown gateway %s", item.Janus))
 			}
 			room, ok := a.cache.rooms.ByGatewayUID[item.Room]
 			if !ok {
-				return httputil.NewBadRequestError(fmt.Errorf("unknown room %d", item.Room))
+				return httputil.NewBadRequestError(nil, fmt.Sprintf("unknown room %d", item.Room))
 			}
 
 			cRooms[i] = &models.CompositesRoom{
@@ -341,6 +336,7 @@ func (a *App) inTx(f func(boil.Transactor) *httputil.HttpError) *httputil.HttpEr
 		}
 	}()
 
+	// invoke logic and rollback on errors
 	if err := f(tx); err != nil {
 		if ex := tx.Rollback(); ex != nil {
 			return httputil.NewInternalError(err)
@@ -348,6 +344,7 @@ func (a *App) inTx(f func(boil.Transactor) *httputil.HttpError) *httputil.HttpEr
 		return err
 	}
 
+	// commit transaction
 	if err := tx.Commit(); err != nil {
 		return httputil.NewInternalError(err)
 	}

@@ -6,8 +6,9 @@ import (
 )
 
 type HttpError struct {
-	Code int
-	Err  error
+	Code    int
+	Err     error
+	Message string
 }
 
 func (e HttpError) Error() string {
@@ -15,37 +16,44 @@ func (e HttpError) Error() string {
 }
 
 func (e HttpError) Abort(w http.ResponseWriter) {
+	// internal errors
 	if e.Code >= http.StatusInternalServerError {
 		fmt.Printf("internal error %+v\n", e.Err)
+		http.Error(w, http.StatusText(e.Code), e.Code)
+		return
 	}
 
-	if e.Err == nil {
-		if e.Code == http.StatusNotFound {
-			RespondWithError(w, e.Code, "not found")
-		} else {
-			RespondWithError(w, e.Code, "")
-		}
-	} else {
-		RespondWithError(w, e.Code, e.Err.Error())
+	// client errors
+	if e.Err != nil {
+		fmt.Printf("client error %+v\n", e.Err)
 	}
+	RespondWithError(w, e.Code, e.Message)
 }
 
-func NewHttpError(code int, err error) *HttpError {
-	return &HttpError{Code: code, Err: err}
+func NewHttpError(code int, err error, msg string) *HttpError {
+	return &HttpError{Code: code, Err: err, Message: msg}
 }
 
 func NewNotFoundError() *HttpError {
-	return &HttpError{Code: http.StatusNotFound}
+	return NewHttpError(http.StatusNotFound, nil, http.StatusText(http.StatusNotFound))
 }
 
-func NewBadRequestError(err error) *HttpError {
-	return NewHttpError(http.StatusBadRequest, err)
+func NewBadRequestError(err error, msg string) *HttpError {
+	return NewHttpError(http.StatusBadRequest, err, msg)
 }
 
-func NewRequestEntityTooLargeError(err error) *HttpError {
-	return NewHttpError(http.StatusRequestEntityTooLarge, err)
+func NewUnauthorizedError(err error) *HttpError {
+	return NewHttpError(http.StatusUnauthorized, err, http.StatusText(http.StatusUnauthorized))
+}
+
+func NewForbiddenError() *HttpError {
+	return NewHttpError(http.StatusForbidden, nil, http.StatusText(http.StatusForbidden))
+}
+
+func NewRequestEntityTooLargeError(err error, msg string) *HttpError {
+	return NewHttpError(http.StatusRequestEntityTooLarge, err, msg)
 }
 
 func NewInternalError(err error) *HttpError {
-	return NewHttpError(http.StatusInternalServerError, err)
+	return NewHttpError(http.StatusInternalServerError, err, "")
 }

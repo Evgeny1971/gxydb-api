@@ -68,24 +68,24 @@ func Middleware(tokenVerifier *oidc.IDTokenVerifier) mux.MiddlewareFunc {
 
 			auth := parseToken(r)
 			if auth == "" {
-				httputil.RespondWithError(w, http.StatusBadRequest, "Token not found")
+				httputil.NewBadRequestError(nil, "no `Authorization` header set").Abort(w)
 				return
 			}
 
 			token, err := tokenVerifier.Verify(context.TODO(), auth)
 			if err != nil {
-				httputil.RespondWithError(w, http.StatusUnauthorized, err.Error())
+				httputil.NewUnauthorizedError(err).Abort(w)
 				return
 			}
 
 			var claims IDTokenClaims
 			if err := token.Claims(&claims); err != nil {
-				httputil.RespondWithError(w, http.StatusBadRequest, err.Error())
+				httputil.NewBadRequestError(err, "malformed JWT claims").Abort(w)
 				return
 			}
 
 			if !checkPermission(claims.RealmAccess.Roles) {
-				httputil.RespondWithError(w, http.StatusForbidden, "Access denied")
+				httputil.NewForbiddenError().Abort(w)
 				return
 			}
 
