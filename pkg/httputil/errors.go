@@ -1,8 +1,9 @@
 package httputil
 
 import (
-	"fmt"
 	"net/http"
+
+	"github.com/rs/zerolog/hlog"
 )
 
 type HttpError struct {
@@ -11,21 +12,23 @@ type HttpError struct {
 	Message string
 }
 
-func (e HttpError) Error() string {
+func (e *HttpError) Error() string {
 	return e.Err.Error()
 }
 
-func (e HttpError) Abort(w http.ResponseWriter) {
+func (e *HttpError) Abort(w http.ResponseWriter, r *http.Request) {
+	log := hlog.FromRequest(r)
+
 	// internal errors
 	if e.Code >= http.StatusInternalServerError {
-		fmt.Printf("internal error %+v\n", e.Err)
+		log.Error().Stack().Err(e.Err).Msg("internal error")
 		http.Error(w, http.StatusText(e.Code), e.Code)
 		return
 	}
 
 	// client errors
 	if e.Err != nil {
-		fmt.Printf("client error %+v\n", e.Err)
+		log.Warn().Err(e.Err).Msg("client error")
 	}
 	RespondWithError(w, e.Code, e.Message)
 }

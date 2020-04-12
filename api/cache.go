@@ -1,8 +1,7 @@
 package api
 
 import (
-	"fmt"
-
+	pkgerr "github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
@@ -21,10 +20,10 @@ func (c *AppCache) Init(db boil.Executor) error {
 
 func (c *AppCache) Reload(db boil.Executor) error {
 	if err := c.gateways.Reload(db); err != nil {
-		return fmt.Errorf("reload gateways: %w", err)
+		return pkgerr.Wrap(err, "reload gateways")
 	}
 	if err := c.rooms.Reload(db); err != nil {
-		return fmt.Errorf("reload rooms: %w", err)
+		return pkgerr.Wrap(err, "reload rooms")
 	}
 
 	return nil
@@ -42,7 +41,7 @@ type GatewayCache struct {
 func (c *GatewayCache) Reload(db boil.Executor) error {
 	gateways, err := models.Gateways().All(db)
 	if err != nil {
-		return fmt.Errorf("fetch from DB: %w", err)
+		return pkgerr.Wrap(err, "db fetch")
 	}
 
 	c.ByID = make(map[int64]*models.Gateway, len(gateways))
@@ -66,7 +65,7 @@ func (c *RoomCache) Reload(db boil.Executor) error {
 		models.RoomWhere.RemovedAt.IsNull(),
 	).All(db)
 	if err != nil {
-		return fmt.Errorf("fetch from DB: %w", err)
+		return pkgerr.Wrap(err, "db fetch")
 	}
 
 	c.ByID = make(map[int64]*models.Room, len(rooms))

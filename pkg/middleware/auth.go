@@ -1,4 +1,4 @@
-package auth
+package middleware
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/coreos/go-oidc"
-	"github.com/gorilla/mux"
 
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
 )
@@ -39,70 +38,71 @@ type IDTokenClaims struct {
 	SessionState      string           `json:"session_state"`
 	Sub               string           `json:"sub"`
 	Typ               string           `json:"typ"`
+
+	rolesMap map[string]struct{}
 }
 
-func Middleware(tokenVerifier *oidc.IDTokenVerifier) mux.MiddlewareFunc {
+func (c *IDTokenClaims) HasRole(role string) bool {
+	if c.rolesMap == nil {
+		c.rolesMap = make(map[string]struct{})
+		if c.RealmAccess.Roles != nil {
+			for _, r := range c.RealmAccess.Roles {
+				c.rolesMap[r] = struct{}{}
+			}
+		}
+	}
+
+	_, ok := c.rolesMap[role]
+	return ok
+}
+
+type claimsKey struct{}
+
+func IDClaimsFromRequest(r *http.Request) (*IDTokenClaims, bool) {
+	if r == nil {
+		return nil, false
+	}
+	return IDClaimFromCtx(r.Context())
+}
+
+func IDClaimFromCtx(ctx context.Context) (*IDTokenClaims, bool) {
+	claims, ok := ctx.Value(claimsKey{}).(*IDTokenClaims)
+	return claims, ok
+}
+
+func AuthenticationMiddleware(tokenVerifier *oidc.IDTokenVerifier, disabled bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if disabled {
+				next.ServeHTTP(w, r)
+				return
+			}
 
-			// Detect client IP
-			//ip := httputil.GetRealIP(r)
-
-			// Check if IP is private
-			//private, err := isPrivateIP(ip)
-			//if err != nil {
-			//	respondWithError(w, httputil.StatusBadRequest, err.Error())
-			//	return
-			//}
-
-			// TODO: IP based authentication simply doesn't work in real life.
-			// Get rid of this.
-			//allow, err := isAllowedIP(ip)
-			//if err != nil {
-			//	httputil.RespondWithError(w, http.StatusBadRequest, "Invalid IP")
-			//	return
-			//} else if allow {
-			//	next.ServeHTTP(w, r)
-			//	return
-			//}
+			// TODO: gxyd traffic from janus instances are using basic auth
 
 			auth := parseToken(r)
 			if auth == "" {
-				httputil.NewBadRequestError(nil, "no `Authorization` header set").Abort(w)
+				httputil.NewBadRequestError(nil, "no `Authorization` header set").Abort(w, r)
 				return
 			}
 
 			token, err := tokenVerifier.Verify(context.TODO(), auth)
 			if err != nil {
-				httputil.NewUnauthorizedError(err).Abort(w)
+				httputil.NewUnauthorizedError(err).Abort(w, r)
 				return
 			}
 
-			var claims IDTokenClaims
-			if err := token.Claims(&claims); err != nil {
-				httputil.NewBadRequestError(err, "malformed JWT claims").Abort(w)
+			var claims *IDTokenClaims
+			if err := token.Claims(claims); err != nil {
+				httputil.NewBadRequestError(err, "malformed JWT claims").Abort(w, r)
 				return
 			}
 
-			if !checkPermission(claims.RealmAccess.Roles) {
-				httputil.NewForbiddenError().Abort(w)
-				return
-			}
+			r = r.WithContext(context.WithValue(r.Context(), claimsKey{}, claims))
 
 			next.ServeHTTP(w, r)
 		})
 	}
-}
-
-func checkPermission(roles []string) bool {
-	if roles != nil {
-		for _, r := range roles {
-			if r == "bb_user" {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 func parseToken(r *http.Request) string {

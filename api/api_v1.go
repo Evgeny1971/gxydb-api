@@ -8,6 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	pkgerr "github.com/pkg/errors"
+	"github.com/rs/zerolog/hlog"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
@@ -59,12 +61,13 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := models.Rooms(
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
+		qm.Where("non_existing_fields is false"),
 		qm.Load(models.RoomRels.Sessions, models.SessionWhere.RemovedAt.IsNull()),
 		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.User)),
 	).All(a.DB)
 
 	if err != nil {
-		httputil.NewInternalError(err).Abort(w)
+		httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		return
 	}
 
@@ -97,7 +100,7 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		httputil.NewBadRequestError(err, "malformed id").Abort(w)
+		httputil.NewBadRequestError(err, "malformed id").Abort(w, r)
 		return
 	}
 
@@ -113,9 +116,9 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			httputil.NewNotFoundError().Abort(w)
+			httputil.NewNotFoundError().Abort(w, r)
 		} else {
-			httputil.NewInternalError(err).Abort(w)
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		}
 		return
 	}
@@ -146,7 +149,7 @@ func (a *App) V1ListUsers(w http.ResponseWriter, r *http.Request) {
 	).All(a.DB)
 
 	if err != nil {
-		httputil.NewInternalError(err).Abort(w)
+		httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		return
 	}
 
@@ -163,7 +166,7 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 36 {
-		httputil.NewBadRequestError(nil, "malformed id").Abort(w)
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w, r)
 		return
 	}
 
@@ -177,9 +180,9 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			httputil.NewNotFoundError().Abort(w)
+			httputil.NewNotFoundError().Abort(w, r)
 		} else {
-			httputil.NewInternalError(err).Abort(w)
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		}
 		return
 	}
@@ -193,9 +196,9 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			httputil.NewNotFoundError().Abort(w)
+			httputil.NewNotFoundError().Abort(w, r)
 		} else {
-			httputil.NewInternalError(err).Abort(w)
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		}
 		return
 	}
@@ -214,7 +217,7 @@ func (a *App) V1ListComposites(w http.ResponseWriter, r *http.Request) {
 	).All(a.DB)
 
 	if err != nil {
-		httputil.NewInternalError(err).Abort(w)
+		httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		return
 	}
 
@@ -230,7 +233,7 @@ func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 16 {
-		httputil.NewBadRequestError(nil, "malformed id").Abort(w)
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w, r)
 		return
 	}
 
@@ -246,9 +249,9 @@ func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			httputil.NewNotFoundError().Abort(w)
+			httputil.NewNotFoundError().Abort(w, r)
 		} else {
-			httputil.NewInternalError(err).Abort(w)
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		}
 		return
 	}
@@ -261,13 +264,13 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 16 {
-		httputil.NewBadRequestError(nil, "malformed id").Abort(w)
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w, r)
 		return
 	}
 
 	var data V1Composite
 	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
-		err.Abort(w)
+		err.Abort(w, r)
 		return
 	}
 
@@ -277,14 +280,14 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			httputil.NewNotFoundError().Abort(w)
+			httputil.NewNotFoundError().Abort(w, r)
 		} else {
-			httputil.NewInternalError(err).Abort(w)
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
 		}
 		return
 	}
 
-	hErr := a.inTx(func(tx boil.Transactor) *httputil.HttpError {
+	hErr := a.inTx(r, func(tx boil.Transactor) *httputil.HttpError {
 		cRooms := make(models.CompositesRoomSlice, len(data.VQuad))
 		for i, item := range data.VQuad {
 			gateway, ok := a.cache.gateways.ByName[item.Janus]
@@ -304,10 +307,10 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if _, err := composite.CompositesRooms().DeleteAll(tx); err != nil {
-			return httputil.NewInternalError(err)
+			return httputil.NewInternalError(pkgerr.WithStack(err))
 		}
 		if err := composite.AddCompositesRooms(tx, true, cRooms...); err != nil {
-			return httputil.NewInternalError(err)
+			return httputil.NewInternalError(pkgerr.WithStack(err))
 		}
 
 		httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
@@ -315,22 +318,22 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		return nil
 	})
 	if hErr != nil {
-		hErr.Abort(w)
+		hErr.Abort(w, r)
 		return
 	}
 }
 
-func (a *App) inTx(f func(boil.Transactor) *httputil.HttpError) *httputil.HttpError {
+func (a *App) inTx(r *http.Request, f func(boil.Transactor) *httputil.HttpError) *httputil.HttpError {
 	tx, err := a.DB.Begin()
 	if err != nil {
-		return httputil.NewInternalError(err)
+		return httputil.NewInternalError(pkgerr.Wrap(err, "begin tx"))
 	}
 
 	// rollback on panics
 	defer func() {
 		if p := recover(); p != nil {
 			if ex := tx.Rollback(); ex != nil {
-				fmt.Printf("rollback error %+v\n", err)
+				hlog.FromRequest(r).Error().Err(ex).Msg("rollback error on panic")
 			}
 			panic(p) // re-throw panic after Rollback
 		}
@@ -339,14 +342,14 @@ func (a *App) inTx(f func(boil.Transactor) *httputil.HttpError) *httputil.HttpEr
 	// invoke logic and rollback on errors
 	if err := f(tx); err != nil {
 		if ex := tx.Rollback(); ex != nil {
-			return httputil.NewInternalError(err)
+			return httputil.NewInternalError(pkgerr.Wrap(err, "tx.Rollback"))
 		}
 		return err
 	}
 
 	// commit transaction
 	if err := tx.Commit(); err != nil {
-		return httputil.NewInternalError(err)
+		return httputil.NewInternalError(pkgerr.Wrap(err, "tx.Commit"))
 	}
 
 	return nil

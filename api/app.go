@@ -3,17 +3,16 @@ package api
 import (
 	"context"
 	"database/sql"
-	"log"
 	"net/http"
-	"os"
 
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/rs/zerolog/log"
 	"github.com/volatiletech/sqlboiler/boil"
 
-	"github.com/Bnei-Baruch/gxydb-api/pkg/auth"
+	"github.com/Bnei-Baruch/gxydb-api/pkg/middleware"
 )
 
 type DBInterface interface {
@@ -32,7 +31,7 @@ type App struct {
 func (a *App) initOidc(issuer string) {
 	oidcProvider, err := oidc.NewProvider(context.TODO(), issuer)
 	if err != nil {
-		log.Fatalf("Error initializing auth %v", err)
+		log.Fatal().Err(err).Msg("oidc.NewProvider")
 	}
 
 	a.tokenVerifier = oidcProvider.Verifier(&oidc.Config{
@@ -41,9 +40,10 @@ func (a *App) initOidc(issuer string) {
 }
 
 func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth bool) {
+	log.Info().Msg("initializing app")
 	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("sql.Open")
 	}
 
 	a.InitializeWithDB(db, accountsUrl, skipAuth)
@@ -57,7 +57,6 @@ func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool
 
 	if !skipAuth {
 		a.initOidc(accountsUrl)
-		a.Router.Use(auth.Middleware(a.tokenVerifier))
 	}
 
 	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Content-Length", "Accept-Encoding", "Content-Range", "Content-Disposition", "Authorization"})
@@ -65,14 +64,16 @@ func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT", "OPTIONS"})
 	cors := handlers.CORS(originsOk, headersOk, methodsOk)
 
-	recovery := handlers.RecoveryHandler(handlers.PrintRecoveryStack(true))
-
-	a.Handler = handlers.LoggingHandler(os.Stdout, recovery(cors(a.Router)))
+	a.Handler = middleware.LoggingMiddleware(
+		middleware.RecoveryMiddleware(
+			middleware.RealIPMiddleware(
+				middleware.AuthenticationMiddleware(a.tokenVerifier, skipAuth)(
+					cors(a.Router)))))
 
 	a.cache = new(AppCache)
 	err := a.cache.Init(db)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("initialize app cache")
 	}
 }
 
@@ -82,7 +83,10 @@ func (a *App) Run(listenAddr string) {
 		addr = ":8080"
 	}
 
-	log.Fatal(http.ListenAndServe(addr, a.Handler))
+	log.Info().Msgf("app run %s", addr)
+	if err := http.ListenAndServe(addr, a.Handler); err != nil {
+		log.Fatal().Err(err).Msg("http.ListenAndServe")
+	}
 }
 
 func (a *App) initializeRoutes() {

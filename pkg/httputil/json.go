@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	pkgerr "github.com/pkg/errors"
 )
 
 // robust json decoding thanks to
@@ -60,7 +62,7 @@ func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) *Ht
 			return NewRequestEntityTooLargeError(err, msg)
 
 		default:
-			return NewInternalError(fmt.Errorf("error decoding JSON: %w", err))
+			return NewInternalError(pkgerr.Wrap(err, "error decoding JSON"))
 		}
 	}
 
