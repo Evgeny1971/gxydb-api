@@ -42,3 +42,12 @@ Run migrations
 ```shell script
 migrate -database "postgres://user:password@localhost/galaxy?sslmode=disable" -path migrations up
 ```
+
+Regenerate models
+
+```shell script
+sqlboiler psql
+```
+
+Download instructions for sqlboiler can be found [here](https://github.com/volatiletech/sqlboiler#download).
+
