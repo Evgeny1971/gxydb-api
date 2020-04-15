@@ -4,9 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
+	"github.com/edoshor/janus-go"
 	"github.com/gorilla/mux"
 	pkgerr "github.com/pkg/errors"
 	"github.com/rs/zerolog/hlog"
@@ -321,6 +323,50 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		hErr.Abort(w, r)
 		return
 	}
+}
+
+func (a *App) V1HandleEvent(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		httputil.NewBadRequestError(err, "").Abort(w, r)
+		return
+	}
+	r.Body.Close()
+
+	event, err := janus.ParseEvent(body)
+	if err != nil {
+		httputil.NewBadRequestError(err, "").Abort(w, r)
+		return
+	}
+
+	if err := a.sessionManager.HandleEvent(r.Context(), event); err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+}
+
+func (a *App) V1HandleProtocol(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		httputil.NewBadRequestError(err, "").Abort(w, r)
+		return
+	}
+	r.Body.Close()
+
+	msg, err := janus.ParseTextroomMessage(body)
+	if err != nil {
+		httputil.NewBadRequestError(err, "").Abort(w, r)
+		return
+	}
+
+	if err := a.sessionManager.HandleProtocol(r.Context(), msg); err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 }
 
 func (a *App) inTx(r *http.Request, f func(boil.Transactor) *httputil.HttpError) *httputil.HttpError {

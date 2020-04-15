@@ -21,11 +21,12 @@ type DBInterface interface {
 }
 
 type App struct {
-	Router        *mux.Router
-	Handler       http.Handler
-	DB            DBInterface
-	tokenVerifier *oidc.IDTokenVerifier
-	cache         *AppCache
+	Router         *mux.Router
+	Handler        http.Handler
+	DB             DBInterface
+	tokenVerifier  *oidc.IDTokenVerifier
+	cache          *AppCache
+	sessionManager SessionManager
 }
 
 func (a *App) initOidc(issuer string) {
@@ -75,6 +76,8 @@ func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool
 	if err != nil {
 		log.Fatal().Err(err).Msg("initialize app cache")
 	}
+
+	a.sessionManager = NewV1SessionManager(a.DB, a.cache)
 }
 
 func (a *App) Run(listenAddr string) {
@@ -98,6 +101,8 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/qids", a.V1ListComposites).Methods("GET")
 	a.Router.HandleFunc("/qids/{id}", a.V1GetComposite).Methods("GET")
 	a.Router.HandleFunc("/qids/{id}", a.V1UpdateComposite).Methods("PUT")
+	a.Router.HandleFunc("/event", a.V1HandleEvent).Methods("POST")
+	a.Router.HandleFunc("/protocol", a.V1HandleProtocol).Methods("POST")
 
 	// api v2
 	//a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")

@@ -78,7 +78,30 @@ func AuthenticationMiddleware(tokenVerifier *oidc.IDTokenVerifier, disabled bool
 				return
 			}
 
-			// TODO: gxyd traffic from janus instances are using basic auth
+			// We start without auth on these endpoints until we retire gxyd
+			if r.URL.Path == "/event" || r.URL.Path == "/protocol" {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			//// Janus events and protocol room are using basic auth
+			//if r.URL.Path == "/event" || r.URL.Path == "/protocol" {
+			//	username, password, ok := r.BasicAuth()
+			//	if !ok {
+			//		httputil.NewBadRequestError(nil, "no `Authorization` header set").Abort(w, r)
+			//		return
+			//	}
+			//
+			//	if username != "replace_me" || password != "replace_me" {
+			//		httputil.NewUnauthorizedError(errors.New("wrong username password")).Abort(w, r)
+			//		return
+			//	}
+			//
+			//	next.ServeHTTP(w, r)
+			//	return
+			//}
+
+			// APIs are using JWT
 
 			auth := parseToken(r)
 			if auth == "" {
