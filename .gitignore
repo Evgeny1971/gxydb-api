@@ -4,4 +4,7 @@
 *.log
 notes.txt
 
+misc/janus/config/default
+misc/janus/config/prod
+
 gxydb-api

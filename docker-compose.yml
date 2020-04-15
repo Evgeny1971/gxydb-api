@@ -10,7 +10,14 @@ services:
       POSTGRES_DB: galaxy
     ports:
       - 5432:5432
-
+  janus1:
+    image: bb-janus:latest
+    restart: always
+    volumes:
+      - ./misc/janus/config/dev:/usr/janusgxy/etc/janus
+    ports:
+      - 8088:8088
+      - 8188:8188
   app:
     build: .
     environment:

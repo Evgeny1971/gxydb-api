@@ -1,0 +1,6793 @@
+#
+# File automatically generated on Fri Apr 10 22:54:24 2020
+#
+
+general : 
+{
+};
+room-1000 : 
+{
+  description = "FWD Protocol";
+  secret = "adminpwd";
+  publishers = "5";
+  bitrate = "64000";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  record = "false";
+  is_private = "yes";
+};
+room-1222 : 
+{
+  description = "Conference";
+  secret = "adminpwd";
+  publishers = "6";
+  bitrate = "1000000";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  audiolevel_event = "yes";
+  audio_level_average = "100";
+  audio_active_packets = "25";
+  transport_wide_cc_ext = "no";
+  record = "false";
+  is_private = "yes";
+};
+room-1223 : 
+{
+  description = "video";
+  secret = "adminpwd";
+  publishers = "5";
+  bitrate = "600000";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  record = "false";
+  is_private = "yes";
+};
+room-1234 : 
+{
+  description = "Galaxy";
+  secret = "adminpwd";
+  publishers = "600";
+  bitrate = "600000";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  audiolevel_event = "yes";
+  audio_level_average = "100";
+  audio_active_packets = "25";
+  transport_wide_cc_ext = "no";
+  record = "false";
+  is_private = "yes";
+};
+room-1051 : 
+{
+  description = "Test Room";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1031 : 
+{
+  description = "Spain - Portugal";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1032 : 
+{
+  description = "Romania";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1038 : 
+{
+  description = "Finland";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1045 : 
+{
+  description = "Hungary";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1047 : 
+{
+  description = "Centro America";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1048 : 
+{
+  description = "Poland";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1060 : 
+{
+  description = "Canada";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1062 : 
+{
+  description = "Mexico City";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1066 : 
+{
+  description = "United VG 3";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1117 : 
+{
+  description = "USA Northeast";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1118 : 
+{
+  description = "USA LA";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1119 : 
+{
+  description = "USA SF";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1120 : 
+{
+  description = "USA Midwest";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1127 : 
+{
+  description = "Medellin";
+  bitrate = "64000";
+  publishers = "30";
+  fir_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1134 : 
+{
+  description = "Moldova";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1050 : 
+{
+  description = "Czechoslovakia";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1143 : 
+{
+  description = "United VG 4";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+};
+room-1146 : 
+{
+  description = "Belarus";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+};
+room-1156 : 
+{
+  description = "MAK TLV";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1157 : 
+{
+  description = "EU Shiur Boker 10";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1158 : 
+{
+  description = "USA - Carolinas";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1057 : 
+{
+  description = "North America 1";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1163 : 
+{
+  description = "North America 2";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1165 : 
+{
+  description = "EU Young Group";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1166 : 
+{
+  description = "EU DACH";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1168 : 
+{
+  description = "Europe";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1046 : 
+{
+  description = "Asia";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1170 : 
+{
+  description = "Hebrew 10";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1176 : 
+{
+  description = "Ukraine";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1178 : 
+{
+  description = "Singapore ";
+  bitrate = "64000";
+  publishers = "30";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1177 : 
+{
+  description = "China";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1116 : 
+{
+  description = "Salt Lake City";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1173 : 
+{
+  description = "Congo";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1044 : 
+{
+  description = "Croatia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1188 : 
+{
+  description = "Test HQ";
+  bitrate = "1000000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1035 : 
+{
+  description = "Holland 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1189 : 
+{
+  description = "Holland 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1198 : 
+{
+  description = "Vienna";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2024 : 
+{
+  description = "Moscow 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2025 : 
+{
+  description = "Moscow 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2026 : 
+{
+  description = "Moscow 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2027 : 
+{
+  description = "Moscow 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2028 : 
+{
+  description = "Moscow 6";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2029 : 
+{
+  description = "Moscow 7";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2030 : 
+{
+  description = "Moscow 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2031 : 
+{
+  description = "Moscow 8";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2048 : 
+{
+  description = "INFO";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2066 : 
+{
+  description = "W INFO";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2072 : 
+{
+  description = "Moscow";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2073 : 
+{
+  description = "St. Petersburg";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2074 : 
+{
+  description = "Kiev";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2091 : 
+{
+  description = "United VG 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2092 : 
+{
+  description = "Brazil 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2093 : 
+{
+  description = "Brazil 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1106 : 
+{
+  description = "W Afula";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2112 : 
+{
+  description = "Haverim";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2113 : 
+{
+  description = "Hebrew";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2122 : 
+{
+  description = "Nahariya";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2123 : 
+{
+  description = "Netanya";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2124 : 
+{
+  description = "Nof HaGalil";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2127 : 
+{
+  description = "PT Young";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2173 : 
+{
+  description = "Raanana";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2174 : 
+{
+  description = "Rehovot";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2175 : 
+{
+  description = "Revadim";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2177 : 
+{
+  description = "Tel Aviv 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2178 : 
+{
+  description = "Tel Aviv 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2179 : 
+{
+  description = "Tveria";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2186 : 
+{
+  description = "Zichron 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2187 : 
+{
+  description = "Zichron 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2183 : 
+{
+  description = "United VG 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2182 : 
+{
+  description = "United VG 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2181 : 
+{
+  description = "United VG";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2180 : 
+{
+  description = "W UK";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2188 : 
+{
+  description = "W Africa";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2189 : 
+{
+  description = "W Argentina";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2190 : 
+{
+  description = "W Asia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2191 : 
+{
+  description = "W Australia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2192 : 
+{
+  description = "W Bogota";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2193 : 
+{
+  description = "W Baltia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2194 : 
+{
+  description = "W Brazil";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2195 : 
+{
+  description = "W Bulgaria 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2196 : 
+{
+  description = "W Bulgaria 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2197 : 
+{
+  description = "W Chile";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2199 : 
+{
+  description = "W Florida";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2200 : 
+{
+  description = "W French";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2198 : 
+{
+  description = "W Galil West 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2201 : 
+{
+  description = "W Ekaterinburg";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2202 : 
+{
+  description = "W Germany 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2203 : 
+{
+  description = "W Germany 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2204 : 
+{
+  description = "W Hebrew";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2205 : 
+{
+  description = "W Hungary";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2206 : 
+{
+  description = "W Italy";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2132 : 
+{
+  description = "PT 13";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2130 : 
+{
+  description = "PT 11";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2128 : 
+{
+  description = "PT 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2129 : 
+{
+  description = "PT 10";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2131 : 
+{
+  description = "PT 12";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2133 : 
+{
+  description = "PT 14";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2134 : 
+{
+  description = "PT 15";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2135 : 
+{
+  description = "PT 16";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2136 : 
+{
+  description = "PT 17";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2137 : 
+{
+  description = "PT 18";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2138 : 
+{
+  description = "PT 19";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2139 : 
+{
+  description = "PT 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2140 : 
+{
+  description = "PT 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2141 : 
+{
+  description = "PT 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2142 : 
+{
+  description = "PT 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2143 : 
+{
+  description = "PT 6";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2144 : 
+{
+  description = "PT 7";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2145 : 
+{
+  description = "PT 8";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2146 : 
+{
+  description = "PT 9";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2147 : 
+{
+  description = "PT 20";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2148 : 
+{
+  description = "PT 21";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2149 : 
+{
+  description = "PT 22";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2150 : 
+{
+  description = "PT 23";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2151 : 
+{
+  description = "PT 24";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2152 : 
+{
+  description = "PT 25";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2153 : 
+{
+  description = "PT 26";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2154 : 
+{
+  description = "PT 27";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2155 : 
+{
+  description = "PT 28";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2156 : 
+{
+  description = "PT 29";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2157 : 
+{
+  description = "PT 30";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2158 : 
+{
+  description = "PT 31";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2159 : 
+{
+  description = "PT 32";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2160 : 
+{
+  description = "PT 33";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2161 : 
+{
+  description = "PT 34";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2162 : 
+{
+  description = "PT 35";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2163 : 
+{
+  description = "PT 36";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2164 : 
+{
+  description = "PT 37";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2165 : 
+{
+  description = "PT 38";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2166 : 
+{
+  description = "PT 39";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2167 : 
+{
+  description = "PT 40";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2168 : 
+{
+  description = "Qazaqstan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2169 : 
+{
+  description = "Queens";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2170 : 
+{
+  description = "Queens 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2171 : 
+{
+  description = "Africa";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2172 : 
+{
+  description = "Africa  2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2209 : 
+{
+  description = "Argentina";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2210 : 
+{
+  description = "Ashdod";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2211 : 
+{
+  description = "Ashkelon";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2212 : 
+{
+  description = "Asia 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2208 : 
+{
+  description = "Arava";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2213 : 
+{
+  description = "Austria";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2214 : 
+{
+  description = "Azerbaijan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2215 : 
+{
+  description = "BB UK";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2216 : 
+{
+  description = "Baltia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2217 : 
+{
+  description = "Baltia 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2218 : 
+{
+  description = "Baltia 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2100 : 
+{
+  description = "Beer Sheva";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2101 : 
+{
+  description = "Berlin";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2219 : 
+{
+  description = "Bulgaria";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2220 : 
+{
+  description = "Bulgaria 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2221 : 
+{
+  description = "CZSK YG";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2102 : 
+{
+  description = "Chelyabinsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2103 : 
+{
+  description = "Dnepr";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2105 : 
+{
+  description = "Eilat";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2104 : 
+{
+  description = "Ekaterinburg";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2223 : 
+{
+  description = "Ethiopia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2224 : 
+{
+  description = "Florida";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2225 : 
+{
+  description = "Focus Group";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2226 : 
+{
+  description = "French";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2106 : 
+{
+  description = "Galil West";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2228 : 
+{
+  description = "Germany";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2229 : 
+{
+  description = "Germany 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2108 : 
+{
+  description = "Haifa 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2109 : 
+{
+  description = "Haver";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2110 : 
+{
+  description = "Haifa 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2111 : 
+{
+  description = "Haifa 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2231 : 
+{
+  description = "ITA 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2232 : 
+{
+  description = "ITA 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2233 : 
+{
+  description = "ITA 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2234 : 
+{
+  description = "ITA 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2235 : 
+{
+  description = "Istanbul";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2236 : 
+{
+  description = "Izmir";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2237 : 
+{
+  description = "Japan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2114 : 
+{
+  description = "Jerusalem";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2238 : 
+{
+  description = "KabU";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2115 : 
+{
+  description = "KabU 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2116 : 
+{
+  description = "KabU 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2117 : 
+{
+  description = "Karmiel";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2239 : 
+{
+  description = "Kavkaz";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2240 : 
+{
+  description = "Krasnodar";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2118 : 
+{
+  description = "Krasnoyarsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2241 : 
+{
+  description = "Latin";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2242 : 
+{
+  description = "Latin 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2243 : 
+{
+  description = "Latin 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2244 : 
+{
+  description = "Latin 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2245 : 
+{
+  description = "Latin 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2246 : 
+{
+  description = "Latin 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2247 : 
+{
+  description = "Latin 6";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2248 : 
+{
+  description = "Latin 7";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2249 : 
+{
+  description = "Latin PC";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2119 : 
+{
+  description = "MAK";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2120 : 
+{
+  description = "MAK 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2121 : 
+{
+  description = "MAK 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2250 : 
+{
+  description = "New York 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2251 : 
+{
+  description = "New York 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2252 : 
+{
+  description = "New York 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2253 : 
+{
+  description = "New York 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2125 : 
+{
+  description = "Novosibirsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2126 : 
+{
+  description = "Nur-Sultan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2254 : 
+{
+  description = "Odessa";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2176 : 
+{
+  description = "Sochi";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2255 : 
+{
+  description = "Piter";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2256 : 
+{
+  description = "Piter 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2257 : 
+{
+  description = "Piter 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2258 : 
+{
+  description = "Piter 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2259 : 
+{
+  description = "Turkey 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2260 : 
+{
+  description = "Turkey 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2261 : 
+{
+  description = "Turkey 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2262 : 
+{
+  description = "Tyumen";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2263 : 
+{
+  description = "Ural-Sib-Kaz";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2264 : 
+{
+  description = "Valparaiso";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2185 : 
+{
+  description = "Volga";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2107 : 
+{
+  description = "Hadera 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2266 : 
+{
+  description = "Hadera 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2268 : 
+{
+  description = "W Rehovot 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2270 : 
+{
+  description = "Baltia 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2271 : 
+{
+  description = "Vilnius";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2184 : 
+{
+  description = "Almaty ";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2272 : 
+{
+  description = "Zaporizhzhia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2274 : 
+{
+  description = "Toronto 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2275 : 
+{
+  description = "Toronto 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2276 : 
+{
+  description = "Toronto 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2269 : 
+{
+  description = "Ramat Hagolan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2227 : 
+{
+  description = "W NA 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2273 : 
+{
+  description = "W MAK";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2278 : 
+{
+  description = "W Japan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2207 : 
+{
+  description = "W Romania";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2279 : 
+{
+  description = "W Turkey";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2280 : 
+{
+  description = "W Spain 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2281 : 
+{
+  description = "W Spain 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2282 : 
+{
+  description = "W NA 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2284 : 
+{
+  description = "W Unity";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2285 : 
+{
+  description = "W F Africa";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2283 : 
+{
+  description = "W Darom";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2286 : 
+{
+  description = "W Eilat";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2287 : 
+{
+  description = "W Karmiel";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2288 : 
+{
+  description = "W Zichron";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2289 : 
+{
+  description = "W Tveria";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2290 : 
+{
+  description = "W Nahariya";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2291 : 
+{
+  description = "W Revadim";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2292 : 
+{
+  description = "W Kfar Saba";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2293 : 
+{
+  description = "W V.Israel";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2294 : 
+{
+  description = "W Hgolan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2295 : 
+{
+  description = "W Tel Aviv";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2296 : 
+{
+  description = "W Rehovot 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2297 : 
+{
+  description = "W Rehovot 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2267 : 
+{
+  description = "W Hasharon 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2298 : 
+{
+  description = "W Hasharon 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2299 : 
+{
+  description = "W Hasharon 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2300 : 
+{
+  description = "W Jerusalem 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2301 : 
+{
+  description = "W Jerusalem 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2302 : 
+{
+  description = "W Jerusalem 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2303 : 
+{
+  description = "W Hadera 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2304 : 
+{
+  description = "W Hadera 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2305 : 
+{
+  description = "W Netanya 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2306 : 
+{
+  description = "W Netanya 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2307 : 
+{
+  description = "W Netanya 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2308 : 
+{
+  description = "W Beer Sheva 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2309 : 
+{
+  description = "W Beer Sheva 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2310 : 
+{
+  description = "W Ashkelon 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2311 : 
+{
+  description = "W Ashkelon 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2312 : 
+{
+  description = "W Haver 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2313 : 
+{
+  description = "W Haver 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2314 : 
+{
+  description = "W Haver 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2315 : 
+{
+  description = "W Haver 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2316 : 
+{
+  description = "Kiev 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2317 : 
+{
+  description = "Kiev 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2318 : 
+{
+  description = "Kiev 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2277 : 
+{
+  description = "W Poland";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2319 : 
+{
+  description = "W Haifa 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2320 : 
+{
+  description = "W Haifa 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2321 : 
+{
+  description = "W Haifa 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2322 : 
+{
+  description = "W Haifa 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2323 : 
+{
+  description = "W Modiin";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2324 : 
+{
+  description = "W Ashdod 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2325 : 
+{
+  description = "W Ashdod 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2326 : 
+{
+  description = "W Em PT 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2327 : 
+{
+  description = "W Em PT 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2328 : 
+{
+  description = "W Kiryat Shmona";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2329 : 
+{
+  description = "W Piter 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2330 : 
+{
+  description = "W Piter 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2331 : 
+{
+  description = "Kharkov";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2332 : 
+{
+  description = "Troitsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2333 : 
+{
+  description = "W Europe 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2334 : 
+{
+  description = "W Europe 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2335 : 
+{
+  description = "W Europe 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2336 : 
+{
+  description = "W PT 39";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2337 : 
+{
+  description = "W World";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2338 : 
+{
+  description = "W Baden-W";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2339 : 
+{
+  description = "W CZ-SL";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2340 : 
+{
+  description = "Georgia";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1028 : 
+{
+  description = "W Tel Aviv 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1029 : 
+{
+  description = "W NY1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1030 : 
+{
+  description = "W NY2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1033 : 
+{
+  description = "Nikolaev";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1034 : 
+{
+  description = "W MAK TLV";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1036 : 
+{
+  description = "W Omsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1037 : 
+{
+  description = "Far East Rus";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1039 : 
+{
+  description = "W Far East Rus";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1040 : 
+{
+  description = "Latin 10";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1041 : 
+{
+  description = "W PT 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1042 : 
+{
+  description = "W PT 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1043 : 
+{
+  description = "W PT 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1049 : 
+{
+  description = "W PT 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1052 : 
+{
+  description = "W PT 6";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1053 : 
+{
+  description = "W PT 7";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1054 : 
+{
+  description = "W PT 8";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1055 : 
+{
+  description = "W PT 9";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1056 : 
+{
+  description = "W PT 10";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1058 : 
+{
+  description = "W PT 11";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1059 : 
+{
+  description = "W PT 12";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1061 : 
+{
+  description = "W PT 13";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1063 : 
+{
+  description = "W PT 14";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1064 : 
+{
+  description = "W PT 15";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1065 : 
+{
+  description = "W PT 16";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1067 : 
+{
+  description = "W PT 17";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1068 : 
+{
+  description = "W PT 18";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1069 : 
+{
+  description = "W PT 19";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1070 : 
+{
+  description = "W PT 20";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1071 : 
+{
+  description = "W PT 21";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1072 : 
+{
+  description = "W PT 22";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1073 : 
+{
+  description = "W PT 23";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1074 : 
+{
+  description = "W PT 24";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1075 : 
+{
+  description = "W PT 25";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1076 : 
+{
+  description = "W PT 26";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1077 : 
+{
+  description = "W PT 27";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1078 : 
+{
+  description = "W PT 28";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1079 : 
+{
+  description = "W PT 29";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1080 : 
+{
+  description = "W PT 30";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1081 : 
+{
+  description = "W PT 31";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1082 : 
+{
+  description = "W PT 32";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1083 : 
+{
+  description = "W PT 33";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1084 : 
+{
+  description = "W PT 34";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1085 : 
+{
+  description = "W PT 35";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1086 : 
+{
+  description = "W PT 36";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1087 : 
+{
+  description = "W PT 37";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-1088 : 
+{
+  description = "W PT 38";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2222 : 
+{
+  description = "W Vladivostok";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2230 : 
+{
+  description = "W Toronto 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2265 : 
+{
+  description = "W Toronto 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2341 : 
+{
+  description = "W Almaty";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2342 : 
+{
+  description = "W NA Florida";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2343 : 
+{
+  description = "W NA West";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2344 : 
+{
+  description = "W NA East";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2345 : 
+{
+  description = "W NA Midwest";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2346 : 
+{
+  description = "W NA Rus";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2347 : 
+{
+  description = "W Brazil 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2348 : 
+{
+  description = "W Chile 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2349 : 
+{
+  description = "W Peru Ecuador";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2350 : 
+{
+  description = "W Latin 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2351 : 
+{
+  description = "W Latin 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2352 : 
+{
+  description = "W Latin 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2353 : 
+{
+  description = "W Latin 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2354 : 
+{
+  description = "W Latin 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2355 : 
+{
+  description = "W Latin 6";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2356 : 
+{
+  description = "W Latin 7";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2357 : 
+{
+  description = "W Latin 8";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2358 : 
+{
+  description = "W Latin 9";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2359 : 
+{
+  description = "W Latin 10";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2360 : 
+{
+  description = "W Berlin";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2361 : 
+{
+  description = "W Qazaqstan";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2362 : 
+{
+  description = "W NA12";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2363 : 
+{
+  description = "W Volga";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2364 : 
+{
+  description = "W Kavkaz";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2365 : 
+{
+  description = "W Kharkov";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2366 : 
+{
+  description = "W NA 23";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2367 : 
+{
+  description = "W DOM";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2368 : 
+{
+  description = "W Irkutsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2369 : 
+{
+  description = "W Petrozavodsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2370 : 
+{
+  description = "W Belarus";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2371 : 
+{
+  description = "W Kiev 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2372 : 
+{
+  description = "W Kiev 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2373 : 
+{
+  description = "W Kiev 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2374 : 
+{
+  description = "W Moscow 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2375 : 
+{
+  description = "W Moscow 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2376 : 
+{
+  description = "W Moscow 3";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2377 : 
+{
+  description = "W Moscow 4";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2378 : 
+{
+  description = "W Moscow 5";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2379 : 
+{
+  description = "W Moscow 6";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2380 : 
+{
+  description = "W Moscow 7";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2381 : 
+{
+  description = "W Krasnoyarsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2382 : 
+{
+  description = "W Holland";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2383 : 
+{
+  description = "W Moscow EG";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2384 : 
+{
+  description = "W Odessa";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2385 : 
+{
+  description = "W Bishkek";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2386 : 
+{
+  description = "W Piter 1";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2387 : 
+{
+  description = "W Piter 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2388 : 
+{
+  description = "Moscow EG";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2389 : 
+{
+  description = "Bishkek";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2390 : 
+{
+  description = "Omsk";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2391 : 
+{
+  description = "K.Shmona";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2392 : 
+{
+  description = "Ashkelon 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
+room-2393 : 
+{
+  description = "Haver 2";
+  bitrate = "64000";
+  publishers = "20";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+};
