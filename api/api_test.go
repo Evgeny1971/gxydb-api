@@ -45,6 +45,44 @@ func (s *ApiTestSuite) TearDownTest() {
 	s.DBCleaner.Clean(s.AllTables()...)
 }
 
+func (s *ApiTestSuite) TestListGroups() {
+	counts := struct {
+		gateways       int
+		roomPerGateway int
+	}{
+		gateways:       3,
+		roomPerGateway: 5,
+	}
+	gateways := make(map[int64]*models.Gateway, counts.gateways)
+	rooms := make(map[int]*models.Room, counts.gateways*counts.roomPerGateway)
+	for i := 0; i < counts.gateways; i++ {
+		gateway := s.createGateway()
+		gateways[gateway.ID] = gateway
+		for j := 0; j < counts.roomPerGateway; j++ {
+			room := s.createRoom(gateway)
+			rooms[room.GatewayUID] = room
+		}
+	}
+
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	req, _ := http.NewRequest("GET", "/groups", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	var body []interface{}
+	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
+	s.Equal(counts.gateways*counts.roomPerGateway, len(body), "group count")
+
+	for i, respRoom := range body {
+		data := respRoom.(map[string]interface{})
+		room, ok := rooms[int(data["room"].(float64))]
+		s.Require().True(ok, "unknown room [%d] %v", i, data["room"])
+		s.Equal(gateways[room.DefaultGatewayID].Name, data["janus"], "Janus")
+		s.Equal(room.Name, data["description"], "description")
+	}
+}
+
 func (s *ApiTestSuite) TestGetRoomMalformedID() {
 	req, _ := http.NewRequest("GET", "/room/id", nil)
 	resp := s.request(req)
@@ -128,7 +166,6 @@ func (s *ApiTestSuite) TestGetRoom() {
 }
 
 func (s *ApiTestSuite) TestListRooms() {
-	//boil.DebugMode = false
 	counts := struct {
 		gateways        int
 		roomPerGateway  int
@@ -153,8 +190,13 @@ func (s *ApiTestSuite) TestListRooms() {
 			}
 		}
 	}
+
+	// create some inactive rooms
+	for _, v := range gateways {
+		s.createRoom(v)
+	}
+
 	s.Require().NoError(s.app.cache.Reload(s.DB))
-	//boil.DebugMode = true
 
 	req, _ := http.NewRequest("GET", "/rooms", nil)
 	resp := s.request(req)

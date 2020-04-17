@@ -11,12 +11,11 @@ import (
 	"github.com/edoshor/janus-go"
 	"github.com/gorilla/mux"
 	pkgerr "github.com/pkg/errors"
-	"github.com/rs/zerolog/hlog"
-	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
+	"github.com/Bnei-Baruch/gxydb-api/pkg/sqlutil"
 )
 
 type V1User struct {
@@ -41,13 +40,17 @@ type V1User struct {
 	SoundTest bool   `json:"sound_test"`
 }
 
+type V1RoomInfo struct {
+	Room        int    `json:"room"`
+	Janus       string `json:"janus"`
+	Description string `json:"description"`
+}
+
 type V1Room struct {
-	Room        int       `json:"room"`
-	Janus       string    `json:"janus"`
-	Questions   bool      `json:"questions"`
-	Description string    `json:"description"`
-	NumUsers    int       `json:"num_users"`
-	Users       []*V1User `json:"users"`
+	V1RoomInfo
+	Questions bool      `json:"questions"`
+	NumUsers  int       `json:"num_users"`
+	Users     []*V1User `json:"users"`
 }
 
 type V1Composite struct {
@@ -66,6 +69,21 @@ type V1ProtocolMessageText struct {
 	User   V1User
 }
 
+func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
+	rooms := make([]*V1RoomInfo, len(a.cache.rooms.ByID))
+	i := 0
+	for _, room := range a.cache.rooms.ByID {
+		rooms[i] = &V1RoomInfo{
+			Room:        room.GatewayUID,
+			Janus:       a.cache.gateways.ByID[room.DefaultGatewayID].Name,
+			Description: room.Name,
+		}
+		i++
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, rooms)
+}
+
 func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := models.Rooms(
 		models.RoomWhere.Disabled.EQ(false),
@@ -79,16 +97,22 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respRooms := make([]*V1Room, len(rooms))
-	for i := range rooms {
-		room := rooms[i]
+	respRooms := make([]*V1Room, 0)
+	for _, room := range rooms {
+
+		// TODO: maybe move this into DB query above for performance reasons ?
+		if len(room.R.Sessions) == 0 {
+			continue
+		}
 
 		respRoom := &V1Room{
-			Room:        room.GatewayUID,
-			Janus:       a.cache.gateways.ByID[room.DefaultGatewayID].Name,
-			Description: room.Name,
-			NumUsers:    len(room.R.Sessions),
-			Users:       make([]*V1User, len(room.R.Sessions)),
+			V1RoomInfo: V1RoomInfo{
+				Room:        room.GatewayUID,
+				Janus:       a.cache.gateways.ByID[room.DefaultGatewayID].Name,
+				Description: room.Name,
+			},
+			NumUsers: len(room.R.Sessions),
+			Users:    make([]*V1User, len(room.R.Sessions)),
 		}
 
 		for i, session := range room.R.Sessions {
@@ -98,7 +122,7 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 			respRoom.Users[i] = a.makeV1User(room, session)
 		}
 
-		respRooms[i] = respRoom
+		respRooms = append(respRooms, respRoom)
 	}
 
 	httputil.RespondWithJSON(w, http.StatusOK, respRooms)
@@ -132,11 +156,13 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respRoom := &V1Room{
-		Room:        room.GatewayUID,
-		Janus:       room.R.DefaultGateway.Name,
-		Description: room.Name,
-		NumUsers:    len(room.R.Sessions),
-		Users:       make([]*V1User, len(room.R.Sessions)),
+		V1RoomInfo: V1RoomInfo{
+			Room:        room.GatewayUID,
+			Janus:       room.R.DefaultGateway.Name,
+			Description: room.Name,
+		},
+		NumUsers: len(room.R.Sessions),
+		Users:    make([]*V1User, len(room.R.Sessions)),
 	}
 
 	for i, session := range room.R.Sessions {
@@ -295,7 +321,7 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hErr := a.inTx(r, func(tx boil.Transactor) *httputil.HttpError {
+	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
 		cRooms := make(models.CompositesRoomSlice, len(data.VQuad))
 		for i, item := range data.VQuad {
 			gateway, ok := a.cache.gateways.ByName[item.Janus]
@@ -315,20 +341,26 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if _, err := composite.CompositesRooms().DeleteAll(tx); err != nil {
-			return httputil.NewInternalError(pkgerr.WithStack(err))
+			return pkgerr.WithStack(err)
 		}
 		if err := composite.AddCompositesRooms(tx, true, cRooms...); err != nil {
-			return httputil.NewInternalError(pkgerr.WithStack(err))
+			return pkgerr.WithStack(err)
 		}
-
-		httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
 
 		return nil
 	})
-	if hErr != nil {
-		hErr.Abort(w, r)
+
+	if err != nil {
+		var hErr *httputil.HttpError
+		if errors.As(err, &hErr) {
+			hErr.Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
 		return
 	}
+
+	httputil.RespondSuccess(w)
 }
 
 func (a *App) V1HandleEvent(w http.ResponseWriter, r *http.Request) {
@@ -350,7 +382,7 @@ func (a *App) V1HandleEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
+	httputil.RespondSuccess(w)
 }
 
 func (a *App) V1HandleProtocol(w http.ResponseWriter, r *http.Request) {
@@ -377,39 +409,7 @@ func (a *App) V1HandleProtocol(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httputil.RespondWithJSON(w, http.StatusOK, map[string]string{"result": "success"})
-}
-
-func (a *App) inTx(r *http.Request, f func(boil.Transactor) *httputil.HttpError) *httputil.HttpError {
-	tx, err := a.DB.Begin()
-	if err != nil {
-		return httputil.NewInternalError(pkgerr.Wrap(err, "begin tx"))
-	}
-
-	// rollback on panics
-	defer func() {
-		if p := recover(); p != nil {
-			if ex := tx.Rollback(); ex != nil {
-				hlog.FromRequest(r).Error().Err(ex).Msg("rollback error on panic")
-			}
-			panic(p) // re-throw panic after Rollback
-		}
-	}()
-
-	// invoke logic and rollback on errors
-	if err := f(tx); err != nil {
-		if ex := tx.Rollback(); ex != nil {
-			return httputil.NewInternalError(pkgerr.Wrap(err, "tx.Rollback"))
-		}
-		return err
-	}
-
-	// commit transaction
-	if err := tx.Commit(); err != nil {
-		return httputil.NewInternalError(pkgerr.Wrap(err, "tx.Commit"))
-	}
-
-	return nil
+	httputil.RespondSuccess(w)
 }
 
 func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
@@ -450,10 +450,12 @@ func (a *App) makeV1Composite(composite *models.Composite) *V1Composite {
 		room := cRoom.R.Room
 		respRoom := &V1CompositeRoom{
 			V1Room: V1Room{
-				Room:        room.GatewayUID,
-				Janus:       a.cache.gateways.ByID[cRoom.GatewayID].Name,
-				Description: room.Name,
-				NumUsers:    len(room.R.Sessions),
+				V1RoomInfo: V1RoomInfo{
+					Room:        room.GatewayUID,
+					Janus:       a.cache.gateways.ByID[cRoom.GatewayID].Name,
+					Description: room.Name,
+				},
+				NumUsers: len(room.R.Sessions),
 			},
 			Position: cRoom.Position,
 		}

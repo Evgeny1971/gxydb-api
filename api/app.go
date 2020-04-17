@@ -94,6 +94,7 @@ func (a *App) Run(listenAddr string) {
 
 func (a *App) initializeRoutes() {
 	// api v1 (current)
+	a.Router.HandleFunc("/groups", a.V1ListGroups).Methods("GET")
 	a.Router.HandleFunc("/rooms", a.V1ListRooms).Methods("GET")
 	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")
 	a.Router.HandleFunc("/users", a.V1ListUsers).Methods("GET")
