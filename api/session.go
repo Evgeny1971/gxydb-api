@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/edoshor/janus-go"
@@ -38,12 +39,12 @@ func (sm *V1SessionManager) HandleEvent(ctx context.Context, event interface{}) 
 	log.Ctx(ctx).Debug().Interface("event", event).Msg("handle gateway event")
 
 	switch event.(type) {
-	case janus.PluginEvent:
-		e := event.(janus.PluginEvent)
+	case *janus.PluginEvent:
+		e := event.(*janus.PluginEvent)
 		if e.Event.Plugin == "janus.plugin.videoroom" {
 			switch e.Event.Data["event"].(string) {
 			case "leaving":
-				if err := sm.onVideoroomLeaving(ctx, &e); err != nil {
+				if err := sm.onVideoroomLeaving(ctx, e); err != nil {
 					return pkgerr.Wrap(err, "V1SessionManager.onVideoroomLeaving")
 				}
 			}
@@ -59,7 +60,7 @@ func (sm *V1SessionManager) HandleProtocol(ctx context.Context, msg *janus.Textr
 
 	var pMsg V1ProtocolMessageText
 	if err := json.Unmarshal([]byte(msg.Text), &pMsg); err != nil {
-		return pkgerr.Wrap(err, "json.Unmarshal")
+		return pkgerr.WithStack(WrappingProtocolError(err, fmt.Sprintf("json.Unmarshal: %s", err.Error())))
 	}
 
 	switch pMsg.Type {
@@ -102,7 +103,7 @@ func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, event *janus
 	logger := log.Ctx(ctx)
 	logger.Info().Msgf("%s has left room %d", v1User.ID, v1User.Room)
 
-	userID, err := sm.getInternalUserID(ctx, v1User.ID)
+	userID, err := sm.getInternalUserID(ctx, &v1User)
 	if err != nil {
 		return pkgerr.Wrap(err, "sm.getInternalUserID")
 	}
@@ -117,7 +118,7 @@ func (sm *V1SessionManager) onProtocolEnter(ctx context.Context, pMsg *V1Protoco
 	logger := log.Ctx(ctx)
 	logger.Info().Msgf("%s has enter room %d", pMsg.User.ID, pMsg.User.Room)
 
-	userID, err := sm.getInternalUserID(ctx, pMsg.User.ID)
+	userID, err := sm.getInternalUserID(ctx, &pMsg.User)
 	if err != nil {
 		return pkgerr.Wrap(err, "sm.getInternalUserID")
 	}
@@ -127,10 +128,14 @@ func (sm *V1SessionManager) onProtocolEnter(ctx context.Context, pMsg *V1Protoco
 			return pkgerr.Wrap(err, "sm.closeSession")
 		}
 	}
+	session, err := sm.makeSession(userID, &pMsg.User)
+	if err != nil {
+		return pkgerr.Wrap(err, "sm.makeSession")
+	}
 
-	session := sm.makeSession(userID, &pMsg.User)
 	err = session.Upsert(sm.db, true,
-		[]string{models.SessionColumns.UserID, models.SessionColumns.RemovedAt}, boil.Infer(), boil.Infer())
+		[]string{models.SessionColumns.UserID, models.SessionColumns.GatewayID, models.SessionColumns.GatewaySession},
+		boil.Infer(), boil.Infer())
 	if err != nil {
 		return pkgerr.Wrap(err, "db upsert")
 	}
@@ -156,12 +161,12 @@ func (sm *V1SessionManager) onProtocolSoundTest(ctx context.Context, pMsg *V1Pro
 	return sm.upsertSession(ctx, &pMsg.User)
 }
 
-func (sm *V1SessionManager) getInternalUserID(ctx context.Context, key string) (int64, error) {
+func (sm *V1SessionManager) getInternalUserID(ctx context.Context, user *V1User) (int64, error) {
 	var userID int64
 
 	err := models.Users(
 		qm.Select(models.UserColumns.ID),
-		models.UserWhere.AccountsID.EQ(key)).
+		models.UserWhere.AccountsID.EQ(user.ID)).
 		QueryRow(sm.db).
 		Scan(&userID)
 
@@ -173,15 +178,17 @@ func (sm *V1SessionManager) getInternalUserID(ctx context.Context, key string) (
 		return 0, pkgerr.Wrap(err, "db fetch userID")
 	}
 
-	log.Ctx(ctx).Info().Msgf("Creating new user: %s", key)
-	user := models.User{
-		AccountsID: key,
+	log.Ctx(ctx).Info().Msgf("Creating new user: %s", user.ID)
+	newUser := models.User{
+		AccountsID: user.ID,
+		Email:      null.StringFrom(user.Email),
+		Username:   null.StringFrom(user.Username),
 	}
-	if err := user.Insert(sm.db, boil.Infer()); err != nil {
+	if err := newUser.Insert(sm.db, boil.Infer()); err != nil {
 		return 0, pkgerr.Wrap(err, "db create user")
 	}
 
-	return user.ID, nil
+	return newUser.ID, nil
 }
 
 func (sm *V1SessionManager) closeSession(ctx context.Context, userID int64) error {
@@ -199,14 +206,19 @@ func (sm *V1SessionManager) closeSession(ctx context.Context, userID int64) erro
 }
 
 func (sm *V1SessionManager) upsertSession(ctx context.Context, user *V1User) error {
-	userID, err := sm.getInternalUserID(ctx, user.ID)
+	userID, err := sm.getInternalUserID(ctx, user)
 	if err != nil {
 		return pkgerr.Wrap(err, "sm.getInternalUserID")
 	}
 
-	session := sm.makeSession(userID, user)
+	session, err := sm.makeSession(userID, user)
+	if err != nil {
+		return pkgerr.Wrap(err, "sm.makeSession")
+	}
+
 	err = session.Upsert(sm.db, true,
-		[]string{models.SessionColumns.UserID, models.SessionColumns.RemovedAt}, boil.Infer(), boil.Infer())
+		[]string{models.SessionColumns.UserID, models.SessionColumns.GatewayID, models.SessionColumns.GatewaySession},
+		boil.Infer(), boil.Blacklist(models.SessionColumns.UpdatedAt))
 	if err != nil {
 		return pkgerr.Wrap(err, "db upsert")
 	}
@@ -214,11 +226,42 @@ func (sm *V1SessionManager) upsertSession(ctx context.Context, user *V1User) err
 	return nil
 }
 
-func (sm *V1SessionManager) makeSession(userID int64, user *V1User) *models.Session {
+type ProtocolError struct {
+	msg   string
+	cause error
+}
+
+func (pe *ProtocolError) Error() string {
+	return pe.msg
+}
+
+func (pe *ProtocolError) Cause() error {
+	return pe.cause
+}
+
+func NewProtocolError(msg string) *ProtocolError {
+	return &ProtocolError{msg: msg}
+}
+
+func WrappingProtocolError(err error, msg string) *ProtocolError {
+	return &ProtocolError{cause: err, msg: msg}
+}
+
+func (sm *V1SessionManager) makeSession(userID int64, user *V1User) (*models.Session, error) {
+	room, ok := sm.cache.rooms.ByGatewayUID[user.Room]
+	if !ok {
+		return nil, NewProtocolError(fmt.Sprintf("Unknown room: %d", user.Room))
+	}
+
+	gateway, ok := sm.cache.gateways.ByName[user.Janus]
+	if !ok {
+		return nil, NewProtocolError(fmt.Sprintf("Unknown gateway: %s", user.Janus))
+	}
+
 	return &models.Session{
 		UserID:         userID,
-		RoomID:         null.Int64From(sm.cache.rooms.ByGatewayUID[user.Room].ID),
-		GatewayID:      null.Int64From(sm.cache.gateways.ByName[user.Janus].ID),
+		RoomID:         null.Int64From(room.ID),
+		GatewayID:      null.Int64From(gateway.ID),
 		GatewaySession: null.Int64From(user.Session),
 		GatewayHandle:  null.Int64From(user.Handle),
 		GatewayFeed:    null.Int64From(user.RFID),
@@ -229,13 +272,6 @@ func (sm *V1SessionManager) makeSession(userID int64, user *V1User) *models.Sess
 		SoundTest:      user.SoundTest,
 		UserAgent:      null.StringFrom(user.System),
 		IPAddress:      null.StringFrom(user.IP),
-		UpdatedAt:      null.Time{},
-	}
-}
-
-type V1ProtocolMessageText struct {
-	Type   string
-	Status bool
-	Room   int
-	User   V1User
+		UpdatedAt:      null.TimeFrom(time.Now().UTC()),
+	}, nil
 }

@@ -59,11 +59,17 @@ type V1CompositeRoom struct {
 	Position int `json:"queue"`
 }
 
+type V1ProtocolMessageText struct {
+	Type   string
+	Status bool
+	Room   int
+	User   V1User
+}
+
 func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := models.Rooms(
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
-		qm.Where("non_existing_fields is false"),
 		qm.Load(models.RoomRels.Sessions, models.SessionWhere.RemovedAt.IsNull()),
 		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.User)),
 	).All(a.DB)
@@ -328,14 +334,14 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 func (a *App) V1HandleEvent(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		httputil.NewBadRequestError(err, "").Abort(w, r)
+		httputil.NewBadRequestError(err, "read request body failed").Abort(w, r)
 		return
 	}
 	r.Body.Close()
 
 	event, err := janus.ParseEvent(body)
 	if err != nil {
-		httputil.NewBadRequestError(err, "").Abort(w, r)
+		httputil.NewBadRequestError(err, "error parsing request body").Abort(w, r)
 		return
 	}
 
@@ -350,19 +356,24 @@ func (a *App) V1HandleEvent(w http.ResponseWriter, r *http.Request) {
 func (a *App) V1HandleProtocol(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 	if err != nil {
-		httputil.NewBadRequestError(err, "").Abort(w, r)
+		httputil.NewBadRequestError(err, "read request body failed").Abort(w, r)
 		return
 	}
 	r.Body.Close()
 
 	msg, err := janus.ParseTextroomMessage(body)
 	if err != nil {
-		httputil.NewBadRequestError(err, "").Abort(w, r)
+		httputil.NewBadRequestError(err, "error parsing request body").Abort(w, r)
 		return
 	}
 
 	if err := a.sessionManager.HandleProtocol(r.Context(), msg); err != nil {
-		httputil.NewInternalError(err).Abort(w, r)
+		var pErr *ProtocolError
+		if errors.As(err, &pErr) {
+			httputil.NewBadRequestError(err, "protocol error").Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
 		return
 	}
 
@@ -411,7 +422,7 @@ func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 		Name:      "",     // Useless. Shouldn't be used on the client side.
 		Role:      "user", // fixed. No more "groups" only "users"
 		System:    session.UserAgent.String,
-		Username:  "", // Useless. Never seen a value here
+		Username:  session.R.User.Username.String, // Useless. Never seen a value here
 		Room:      room.GatewayUID,
 		Timestamp: session.CreatedAt.Unix(), // Not sure we really need this
 		Session:   session.GatewaySession.Int64,

@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/edoshor/janus-go"
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -104,7 +105,7 @@ func (s *ApiTestSuite) TestGetRoom() {
 		for j, user := range users {
 			if user.AccountsID == data["id"] {
 				found = true
-				s.assertV1User(sessions[j], data)
+				s.assertV1Session(sessions[j], data)
 				break
 			}
 		}
@@ -180,7 +181,7 @@ func (s *ApiTestSuite) TestListRooms() {
 			data := respUser.(map[string]interface{})
 			session, ok := sessions[data["id"].(string)]
 			s.Require().True(ok, "unknown session [%d] %v", j, data["id"])
-			s.assertV1User(session, data)
+			s.assertV1Session(session, data)
 		}
 	}
 }
@@ -227,7 +228,7 @@ func (s *ApiTestSuite) TestGetUser() {
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
 	body := s.request200json(req)
-	s.assertV1User(session, body)
+	s.assertV1Session(session, body)
 
 	// turn camera off
 	session.Camera = false
@@ -285,7 +286,7 @@ func (s *ApiTestSuite) TestListUsers() {
 		data := respSession.(map[string]interface{})
 		session, ok := sessions[data["id"].(string)]
 		s.Require().True(ok, "unknown session [%s] %v", id, data["room"])
-		s.assertV1User(session, data)
+		s.assertV1Session(session, data)
 	}
 }
 
@@ -425,12 +426,6 @@ func (s *ApiTestSuite) TestUpdateCompositeMalformedID() {
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
 
-func (s *ApiTestSuite) TestUpdateCompositeNoBody() {
-	req, _ := http.NewRequest("PUT", "/qids/q1", nil)
-	resp := s.request(req)
-	s.Require().Equal(http.StatusBadRequest, resp.Code)
-}
-
 func (s *ApiTestSuite) TestUpdateCompositeNotFound() {
 	b, _ := json.Marshal(V1Composite{})
 	req, _ := http.NewRequest("PUT", "/qids/q1", bytes.NewBuffer(b))
@@ -476,7 +471,459 @@ func (s *ApiTestSuite) TestUpdateComposite() {
 		s.False(croom["questions"].(bool), "questions")
 		s.Equal(0, int(croom["num_users"].(float64)), "num_users")
 	}
+}
 
+func (s *ApiTestSuite) TestHandleEventBadJSON() {
+	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleEventUnknownType() {
+	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer([]byte("{\"type\":7}")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleEventVideoroomLeaving() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	s.Require().NoError(session.L.LoadUser(s.DB, true, session, nil))
+	v1User := s.app.makeV1User(room, session)
+	v1UserJson, _ := json.Marshal(v1User)
+	event := janus.PluginEvent{
+		BaseEvent: janus.BaseEvent{
+			Emitter:   gateway.Name,
+			Type:      64,
+			Timestamp: time.Now().UTC().Unix(),
+			Session:   uint64(session.GatewaySession.Int64),
+			Handle:    uint64(session.GatewayHandle.Int64),
+		},
+		Event: janus.PluginEventBody{
+			Plugin: "janus.plugin.videoroom",
+			Data: map[string]interface{}{
+				"event":   "leaving",
+				"display": string(v1UserJson),
+			},
+		},
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.True(session.RemovedAt.Valid, "removed_at")
+}
+
+func (s *ApiTestSuite) TestHandleEventVideoroomLeavingUnknownUser() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	s.Require().NoError(session.L.LoadUser(s.DB, true, session, nil))
+	v1User := s.app.makeV1User(room, session)
+	v1User.ID = "some_new_user_id"
+	v1UserJson, _ := json.Marshal(v1User)
+	event := janus.PluginEvent{
+		BaseEvent: janus.BaseEvent{
+			Emitter:   gateway.Name,
+			Type:      64,
+			Timestamp: time.Now().UTC().Unix(),
+			Session:   uint64(session.GatewaySession.Int64),
+			Handle:    uint64(session.GatewayHandle.Int64),
+		},
+		Event: janus.PluginEventBody{
+			Plugin: "janus.plugin.videoroom",
+			Data: map[string]interface{}{
+				"event":   "leaving",
+				"display": string(v1UserJson),
+			},
+		},
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	// no changes to existing sessions as we expect a noop
+	count, err := models.Sessions().Count(s.DB)
+	s.Require().NoError(err)
+	s.EqualValues(1, count, "existing sessions count")
+	s.Require().NoError(session.Reload(s.DB))
+	s.False(session.RemovedAt.Valid, "removed_at")
+
+	// new user record
+	ok, err := models.Users(models.UserWhere.AccountsID.EQ(v1User.ID)).Exists(s.DB)
+	s.Require().NoError(err)
+	s.True(ok, "new user exists")
+}
+
+func (s *ApiTestSuite) TestHandleProtocolBadJSON() {
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolUnknownType() {
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer([]byte("{\"type\":7}")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolBadTextJSON() {
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     "someone",
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     "{\"bad\":\"json",
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolUnknownGateway() {
+	user := s.createUser()
+
+	v1User := s.makeV1user(nil, nil, user)
+	payload := map[string]interface{}{
+		"type":   "enter",
+		"status": true,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolUnknownRoom() {
+	gateway := s.createGateway()
+	user := s.createUser()
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, nil, user)
+	payload := map[string]interface{}{
+		"type":   "enter",
+		"status": true,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolEnter() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, room, user)
+
+	payload := map[string]interface{}{
+		"type":   "enter",
+		"status": true,
+		"room":   room.GatewayUID,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolEnterUnknownUser() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, room, nil)
+	v1User.ID = "some_new_user_id"
+	v1User.Display = "test user"
+	v1User.Email = "user@example.com"
+	v1User.Username = "username"
+
+	payload := map[string]interface{}{
+		"type":   "enter",
+		"status": true,
+		"room":   room.GatewayUID,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", "/users/some_new_user_id", nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+}
+
+func (s *ApiTestSuite) TestHandleProtocolEnterExistingSession() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, room, user)
+	v1User.Session = session.GatewaySession.Int64
+	v1User.Handle = session.GatewayHandle.Int64
+
+	payload := map[string]interface{}{
+		"type":   "enter",
+		"status": true,
+		"room":   room.GatewayUID,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.False(session.RemovedAt.Valid, "removed_at")
+}
+
+func (s *ApiTestSuite) TestHandleProtocolQuestion() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, room, user)
+	v1User.Session = session.GatewaySession.Int64
+	v1User.Handle = session.GatewayHandle.Int64
+	v1User.Question = true
+	payload := map[string]interface{}{
+		"type":   "question",
+		"status": true,
+		"room":   room.GatewayUID,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.True(session.Question, "question")
+
+	// now turn it off
+	v1User.Question = false
+	payloadJson, _ = json.Marshal(payload)
+	event.Text = string(payloadJson)
+	b, _ = json.Marshal(event)
+
+	req, _ = http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body = s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.False(session.Question, "question false")
+}
+
+func (s *ApiTestSuite) TestHandleProtocolCamera() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, room, user)
+	v1User.Session = session.GatewaySession.Int64
+	v1User.Handle = session.GatewayHandle.Int64
+	v1User.Camera = true
+	payload := map[string]interface{}{
+		"type":   "camera",
+		"status": true,
+		"room":   room.GatewayUID,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.True(session.Camera, "camera")
+
+	// now turn it off
+	v1User.Camera = false
+	payloadJson, _ = json.Marshal(payload)
+	event.Text = string(payloadJson)
+	b, _ = json.Marshal(event)
+
+	req, _ = http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body = s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.False(session.Camera, "camera false")
+}
+
+func (s *ApiTestSuite) TestHandleProtocolSoundTest() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	session := s.createSession(user, gateway, room)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	v1User := s.makeV1user(gateway, room, user)
+	v1User.Session = session.GatewaySession.Int64
+	v1User.Handle = session.GatewayHandle.Int64
+	v1User.SoundTest = true
+	payload := map[string]interface{}{
+		"type":   "sound-test",
+		"status": true,
+		"room":   room.GatewayUID,
+		"user":   v1User,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	event := janus.TextroomPostMsg{
+		Textroom: "message",
+		Room:     1000,
+		From:     v1User.ID,
+		Date:     janus.DateTime{Time: time.Now()},
+		Text:     string(payloadJson),
+		Whisper:  false,
+	}
+	b, _ := json.Marshal(event)
+
+	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.True(session.SoundTest, "sound-test")
+
+	// now turn it off
+	v1User.SoundTest = false
+	payloadJson, _ = json.Marshal(payload)
+	event.Text = string(payloadJson)
+	b, _ = json.Marshal(event)
+
+	req, _ = http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body = s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	s.Require().NoError(session.Reload(s.DB))
+	s.False(session.SoundTest, "sound-test false")
 }
 
 func (s *ApiTestSuite) request(req *http.Request) *httptest.ResponseRecorder {
@@ -493,7 +940,7 @@ func (s *ApiTestSuite) request200json(req *http.Request) map[string]interface{} 
 	return body
 }
 
-func (s *ApiTestSuite) assertV1User(session *models.Session, actual map[string]interface{}) {
+func (s *ApiTestSuite) assertV1Session(session *models.Session, actual map[string]interface{}) {
 	if session.R == nil {
 		s.Require().NoError(session.L.LoadUser(s.DB, true, session, nil))
 		s.Require().NoError(session.L.LoadRoom(s.DB, true, session, nil))
@@ -507,7 +954,7 @@ func (s *ApiTestSuite) assertV1User(session *models.Session, actual map[string]i
 	s.Equal(session.R.Gateway.Name, actual["janus"], "janus")
 	s.Equal("user", actual["role"], "role")
 	s.Equal(session.UserAgent.String, actual["system"], "system")
-	s.Equal("", actual["username"], "username")
+	s.Equal(session.R.User.Username.String, actual["username"], "username")
 	s.Equal(session.CreatedAt.Unix(), int64(actual["timestamp"].(float64)), "timestamp")
 	s.Equal(session.GatewaySession.Int64, int64(actual["session"].(float64)), "session")
 	s.Equal(session.GatewayHandle.Int64, int64(actual["handle"].(float64)), "handle")
@@ -516,6 +963,26 @@ func (s *ApiTestSuite) assertV1User(session *models.Session, actual map[string]i
 	s.Equal(session.Question, actual["question"], "question")
 	s.Equal(session.SelfTest, actual["self_test"], "self_test")
 	s.Equal(session.SoundTest, actual["sound_test"], "sound_test")
+}
+
+func (s *ApiTestSuite) assertV1User(v1User *V1User, body map[string]interface{}) {
+	s.Equal(v1User.ID, body["id"], "id")
+	s.Equal(v1User.Display, body["display"], "display")
+	s.Equal(v1User.Email, body["email"], "email")
+	s.Equal(v1User.Room, int(body["room"].(float64)), "room")
+	s.Equal(v1User.IP, body["ip"], "ip")
+	s.Equal(v1User.Janus, body["janus"], "janus")
+	s.Equal(v1User.Role, body["role"], "role")
+	s.Equal(v1User.System, body["system"], "system")
+	s.Equal(v1User.Username, body["username"], "username")
+	s.InEpsilon(v1User.Timestamp, int64(body["timestamp"].(float64)), 1, "timestamp")
+	s.Equal(v1User.Session, int64(body["session"].(float64)), "session")
+	s.Equal(v1User.Handle, int64(body["handle"].(float64)), "handle")
+	s.Equal(v1User.RFID, int64(body["rfid"].(float64)), "rfid")
+	s.Equal(v1User.Camera, body["camera"], "camera")
+	s.Equal(v1User.Question, body["question"], "question")
+	s.Equal(v1User.SelfTest, body["self_test"], "self_test")
+	s.Equal(v1User.SoundTest, body["sound_test"], "sound_test")
 }
 
 func (s *ApiTestSuite) createGateway() *models.Gateway {
@@ -588,6 +1055,39 @@ func (s *ApiTestSuite) createComposite(rooms []*models.Room) *models.Composite {
 	s.Require().NoError(composite.AddCompositesRooms(s.DB, true, cRooms...))
 
 	return composite
+}
+
+func (s *ApiTestSuite) makeV1user(gateway *models.Gateway, room *models.Room, user *models.User) *V1User {
+	v1User := &V1User{
+		Group:     "Test Room",
+		IP:        "127.0.0.1",
+		Name:      fmt.Sprintf("user-%s", stringutil.GenerateName(4)),
+		Role:      "user",
+		System:    "user_agent",
+		Timestamp: time.Now().Unix(),
+		Session:   rand.Int63n(math.MaxInt32),
+		Handle:    rand.Int63n(math.MaxInt32),
+		RFID:      rand.Int63n(math.MaxInt32),
+		Camera:    false,
+		Question:  false,
+		SelfTest:  false,
+		SoundTest: false,
+	}
+	if user != nil {
+		v1User.ID = user.AccountsID
+		v1User.Display = fmt.Sprintf("%s %s", user.FirstName.String, user.LastName.String)
+		v1User.Email = user.Email.String
+		v1User.Username = user.Username.String
+	}
+
+	if gateway != nil {
+		v1User.Janus = gateway.Name
+	}
+	if room != nil {
+		v1User.Room = room.GatewayUID
+	}
+
+	return v1User
 }
 
 func TestApiTestSuite(t *testing.T) {

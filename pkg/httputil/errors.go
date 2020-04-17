@@ -30,7 +30,7 @@ func (e *HttpError) Abort(w http.ResponseWriter, r *http.Request) {
 	if e.Err == nil {
 		log.Warn().Str("error", e.Message).Msg("client error")
 	} else {
-		log.Warn().Err(e.Err).Msg("client error")
+		log.Warn().Stack().Err(e.Err).Msg("client error")
 	}
 	RespondWithError(w, e.Code, e.Message)
 }

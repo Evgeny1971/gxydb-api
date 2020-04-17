@@ -16,10 +16,6 @@ import (
 // https://www.alexedwards.net/blog/how-to-properly-parse-a-json-request-body
 
 func DecodeJSONBody(w http.ResponseWriter, r *http.Request, dst interface{}) *HttpError {
-	if r.Body == nil {
-		return NewBadRequestError(nil, "request body must not be empty")
-	}
-
 	defer func() {
 		if _, err := io.Copy(ioutil.Discard, r.Body); err != nil {
 			fmt.Printf("error draining request body: %+v", err)

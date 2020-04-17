@@ -26,7 +26,7 @@ require (
 	github.com/mitchellh/mapstructure v1.2.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/pkg/errors v0.8.1
+	github.com/pkg/errors v0.9.1
 	github.com/pquerna/cachecontrol v0.0.0-20180517163645-1555304b9b35 // indirect
 	github.com/rs/zerolog v1.18.0
 	github.com/spf13/afero v1.2.2 // indirect
@@ -48,4 +48,4 @@ require (
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 )
 
-// replace github.com/edoshor/janus-go => /Users/edoshor/projects/janus-go
+replace github.com/edoshor/janus-go => /Users/edoshor/projects/janus-go

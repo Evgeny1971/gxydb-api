@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS sessions
     created_at      TIMESTAMP WITH TIME ZONE DEFAULT now_utc() NOT NULL,
     updated_at      TIMESTAMP WITH TIME ZONE                   NULL,
     removed_at      TIMESTAMP WITH TIME ZONE                   NULL,
-    UNIQUE (gateway_id, gateway_session)
+    UNIQUE (user_id, gateway_id, gateway_session)
 );
 
 DROP TABLE IF EXISTS composites;
@@ -116,3 +116,5 @@ CREATE TABLE IF NOT EXISTS composites_rooms
 CREATE INDEX IF NOT EXISTS sessions_room_id_idx
     ON sessions USING BTREE (room_id, created_at);
 
+CREATE INDEX IF NOT EXISTS sessions_user_id_idx
+    ON sessions USING BTREE (user_id, removed_at);
