@@ -72,8 +72,7 @@ func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool
 					cors(a.Router)))))
 
 	a.cache = new(AppCache)
-	err := a.cache.Init(db)
-	if err != nil {
+	if err := a.cache.Init(db); err != nil {
 		log.Fatal().Err(err).Msg("initialize app cache")
 	}
 
@@ -95,6 +94,7 @@ func (a *App) Run(listenAddr string) {
 func (a *App) initializeRoutes() {
 	// api v1 (current)
 	a.Router.HandleFunc("/groups", a.V1ListGroups).Methods("GET")
+	a.Router.HandleFunc("/group/{id}", a.V1CreateGroup).Methods("PUT")
 	a.Router.HandleFunc("/rooms", a.V1ListRooms).Methods("GET")
 	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")
 	a.Router.HandleFunc("/users", a.V1ListUsers).Methods("GET")

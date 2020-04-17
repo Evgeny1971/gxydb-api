@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/edoshor/janus-go"
 	"github.com/gorilla/mux"
 	pkgerr "github.com/pkg/errors"
+	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
@@ -70,18 +72,66 @@ type V1ProtocolMessageText struct {
 }
 
 func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
-	rooms := make([]*V1RoomInfo, len(a.cache.rooms.ByID))
-	i := 0
-	for _, room := range a.cache.rooms.ByID {
-		rooms[i] = &V1RoomInfo{
+	rooms := a.cache.rooms.Values()
+	roomInfos := make([]*V1RoomInfo, len(rooms))
+	for i := range rooms {
+		room := rooms[i]
+		roomInfos[i] = &V1RoomInfo{
 			Room:        room.GatewayUID,
-			Janus:       a.cache.gateways.ByID[room.DefaultGatewayID].Name,
+			Janus:       a.cache.gateways.Get(room.DefaultGatewayID).Name,
 			Description: room.Name,
 		}
-		i++
 	}
 
-	httputil.RespondWithJSON(w, http.StatusOK, rooms)
+	sort.SliceStable(roomInfos, func(i, j int) bool {
+		return roomInfos[i].Description < roomInfos[j].Description
+	})
+
+	httputil.RespondWithJSON(w, http.StatusOK, roomInfos)
+}
+
+func (a *App) V1CreateGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		httputil.NewBadRequestError(err, "malformed id").Abort(w, r)
+		return
+	}
+
+	var data V1RoomInfo
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w, r)
+		return
+	}
+
+	gateway := a.cache.gateways.Get(data.Janus)
+	if gateway == nil {
+		httputil.NewBadRequestError(nil, fmt.Sprintf("unknown gateway %s", data.Janus)).Abort(w, r)
+		return
+	}
+
+	room := models.Room{
+		Name:             data.Description,
+		DefaultGatewayID: gateway.ID,
+		GatewayUID:       id,
+	}
+
+	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
+		if err := room.Upsert(tx, true, []string{models.RoomColumns.GatewayUID}, boil.Infer(), boil.Infer()); err != nil {
+			return pkgerr.WithStack(err)
+		}
+
+		a.cache.rooms.Set(&room)
+
+		return nil
+	})
+
+	if err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	}
+
+	httputil.RespondSuccess(w)
 }
 
 func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
@@ -108,7 +158,7 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 		respRoom := &V1Room{
 			V1RoomInfo: V1RoomInfo{
 				Room:        room.GatewayUID,
-				Janus:       a.cache.gateways.ByID[room.DefaultGatewayID].Name,
+				Janus:       a.cache.gateways.Get(room.DefaultGatewayID).Name,
 				Description: room.Name,
 			},
 			NumUsers: len(room.R.Sessions),
@@ -324,12 +374,12 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
 		cRooms := make(models.CompositesRoomSlice, len(data.VQuad))
 		for i, item := range data.VQuad {
-			gateway, ok := a.cache.gateways.ByName[item.Janus]
-			if !ok {
+			gateway := a.cache.gateways.Get(item.Janus)
+			if gateway == nil {
 				return httputil.NewBadRequestError(nil, fmt.Sprintf("unknown gateway %s", item.Janus))
 			}
-			room, ok := a.cache.rooms.ByGatewayUID[item.Room]
-			if !ok {
+			room := a.cache.rooms.Get(item.Room)
+			if room == nil {
 				return httputil.NewBadRequestError(nil, fmt.Sprintf("unknown room %d", item.Room))
 			}
 
@@ -435,7 +485,7 @@ func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 	}
 
 	if session.GatewayID.Valid {
-		user.Janus = a.cache.gateways.ByID[session.GatewayID.Int64].Name
+		user.Janus = a.cache.gateways.Get(session.GatewayID.Int64).Name
 	}
 
 	return user
@@ -452,7 +502,7 @@ func (a *App) makeV1Composite(composite *models.Composite) *V1Composite {
 			V1Room: V1Room{
 				V1RoomInfo: V1RoomInfo{
 					Room:        room.GatewayUID,
-					Janus:       a.cache.gateways.ByID[cRoom.GatewayID].Name,
+					Janus:       a.cache.gateways.Get(cRoom.GatewayID).Name,
 					Description: room.Name,
 				},
 				NumUsers: len(room.R.Sessions),

@@ -74,13 +74,98 @@ func (s *ApiTestSuite) TestListGroups() {
 	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
 	s.Equal(counts.gateways*counts.roomPerGateway, len(body), "group count")
 
+	lastDescription := ""
 	for i, respRoom := range body {
 		data := respRoom.(map[string]interface{})
 		room, ok := rooms[int(data["room"].(float64))]
 		s.Require().True(ok, "unknown room [%d] %v", i, data["room"])
 		s.Equal(gateways[room.DefaultGatewayID].Name, data["janus"], "Janus")
 		s.Equal(room.Name, data["description"], "description")
+		s.GreaterOrEqual(data["description"], lastDescription, "order by")
+		lastDescription = data["description"].(string)
 	}
+}
+
+func (s *ApiTestSuite) TestCreateGroupMalformedID() {
+	req, _ := http.NewRequest("PUT", "/group/id", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestCreateGroupBadJSON() {
+	req, _ := http.NewRequest("PUT", "/group/1234", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestCreateGroupUnknownGateway() {
+	roomInfo := V1RoomInfo{
+		Room:        1234,
+		Janus:       "unknown",
+		Description: "description",
+	}
+
+	b, _ := json.Marshal(roomInfo)
+	req, _ := http.NewRequest("PUT", "/group/1234", bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestCreateGroup() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	roomInfo := V1RoomInfo{
+		Room:        1234,
+		Janus:       gateway.Name,
+		Description: "description",
+	}
+
+	b, _ := json.Marshal(roomInfo)
+	req, _ := http.NewRequest("PUT", "/group/1234", bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	req, _ = http.NewRequest("GET", "/groups", nil)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	var body []interface{}
+	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
+	s.Equal(1, len(body), "group count")
+	data := body[0].(map[string]interface{})
+	s.Equal(roomInfo.Room, int(data["room"].(float64)), "Janus")
+	s.Equal(roomInfo.Janus, data["janus"], "Janus")
+	s.Equal(roomInfo.Description, data["description"], "description")
+}
+
+func (s *ApiTestSuite) TestCreateGroupExiting() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	s.Require().NoError(s.app.cache.Reload(s.DB))
+
+	roomInfo := V1RoomInfo{
+		Room:        room.GatewayUID,
+		Janus:       gateway.Name,
+		Description: "updated name",
+	}
+
+	b, _ := json.Marshal(roomInfo)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/group/%d", roomInfo.Room), bytes.NewBuffer(b))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	req, _ = http.NewRequest("GET", "/groups", nil)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	var body []interface{}
+	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
+	s.Equal(1, len(body), "group count")
+	data := body[0].(map[string]interface{})
+	s.Equal(roomInfo.Room, int(data["room"].(float64)), "Janus")
+	s.Equal(roomInfo.Janus, data["janus"], "Janus")
+	s.Equal(roomInfo.Description, data["description"], "description")
 }
 
 func (s *ApiTestSuite) TestGetRoomMalformedID() {
