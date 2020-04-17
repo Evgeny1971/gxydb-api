@@ -101,6 +101,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET")
 	a.Router.HandleFunc("/qids", a.V1ListComposites).Methods("GET")
 	a.Router.HandleFunc("/qids/{id}", a.V1GetComposite).Methods("GET")
+	a.Router.HandleFunc("/program/{id}", a.V1GetComposite).Methods("GET")
 	a.Router.HandleFunc("/qids/{id}", a.V1UpdateComposite).Methods("PUT")
 	a.Router.HandleFunc("/event", a.V1HandleEvent).Methods("POST")
 	a.Router.HandleFunc("/protocol", a.V1HandleProtocol).Methods("POST")
