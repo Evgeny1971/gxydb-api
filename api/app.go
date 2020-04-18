@@ -65,11 +65,12 @@ func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool
 	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT", "OPTIONS"})
 	cors := handlers.CORS(originsOk, headersOk, methodsOk)
 
-	a.Handler = middleware.LoggingMiddleware(
-		middleware.RecoveryMiddleware(
-			middleware.RealIPMiddleware(
-				middleware.AuthenticationMiddleware(a.tokenVerifier, skipAuth)(
-					cors(a.Router)))))
+	a.Handler = middleware.ContextMiddleware(
+		middleware.LoggingMiddleware(
+			middleware.RecoveryMiddleware(
+				middleware.RealIPMiddleware(
+					middleware.AuthenticationMiddleware(a.tokenVerifier, skipAuth)(
+						cors(a.Router))))))
 
 	a.cache = new(AppCache)
 	if err := a.cache.Init(db); err != nil {

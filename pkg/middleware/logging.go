@@ -38,12 +38,11 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			Int("size", size).
 			Dur("duration", duration)
 
-		if realIP, ok := RealIPFromRequest(r); ok {
-			event.Str("ip", realIP)
-		}
-
-		if idClaims, ok := IDClaimsFromRequest(r); ok {
-			event.Str("user", idClaims.Aud)
+		if rCtx, ok := ContextFromRequest(r); ok {
+			event.Str("ip", rCtx.IP)
+			if rCtx.IDClaims != nil {
+				event.Str("user", rCtx.IDClaims.Aud)
+			}
 		}
 
 		event.Msg("")

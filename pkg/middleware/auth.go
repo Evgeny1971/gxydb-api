@@ -56,20 +56,6 @@ func (c *IDTokenClaims) HasRole(role string) bool {
 	return ok
 }
 
-type claimsKey struct{}
-
-func IDClaimsFromRequest(r *http.Request) (*IDTokenClaims, bool) {
-	if r == nil {
-		return nil, false
-	}
-	return IDClaimFromCtx(r.Context())
-}
-
-func IDClaimFromCtx(ctx context.Context) (*IDTokenClaims, bool) {
-	claims, ok := ctx.Value(claimsKey{}).(*IDTokenClaims)
-	return claims, ok
-}
-
 func AuthenticationMiddleware(tokenVerifier *oidc.IDTokenVerifier, disabled bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -121,7 +107,10 @@ func AuthenticationMiddleware(tokenVerifier *oidc.IDTokenVerifier, disabled bool
 				return
 			}
 
-			r = r.WithContext(context.WithValue(r.Context(), claimsKey{}, claims))
+			rCtx, ok := ContextFromRequest(r)
+			if ok {
+				rCtx.IDClaims = claims
+			}
 
 			next.ServeHTTP(w, r)
 		})
