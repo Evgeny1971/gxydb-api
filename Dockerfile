@@ -5,9 +5,11 @@ FROM golang:1.14-alpine3.11 as build
 LABEL maintainer="edoshor@gmail.com"
 
 ARG work_dir
+ARG db_url="postgres://user:password@host.docker.internal/galaxy?sslmode=disable"
 
 ENV GOOS=linux \
-	CGO_ENABLED=0
+	CGO_ENABLED=0 \
+	DB_URL=${db_url}
 
 RUN apk update && \
     apk add --no-cache \
@@ -15,17 +17,16 @@ RUN apk update && \
 
 WORKDIR ${work_dir}
 COPY . .
-RUN go build
+
+RUN go test $(go list ./... | grep -v /models) \
+    && go build
 
 
 FROM alpine:3.11
 ARG work_dir
 WORKDIR /app
-#COPY ./misc/wait-for /wait-for
+COPY ./misc/wait-for /wait-for
 COPY --from=build ${work_dir}/gxydb-api .
-
-ENV DB_URL="postgres://user:password@db/galaxy?sslmode=disable"
-ENV ACC_URL="https://accounts.kbb1.com/auth/realms/main"
 
 EXPOSE 8080
 CMD ["./gxydb-api"]

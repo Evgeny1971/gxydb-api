@@ -4,7 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/golang-migrate/migrate"
@@ -122,7 +124,9 @@ func (m *TestDBManager) runMigrations(dsn string) error {
 		return err
 	}
 
-	migrator, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
+	_, filename, _, _ := runtime.Caller(0)
+	rel := filepath.Join(filepath.Dir(filename), "..", "..", "migrations")
+	migrator, err := migrate.NewWithDatabaseInstance(fmt.Sprintf("file://%s", rel), "postgres", driver)
 	if err != nil {
 		return err
 	}

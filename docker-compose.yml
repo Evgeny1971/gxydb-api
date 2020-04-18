@@ -24,3 +24,7 @@ services:
       DB_URL: postgres://user:password@db/galaxy?sslmode=disable
     ports:
       - 8080:8080
+    depends_on:
+      - db
+      - janus1
+    command: ["/wait-for", "db:5432", "--", "./gxydb-api"]

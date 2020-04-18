@@ -39,6 +39,8 @@ github.com/docker/go-units v0.4.0 h1:3uh0PgVws3nIA0Q+MwDC8yjEPf9zjRfZZWXZYDct3Tw
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/edoshor/janus-go v0.0.0-20200415123632-eab4f494fd9d h1:uijx4W0tCuGxcI24Y7QKeK4Z8XziD4yo+NbYQLJw80U=
 github.com/edoshor/janus-go v0.0.0-20200415123632-eab4f494fd9d/go.mod h1:FsN3rAnqr3vJV6RIoRh4GqZ/mBA0EWjFq6IstAmnmiM=
+github.com/edoshor/janus-go v0.0.0-20200417022012-32c4225085f8 h1:zU4eqdchTZbqU4G9VeMUlVC+FSwMrFAodaKjnCW4c5M=
+github.com/edoshor/janus-go v0.0.0-20200417022012-32c4225085f8/go.mod h1:MtMSWgICYueR+PDTGMxVj3NdyMaI0NdMKT5x7GrSgpo=
 github.com/friendsofgo/errors v0.9.2 h1:X6NYxef4efCBdwI7BgS820zFaN7Cphrmb+Pljdzjtgk=
 github.com/friendsofgo/errors v0.9.2/go.mod h1:yCvFW5AkDIL9qn7suHVLiI/gH228n7PC4Pn44IGoTOI=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=

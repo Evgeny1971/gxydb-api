@@ -8,3 +8,4 @@ misc/janus/config/default
 misc/janus/config/prod
 
 gxydb-api
+gxydb-api-linux
