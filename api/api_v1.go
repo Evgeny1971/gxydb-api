@@ -186,8 +186,14 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	cachedRoom := a.cache.rooms.Get(id)
+	if cachedRoom == nil {
+		httputil.NewNotFoundError().Abort(w, r)
+		return
+	}
+
 	room, err := models.Rooms(
-		models.RoomWhere.ID.EQ(int64(id)),
+		models.RoomWhere.ID.EQ(cachedRoom.ID),
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
 		qm.Load(models.RoomRels.DefaultGateway),

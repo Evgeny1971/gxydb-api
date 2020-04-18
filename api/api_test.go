@@ -179,7 +179,7 @@ func (s *ApiTestSuite) TestGetRoomNotFound() {
 	room.Disabled = true
 	_, err := room.Update(s.DB, boil.Whitelist(models.RoomColumns.Disabled))
 	s.Require().NoError(err)
-	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.GatewayUID), nil)
 	resp = s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
 
@@ -188,7 +188,7 @@ func (s *ApiTestSuite) TestGetRoomNotFound() {
 	room.RemovedAt = null.TimeFrom(time.Now().UTC())
 	_, err = room.Update(s.DB, boil.Whitelist(models.RoomColumns.Disabled, models.RoomColumns.RemovedAt))
 	s.Require().NoError(err)
-	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.GatewayUID), nil)
 	resp = s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
 }
@@ -204,7 +204,7 @@ func (s *ApiTestSuite) TestGetRoom() {
 	}
 	s.Require().NoError(s.app.cache.Reload(s.DB))
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/room/%d", room.ID), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/room/%d", room.GatewayUID), nil)
 	body := s.request200json(req)
 
 	// verify room's attributes
