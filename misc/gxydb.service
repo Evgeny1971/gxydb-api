@@ -1,0 +1,19 @@
+[Unit]
+Description=Galaxy backend API
+After=network.target
+StartLimitBurst=10
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+ExecStart=/bin/bash -c "/opt/gxydb/gxydb-api-linux >> /opt/gxydb/logs/gxydb.log 2>&1"
+Restart=on-failure
+RestartSec=1
+TimeoutSec=30
+LimitNOFILE=65536
+
+EnvironmentFile=/opt/gxydb/.env
+WorkingDirectory=/opt/gxydb
+
+[Install]
+WantedBy=multi-user.target

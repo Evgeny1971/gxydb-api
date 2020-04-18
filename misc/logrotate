@@ -1,0 +1,13 @@
+/opt/gxydb/logs/*.log {
+    su root root
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    create
+    copytruncate
+    dateext
+    dateformat -%Y-%m-%d
+    dateyesterday
+}

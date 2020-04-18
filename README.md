@@ -1,5 +1,5 @@
 # gxydb-api
-
+Backend API for the BB galaxy system.
 
 ### Development Environment
 In local dev env we use docker-compose to have our dependencies setup for us.
