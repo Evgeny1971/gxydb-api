@@ -87,7 +87,7 @@ func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
 		return roomInfos[i].Description < roomInfos[j].Description
 	})
 
-	httputil.RespondWithJSON(w, http.StatusOK, roomInfos)
+	httputil.RespondWithJSON(w, http.StatusOK, map[string]interface{}{"rooms": roomInfos})
 }
 
 func (a *App) V1CreateGroup(w http.ResponseWriter, r *http.Request) {

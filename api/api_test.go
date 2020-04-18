@@ -67,15 +67,13 @@ func (s *ApiTestSuite) TestListGroups() {
 	s.Require().NoError(s.app.cache.Reload(s.DB))
 
 	req, _ := http.NewRequest("GET", "/groups", nil)
-	resp := s.request(req)
-	s.Require().Equal(http.StatusOK, resp.Code)
-
-	var body []interface{}
-	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
-	s.Equal(counts.gateways*counts.roomPerGateway, len(body), "group count")
+	body := s.request200json(req)
+	respRooms, ok := body["rooms"].([]interface{})
+	s.Require().True(ok, "rooms is array")
+	s.Equal(counts.gateways*counts.roomPerGateway, len(respRooms), "group count")
 
 	lastDescription := ""
-	for i, respRoom := range body {
+	for i, respRoom := range respRooms {
 		data := respRoom.(map[string]interface{})
 		room, ok := rooms[int(data["room"].(float64))]
 		s.Require().True(ok, "unknown room [%d] %v", i, data["room"])
@@ -127,13 +125,11 @@ func (s *ApiTestSuite) TestCreateGroup() {
 	s.Require().Equal(http.StatusOK, resp.Code)
 
 	req, _ = http.NewRequest("GET", "/groups", nil)
-	resp = s.request(req)
-	s.Require().Equal(http.StatusOK, resp.Code)
-
-	var body []interface{}
-	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
-	s.Equal(1, len(body), "group count")
-	data := body[0].(map[string]interface{})
+	body := s.request200json(req)
+	respRooms, ok := body["rooms"].([]interface{})
+	s.Require().True(ok, "rooms is array")
+	s.Equal(1, len(respRooms), "group count")
+	data := respRooms[0].(map[string]interface{})
 	s.Equal(roomInfo.Room, int(data["room"].(float64)), "Janus")
 	s.Equal(roomInfo.Janus, data["janus"], "Janus")
 	s.Equal(roomInfo.Description, data["description"], "description")
@@ -156,13 +152,11 @@ func (s *ApiTestSuite) TestCreateGroupExiting() {
 	s.Require().Equal(http.StatusOK, resp.Code)
 
 	req, _ = http.NewRequest("GET", "/groups", nil)
-	resp = s.request(req)
-	s.Require().Equal(http.StatusOK, resp.Code)
-
-	var body []interface{}
-	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
-	s.Equal(1, len(body), "group count")
-	data := body[0].(map[string]interface{})
+	body := s.request200json(req)
+	respRooms, ok := body["rooms"].([]interface{})
+	s.Require().True(ok, "rooms is array")
+	s.Equal(1, len(respRooms), "group count")
+	data := respRooms[0].(map[string]interface{})
 	s.Equal(roomInfo.Room, int(data["room"].(float64)), "Janus")
 	s.Equal(roomInfo.Janus, data["janus"], "Janus")
 	s.Equal(roomInfo.Description, data["description"], "description")
