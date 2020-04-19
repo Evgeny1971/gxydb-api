@@ -24,6 +24,7 @@ func init() {
 		return fmt.Sprintf("%s:%d", rel[1], line)
 	}
 
+	zerolog.TimeFieldFormat = time.RFC3339Nano
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	log.With().Stack()
 }
