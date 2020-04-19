@@ -251,13 +251,13 @@ func WrappingProtocolError(err error, msg string) *ProtocolError {
 }
 
 func (sm *V1SessionManager) makeSession(userID int64, user *V1User) (*models.Session, error) {
-	room := sm.cache.rooms.Get(user.Room)
-	if room == nil {
+	room, ok := sm.cache.rooms.ByGatewayUID(user.Room)
+	if !ok {
 		return nil, NewProtocolError(fmt.Sprintf("Unknown room: %d", user.Room))
 	}
 
-	gateway := sm.cache.gateways.Get(user.Janus)
-	if gateway == nil {
+	gateway, ok := sm.cache.gateways.ByName(user.Janus)
+	if !ok {
 		return nil, NewProtocolError(fmt.Sprintf("Unknown gateway: %s", user.Janus))
 	}
 

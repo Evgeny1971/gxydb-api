@@ -36,46 +36,59 @@ type DBCache interface {
 }
 
 type GatewayCache struct {
-	sm sync.Map
+	byID   map[int64]*models.Gateway
+	byName map[string]*models.Gateway
+	lock   sync.RWMutex
 }
 
 func (c *GatewayCache) Reload(db boil.Executor) error {
-	c.sm = sync.Map{}
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	gateways, err := models.Gateways().All(db)
 	if err != nil {
 		return pkgerr.WithStack(err)
 	}
 
-	for i := range gateways {
-		c.Set(gateways[i])
+	c.byID = make(map[int64]*models.Gateway, len(gateways))
+	c.byName = make(map[string]*models.Gateway, len(gateways))
+	for _, gateway := range gateways {
+		c.byID[gateway.ID] = gateway
+		c.byName[gateway.Name] = gateway
 	}
 
 	return nil
 }
 
-func (c *GatewayCache) Get(key interface{}) *models.Gateway {
-	if x, ok := c.sm.Load(key); ok {
-		return x.(*models.Gateway)
-	}
-	return nil
+func (c *GatewayCache) ByID(id int64) (*models.Gateway, bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	gateway, ok := c.byID[id]
+	return gateway, ok
+}
+
+func (c *GatewayCache) ByName(name string) (*models.Gateway, bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	gateway, ok := c.byName[name]
+	return gateway, ok
 }
 
 func (c *GatewayCache) Set(gateway *models.Gateway) {
-	c.sm.Store(gateway.ID, gateway)
-	c.sm.Store(gateway.Name, gateway)
+	c.lock.Lock()
+	c.byID[gateway.ID] = gateway
+	c.byName[gateway.Name] = gateway
+	c.lock.Unlock()
 }
 
 func (c *GatewayCache) Values() []*models.Gateway {
-	m := make(map[*models.Gateway]struct{}, 0)
-	c.sm.Range(func(key, value interface{}) bool {
-		m[value.(*models.Gateway)] = struct{}{}
-		return true
-	})
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 
-	values := make([]*models.Gateway, len(m))
+	values := make([]*models.Gateway, len(c.byID))
 	i := 0
-	for k, _ := range m {
-		values[i] = k
+	for _, v := range c.byID {
+		values[i] = v
 		i++
 	}
 
@@ -83,11 +96,14 @@ func (c *GatewayCache) Values() []*models.Gateway {
 }
 
 type RoomCache struct {
-	sm sync.Map
+	m    map[int]*models.Room
+	lock sync.RWMutex
 }
 
 func (c *RoomCache) Reload(db boil.Executor) error {
-	c.sm = sync.Map{}
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
 	rooms, err := models.Rooms(
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
@@ -96,36 +112,35 @@ func (c *RoomCache) Reload(db boil.Executor) error {
 		return pkgerr.WithStack(err)
 	}
 
-	for i := range rooms {
-		c.Set(rooms[i])
+	c.m = make(map[int]*models.Room, len(rooms))
+	for _, room := range rooms {
+		c.m[room.GatewayUID] = room
 	}
 
 	return nil
 }
 
-func (c *RoomCache) Get(key interface{}) *models.Room {
-	if x, ok := c.sm.Load(key); ok {
-		return x.(*models.Room)
-	}
-	return nil
+func (c *RoomCache) ByGatewayUID(uid int) (*models.Room, bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	r, ok := c.m[uid]
+	return r, ok
 }
 
 func (c *RoomCache) Set(room *models.Room) {
-	c.sm.Store(room.ID, room)
-	c.sm.Store(room.GatewayUID, room)
+	c.lock.Lock()
+	c.m[room.GatewayUID] = room
+	c.lock.Unlock()
 }
 
 func (c *RoomCache) Values() []*models.Room {
-	m := make(map[*models.Room]struct{}, 0)
-	c.sm.Range(func(key, value interface{}) bool {
-		m[value.(*models.Room)] = struct{}{}
-		return true
-	})
+	c.lock.RLock()
+	defer c.lock.RUnlock()
 
-	values := make([]*models.Room, len(m))
+	values := make([]*models.Room, len(c.m))
 	i := 0
-	for k, _ := range m {
-		values[i] = k
+	for _, v := range c.m {
+		values[i] = v
 		i++
 	}
 
