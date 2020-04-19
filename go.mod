@@ -19,6 +19,7 @@ require (
 	github.com/golang-migrate/migrate v3.5.4+incompatible
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
+	github.com/hashicorp/golang-lru v0.5.4
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
 	github.com/khaiql/dbcleaner v2.3.0+incompatible // indirect
 	github.com/lib/pq v1.3.0

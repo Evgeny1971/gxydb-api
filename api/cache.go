@@ -1,10 +1,13 @@
 package api
 
 import (
+	"fmt"
 	"sync"
 
+	"github.com/hashicorp/golang-lru"
 	pkgerr "github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/queries/qm"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
 )
@@ -12,27 +15,30 @@ import (
 type AppCache struct {
 	gateways *GatewayCache
 	rooms    *RoomCache
+	users    *UserCache
 }
 
 func (c *AppCache) Init(db boil.Executor) error {
 	c.gateways = new(GatewayCache)
 	c.rooms = new(RoomCache)
-	return c.Reload(db)
+	c.users = new(UserCache)
+	return c.ReloadAll(db)
 }
 
-func (c *AppCache) Reload(db boil.Executor) error {
+func (c *AppCache) ReloadAll(db boil.Executor) error {
 	if err := c.gateways.Reload(db); err != nil {
 		return pkgerr.Wrap(err, "reload gateways")
 	}
+
 	if err := c.rooms.Reload(db); err != nil {
 		return pkgerr.Wrap(err, "reload rooms")
 	}
 
-	return nil
-}
+	if err := c.users.Reload(db); err != nil {
+		return pkgerr.Wrap(err, "reload users")
+	}
 
-type DBCache interface {
-	Reload(db boil.Executor) error
+	return nil
 }
 
 type GatewayCache struct {
@@ -145,4 +151,43 @@ func (c *RoomCache) Values() []*models.Room {
 	}
 
 	return values
+}
+
+type UserCache struct {
+	cache *lru.ARCCache
+}
+
+func (c *UserCache) Reload(db boil.Executor) error {
+	users, err := models.Users(
+		models.UserWhere.Disabled.EQ(false),
+		models.UserWhere.RemovedAt.IsNull(),
+		qm.OrderBy(fmt.Sprintf("%s desc", models.UserColumns.CreatedAt)),
+		qm.Limit(500),
+	).All(db)
+	if err != nil {
+		return pkgerr.WithStack(err)
+	}
+
+	if c.cache != nil {
+		c.cache.Purge()
+	}
+	c.cache, _ = lru.NewARC(5_000)
+	for _, user := range users {
+		c.cache.Add(user.AccountsID, user)
+	}
+
+	return nil
+}
+
+func (c *UserCache) ByAccountsID(id string) (*models.User, bool) {
+	u, ok := c.cache.Get(id)
+	if ok {
+		return u.(*models.User), true
+	}
+
+	return nil, false
+}
+
+func (c *UserCache) Set(user *models.User) {
+	c.cache.Add(user.AccountsID, user)
 }

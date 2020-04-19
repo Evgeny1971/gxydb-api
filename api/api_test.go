@@ -64,7 +64,7 @@ func (s *ApiTestSuite) TestListGroups() {
 		}
 	}
 
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", "/groups", nil)
 	body := s.request200json(req)
@@ -111,7 +111,7 @@ func (s *ApiTestSuite) TestCreateGroupUnknownGateway() {
 
 func (s *ApiTestSuite) TestCreateGroup() {
 	gateway := s.createGateway()
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	roomInfo := V1RoomInfo{
 		Room:        1234,
@@ -138,7 +138,7 @@ func (s *ApiTestSuite) TestCreateGroup() {
 func (s *ApiTestSuite) TestCreateGroupExiting() {
 	gateway := s.createGateway()
 	room := s.createRoom(gateway)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	roomInfo := V1RoomInfo{
 		Room:        room.GatewayUID,
@@ -202,7 +202,7 @@ func (s *ApiTestSuite) TestGetRoom() {
 		users[i] = s.createUser()
 		sessions[i] = s.createSession(users[i], gateway, room)
 	}
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/room/%d", room.GatewayUID), nil)
 	body := s.request200json(req)
@@ -275,7 +275,7 @@ func (s *ApiTestSuite) TestListRooms() {
 		s.createRoom(v)
 	}
 
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", "/rooms", nil)
 	resp := s.request(req)
@@ -345,7 +345,7 @@ func (s *ApiTestSuite) TestGetUser() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
 	body := s.request200json(req)
@@ -391,7 +391,7 @@ func (s *ApiTestSuite) TestListUsers() {
 			}
 		}
 	}
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	// create some inactive users
 	for i := 0; i < counts.sessionsPerRoom; i++ {
@@ -436,7 +436,7 @@ func (s *ApiTestSuite) TestGetComposite() {
 		}
 	}
 	composite := s.createComposite(rooms)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
 	body := s.request200json(req)
@@ -507,7 +507,7 @@ func (s *ApiTestSuite) TestListComposites() {
 	composite = s.createComposite(rooms[1][4:])
 	composites[composite.Name] = composite
 
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", "/qids", nil)
 	body := s.request200json(req)
@@ -561,13 +561,13 @@ func (s *ApiTestSuite) TestUpdateComposite() {
 		rooms[i] = s.createRoom(gateway)
 	}
 	composite := s.createComposite(rooms)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
 	body := s.request200json(req)
 
 	rooms[0] = s.createRoom(gateway)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	body["vquad"].([]interface{})[0].(map[string]interface{})["room"] = rooms[0].GatewayUID
 	body["vquad"].([]interface{})[0].(map[string]interface{})["queue"] = 5
@@ -611,7 +611,7 @@ func (s *ApiTestSuite) TestHandleEventVideoroomLeaving() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	s.Require().NoError(session.L.LoadUser(s.DB, true, session, nil))
 	v1User := s.app.makeV1User(room, session)
@@ -646,7 +646,7 @@ func (s *ApiTestSuite) TestHandleEventVideoroomLeavingUnknownUser() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	s.Require().NoError(session.L.LoadUser(s.DB, true, session, nil))
 	v1User := s.app.makeV1User(room, session)
@@ -743,7 +743,7 @@ func (s *ApiTestSuite) TestHandleProtocolUnknownGateway() {
 func (s *ApiTestSuite) TestHandleProtocolUnknownRoom() {
 	gateway := s.createGateway()
 	user := s.createUser()
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, nil, user)
 	payload := map[string]interface{}{
@@ -772,7 +772,7 @@ func (s *ApiTestSuite) TestHandleProtocolEnter() {
 	gateway := s.createGateway()
 	room := s.createRoom(gateway)
 	user := s.createUser()
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
 
@@ -805,7 +805,7 @@ func (s *ApiTestSuite) TestHandleProtocolEnter() {
 func (s *ApiTestSuite) TestHandleProtocolEnterUnknownUser() {
 	gateway := s.createGateway()
 	room := s.createRoom(gateway)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, nil)
 	v1User.ID = "some_new_user_id"
@@ -844,7 +844,7 @@ func (s *ApiTestSuite) TestHandleProtocolEnterExistingSession() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
 	v1User.Session = session.GatewaySession.Int64
@@ -884,7 +884,7 @@ func (s *ApiTestSuite) TestHandleProtocolQuestion() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
 	v1User.Session = session.GatewaySession.Int64
@@ -940,7 +940,7 @@ func (s *ApiTestSuite) TestHandleProtocolCamera() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
 	v1User.Session = session.GatewaySession.Int64
@@ -996,7 +996,7 @@ func (s *ApiTestSuite) TestHandleProtocolSoundTest() {
 	room := s.createRoom(gateway)
 	user := s.createUser()
 	session := s.createSession(user, gateway, room)
-	s.Require().NoError(s.app.cache.Reload(s.DB))
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
 	v1User.Session = session.GatewaySession.Int64

@@ -13,7 +13,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
-	"github.com/volatiletech/sqlboiler/queries/qm"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/errs"
@@ -169,16 +168,17 @@ func (sm *V1SessionManager) onProtocolSoundTest(ctx context.Context, tx *sql.Tx,
 }
 
 func (sm *V1SessionManager) getInternalUserID(ctx context.Context, tx *sql.Tx, user *V1User) (int64, error) {
-	var userID int64
+	u, ok := sm.cache.users.ByAccountsID(user.ID)
+	if ok {
+		return u.ID, nil
+	}
 
-	err := models.Users(
-		qm.Select(models.UserColumns.ID),
+	u, err := models.Users(
 		models.UserWhere.AccountsID.EQ(user.ID)).
-		QueryRow(tx).
-		Scan(&userID)
-
+		One(tx)
 	if err == nil {
-		return userID, nil
+		sm.cache.users.Set(u)
+		return u.ID, nil
 	}
 
 	if !errors.Is(err, sql.ErrNoRows) {
@@ -186,16 +186,18 @@ func (sm *V1SessionManager) getInternalUserID(ctx context.Context, tx *sql.Tx, u
 	}
 
 	log.Ctx(ctx).Info().Msgf("Creating new user: %s", user.ID)
-	newUser := models.User{
+	u = &models.User{
 		AccountsID: user.ID,
 		Email:      null.StringFrom(user.Email),
 		Username:   null.StringFrom(user.Username),
 	}
-	if err := newUser.Insert(tx, boil.Infer()); err != nil {
+	if err := u.Insert(tx, boil.Infer()); err != nil {
 		return 0, pkgerr.Wrap(err, "db create user")
 	}
 
-	return newUser.ID, nil
+	sm.cache.users.Set(u)
+
+	return u.ID, nil
 }
 
 func (sm *V1SessionManager) closeSession(ctx context.Context, tx *sql.Tx, userID int64) error {
