@@ -1,7 +1,14 @@
 package testutil
 
-import "github.com/subosito/gotenv"
+import (
+	"path/filepath"
+	"runtime"
+
+	"github.com/subosito/gotenv"
+)
 
 func init() {
-	gotenv.Load()
+	_, filename, _, _ := runtime.Caller(0)
+	rel := filepath.Join(filepath.Dir(filename), "..", "..", ".env")
+	gotenv.Load(rel)
 }

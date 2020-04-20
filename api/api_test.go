@@ -307,6 +307,62 @@ func (s *ApiTestSuite) TestListRooms() {
 	}
 }
 
+func (s *ApiTestSuite) TestListRoomsIsSorted() {
+	gateway := s.createGateway()
+	rooms := make([]*models.Room, 10)
+	sessions := make([]*models.Session, len(rooms))
+	for i := range rooms {
+		rooms[i] = s.createRoom(gateway)
+		user := s.createUser()
+		sessions[i] = s.createSession(user, gateway, rooms[i])
+	}
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	req, _ := http.NewRequest("GET", "/rooms", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	var body []interface{}
+	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
+	s.Equal(len(rooms), len(body), "room count")
+
+	for i, respRoom := range body {
+		data := respRoom.(map[string]interface{})
+		room := rooms[i]
+
+		// verify room's attributes
+		s.Equal(gateway.Name, data["janus"], "Janus")
+		s.Equal(room.Name, data["description"], "description")
+		s.False(data["questions"].(bool), "questions")
+		s.Equal(1, int(data["num_users"].(float64)), "num_users")
+	}
+
+	// reorder sessions created_at
+	for i, session := range sessions {
+		session.CreatedAt = session.CreatedAt.Add(time.Duration(len(sessions)-i) * time.Second)
+		_, err := session.Update(s.DB, boil.Whitelist(models.SessionColumns.CreatedAt))
+		s.Require().NoError(err)
+	}
+
+	resp = s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	var body2 []interface{}
+	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body2))
+	s.Equal(len(rooms), len(body2), "room count")
+
+	for i, respRoom := range body2 {
+		data := respRoom.(map[string]interface{})
+		room := rooms[len(rooms)-1-i]
+
+		// verify room's attributes
+		s.Equal(gateway.Name, data["janus"], "Janus")
+		s.Equal(room.Name, data["description"], "description")
+		s.False(data["questions"].(bool), "questions")
+		s.Equal(1, int(data["num_users"].(float64)), "num_users")
+	}
+}
+
 func (s *ApiTestSuite) TestGetUserMalformedID() {
 	req, _ := http.NewRequest("GET", "/users/1234567890123456789012345678901234567890", nil)
 	resp := s.request(req)

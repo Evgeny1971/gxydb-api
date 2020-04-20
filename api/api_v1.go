@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/edoshor/janus-go"
 	"github.com/gorilla/mux"
@@ -51,9 +52,10 @@ type V1RoomInfo struct {
 
 type V1Room struct {
 	V1RoomInfo
-	Questions bool      `json:"questions"`
-	NumUsers  int       `json:"num_users"`
-	Users     []*V1User `json:"users"`
+	Questions          bool      `json:"questions"`
+	NumUsers           int       `json:"num_users"`
+	Users              []*V1User `json:"users"`
+	firstSessionInRoom time.Time
 }
 
 type V1Composite struct {
@@ -183,11 +185,19 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 			if session.Question {
 				respRoom.Questions = true
 			}
+			if respRoom.firstSessionInRoom.IsZero() || respRoom.firstSessionInRoom.After(session.CreatedAt) {
+				respRoom.firstSessionInRoom = session.CreatedAt
+			}
 			respRoom.Users[i] = a.makeV1User(room, session)
 		}
 
 		respRooms = append(respRooms, respRoom)
 	}
+
+	// TODO: maybe move to client ?!
+	sort.Slice(respRooms, func(i, j int) bool {
+		return respRooms[i].firstSessionInRoom.Before(respRooms[j].firstSessionInRoom)
+	})
 
 	httputil.RespondWithJSON(w, http.StatusOK, respRooms)
 }
