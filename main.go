@@ -1,18 +1,15 @@
 package main
 
 import (
-	"os"
+	"github.com/subosito/gotenv"
 
-	"github.com/Bnei-Baruch/gxydb-api/api"
+	"github.com/Bnei-Baruch/gxydb-api/cmd"
 )
 
-func main() {
-	listenAddress := os.Getenv("LISTEN_ADDRESS")
-	dbUrl := os.Getenv("DB_URL")
-	accountsUrl := os.Getenv("ACC_URL")
-	skipAuth := os.Getenv("SKIP_AUTH") == "true"
+func init() {
+	gotenv.Load()
+}
 
-	a := api.App{}
-	a.Initialize(dbUrl, accountsUrl, skipAuth)
-	a.Run(listenAddress)
+func main() {
+	cmd.Execute()
 }

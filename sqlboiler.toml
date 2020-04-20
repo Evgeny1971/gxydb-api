@@ -1,4 +1,5 @@
 no-hooks=true
+no-tests=true
 no-auto-timestamps=true
 no-context=true
 blacklist=["schema_migrations"]

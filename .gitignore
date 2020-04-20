@@ -1,5 +1,6 @@
 .idea/
 
+.env
 *.swp
 *.log
 notes.txt

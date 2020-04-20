@@ -29,4 +29,4 @@ COPY ./misc/wait-for /wait-for
 COPY --from=build ${work_dir}/gxydb-api .
 
 EXPOSE 8080
-CMD ["./gxydb-api"]
+CMD ["./gxydb-api", "server"]
