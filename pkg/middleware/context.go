@@ -8,6 +8,7 @@ import (
 type RequestContext struct {
 	IP       string
 	IDClaims *IDTokenClaims
+	Params   interface{}
 }
 
 type requestCtx struct{}

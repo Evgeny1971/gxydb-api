@@ -610,6 +610,12 @@ func (s *ApiTestSuite) TestUpdateCompositeNotFound() {
 	s.Require().Equal(http.StatusNotFound, resp.Code)
 }
 
+func (s *ApiTestSuite) TestUpdateCompositeBadJSON() {
+	req, _ := http.NewRequest("PUT", "/qids/q1", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
 func (s *ApiTestSuite) TestUpdateComposite() {
 	gateway := s.createGateway()
 	rooms := make([]*models.Room, 4)
@@ -645,6 +651,66 @@ func (s *ApiTestSuite) TestUpdateComposite() {
 		s.Equal(rooms[i].GatewayUID, int(croom["room"].(float64)), "room")
 		s.Equal(gateway.Name, croom["janus"], "Janus")
 		s.Equal(rooms[i].Name, croom["description"], "description")
+		s.False(croom["questions"].(bool), "questions")
+		s.Equal(0, int(croom["num_users"].(float64)), "num_users")
+	}
+}
+
+func (s *ApiTestSuite) TestUpdateCompositeClear() {
+	gateway := s.createGateway()
+	rooms := make([]*models.Room, 4)
+	for i := 0; i < 4; i++ {
+		rooms[i] = s.createRoom(gateway)
+	}
+	composite := s.createComposite(rooms)
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/qids/%s", composite.Name), bytes.NewBuffer([]byte("{\"vquad\":[]}")))
+	body := s.request200json(req)
+	s.Equal("success", body["result"], "PUT result")
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
+	body = s.request200json(req)
+	vquad, ok := body["vquad"]
+	s.Require().True(ok, "vquad")
+	vquadArr, ok := vquad.([]interface{})
+	s.Require().True(ok, "vquad array")
+	s.Empty(vquadArr, 0, "vquad len")
+}
+
+func (s *ApiTestSuite) TestUpdateCompositeDuplicateRoom() {
+	gateway := s.createGateway()
+	rooms := make([]*models.Room, 4)
+	for i := 0; i < 4; i++ {
+		rooms[i] = s.createRoom(gateway)
+	}
+	composite := s.createComposite(rooms)
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
+	body := s.request200json(req)
+	bodyArr := body["vquad"].([]interface{})
+	for i := 0; i < 4; i++ {
+		bodyArr[i].(map[string]interface{})["room"] = rooms[0].GatewayUID
+		bodyArr[i].(map[string]interface{})["queue"] = 5 + i
+	}
+	b, _ := json.Marshal(body)
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/qids/%s", composite.Name), bytes.NewBuffer(b))
+	body = s.request200json(req)
+	s.Equal("success", body["result"], "PUT result")
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
+	body = s.request200json(req)
+	vquad, ok := body["vquad"]
+	s.Require().True(ok, "vquad")
+	vquadArr, ok := vquad.([]interface{})
+	s.Require().True(ok, "vquad array")
+
+	for _, respCRoom := range vquadArr {
+		croom, ok := respCRoom.(map[string]interface{})
+		s.Require().True(ok, "vquad array item")
+		s.Equal(rooms[0].GatewayUID, int(croom["room"].(float64)), "room")
+		s.Equal(gateway.Name, croom["janus"], "Janus")
+		s.Equal(rooms[0].Name, croom["description"], "description")
 		s.False(croom["questions"].(bool), "questions")
 		s.Equal(0, int(croom["num_users"].(float64)), "num_users")
 	}

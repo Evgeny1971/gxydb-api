@@ -19,6 +19,7 @@ import (
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
+	"github.com/Bnei-Baruch/gxydb-api/pkg/middleware"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/sqlutil"
 )
 
@@ -113,6 +114,7 @@ func (a *App) V1CreateGroup(w http.ResponseWriter, r *http.Request) {
 		err.Abort(w, r)
 		return
 	}
+	a.requestContext(r).Params = data
 
 	gateway, ok := a.cache.gateways.ByName(data.Janus)
 	if !ok {
@@ -387,6 +389,7 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 		err.Abort(w, r)
 		return
 	}
+	a.requestContext(r).Params = data
 
 	composite, err := models.Composites(
 		models.CompositeWhere.Name.EQ(id),
@@ -450,12 +453,15 @@ func (a *App) V1HandleEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
+	rCtx := a.requestContext(r)
+	rCtx.Params = body
 
 	event, err := janus.ParseEvent(body)
 	if err != nil {
 		httputil.NewBadRequestError(err, "error parsing request body").Abort(w, r)
 		return
 	}
+	rCtx.Params = event
 
 	if err := a.sessionManager.HandleEvent(r.Context(), event); err != nil {
 		httputil.NewInternalError(err).Abort(w, r)
@@ -472,12 +478,15 @@ func (a *App) V1HandleProtocol(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	r.Body.Close()
+	rCtx := a.requestContext(r)
+	rCtx.Params = body
 
 	msg, err := janus.ParseTextroomMessage(body)
 	if err != nil {
 		httputil.NewBadRequestError(err, "error parsing request body").Abort(w, r)
 		return
 	}
+	rCtx.Params = msg
 
 	if err := a.sessionManager.HandleProtocol(r.Context(), msg); err != nil {
 		var pErr *ProtocolError
@@ -553,4 +562,9 @@ func (a *App) makeV1Composite(composite *models.Composite) *V1Composite {
 	}
 
 	return respComposite
+}
+
+func (a *App) requestContext(r *http.Request) *middleware.RequestContext {
+	rCtx, _ := middleware.ContextFromRequest(r)
+	return rCtx
 }

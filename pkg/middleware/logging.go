@@ -44,6 +44,9 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			if rCtx.IDClaims != nil {
 				event.Str("user", rCtx.IDClaims.Aud)
 			}
+			if status >= http.StatusBadRequest {
+				event.Interface("params", rCtx.Params)
+			}
 		}
 
 		event.Msg("")

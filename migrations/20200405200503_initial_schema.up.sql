@@ -107,8 +107,6 @@ CREATE TABLE IF NOT EXISTS composites_rooms
     PRIMARY KEY (composite_id, room_id, gateway_id)
 );
 
--- TODO: program state (shidur)
-
 -------------
 -- Indexes --
 -------------
