@@ -353,7 +353,7 @@ func (o *Composite) AddCompositesRooms(exec boil.Executor, insert bool, related 
 				strmangle.SetParamNames("\"", "\"", 1, []string{"composite_id"}),
 				strmangle.WhereClause("\"", "\"", 2, compositesRoomPrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.CompositeID, rel.RoomID, rel.GatewayID}
+			values := []interface{}{o.ID, rel.CompositeID, rel.RoomID, rel.GatewayID, rel.Position}
 
 			if boil.DebugMode {
 				fmt.Fprintln(boil.DebugWriter, updateQuery)

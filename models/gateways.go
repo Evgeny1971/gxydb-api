@@ -23,46 +23,49 @@ import (
 
 // Gateway is an object representing the database table.
 type Gateway struct {
-	ID            int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name          string      `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Description   null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
-	URL           string      `boil:"url" json:"url" toml:"url" yaml:"url"`
-	AdminURL      string      `boil:"admin_url" json:"admin_url" toml:"admin_url" yaml:"admin_url"`
-	AdminPassword string      `boil:"admin_password" json:"admin_password" toml:"admin_password" yaml:"admin_password"`
-	Disabled      bool        `boil:"disabled" json:"disabled" toml:"disabled" yaml:"disabled"`
-	Properties    null.JSON   `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
-	CreatedAt     time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt     null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	RemovedAt     null.Time   `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
+	ID             int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name           string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Description    null.String `boil:"description" json:"description,omitempty" toml:"description" yaml:"description,omitempty"`
+	URL            string      `boil:"url" json:"url" toml:"url" yaml:"url"`
+	AdminURL       string      `boil:"admin_url" json:"admin_url" toml:"admin_url" yaml:"admin_url"`
+	AdminPassword  string      `boil:"admin_password" json:"admin_password" toml:"admin_password" yaml:"admin_password"`
+	Disabled       bool        `boil:"disabled" json:"disabled" toml:"disabled" yaml:"disabled"`
+	Properties     null.JSON   `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
+	CreatedAt      time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt      null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	RemovedAt      null.Time   `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
+	EventsPassword string      `boil:"events_password" json:"events_password" toml:"events_password" yaml:"events_password"`
 
 	R *gatewayR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L gatewayL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var GatewayColumns = struct {
-	ID            string
-	Name          string
-	Description   string
-	URL           string
-	AdminURL      string
-	AdminPassword string
-	Disabled      string
-	Properties    string
-	CreatedAt     string
-	UpdatedAt     string
-	RemovedAt     string
+	ID             string
+	Name           string
+	Description    string
+	URL            string
+	AdminURL       string
+	AdminPassword  string
+	Disabled       string
+	Properties     string
+	CreatedAt      string
+	UpdatedAt      string
+	RemovedAt      string
+	EventsPassword string
 }{
-	ID:            "id",
-	Name:          "name",
-	Description:   "description",
-	URL:           "url",
-	AdminURL:      "admin_url",
-	AdminPassword: "admin_password",
-	Disabled:      "disabled",
-	Properties:    "properties",
-	CreatedAt:     "created_at",
-	UpdatedAt:     "updated_at",
-	RemovedAt:     "removed_at",
+	ID:             "id",
+	Name:           "name",
+	Description:    "description",
+	URL:            "url",
+	AdminURL:       "admin_url",
+	AdminPassword:  "admin_password",
+	Disabled:       "disabled",
+	Properties:     "properties",
+	CreatedAt:      "created_at",
+	UpdatedAt:      "updated_at",
+	RemovedAt:      "removed_at",
+	EventsPassword: "events_password",
 }
 
 // Generated where
@@ -144,29 +147,31 @@ func (w whereHelpernull_Time) GTE(x null.Time) qm.QueryMod {
 }
 
 var GatewayWhere = struct {
-	ID            whereHelperint64
-	Name          whereHelperstring
-	Description   whereHelpernull_String
-	URL           whereHelperstring
-	AdminURL      whereHelperstring
-	AdminPassword whereHelperstring
-	Disabled      whereHelperbool
-	Properties    whereHelpernull_JSON
-	CreatedAt     whereHelpertime_Time
-	UpdatedAt     whereHelpernull_Time
-	RemovedAt     whereHelpernull_Time
+	ID             whereHelperint64
+	Name           whereHelperstring
+	Description    whereHelpernull_String
+	URL            whereHelperstring
+	AdminURL       whereHelperstring
+	AdminPassword  whereHelperstring
+	Disabled       whereHelperbool
+	Properties     whereHelpernull_JSON
+	CreatedAt      whereHelpertime_Time
+	UpdatedAt      whereHelpernull_Time
+	RemovedAt      whereHelpernull_Time
+	EventsPassword whereHelperstring
 }{
-	ID:            whereHelperint64{field: "\"gateways\".\"id\""},
-	Name:          whereHelperstring{field: "\"gateways\".\"name\""},
-	Description:   whereHelpernull_String{field: "\"gateways\".\"description\""},
-	URL:           whereHelperstring{field: "\"gateways\".\"url\""},
-	AdminURL:      whereHelperstring{field: "\"gateways\".\"admin_url\""},
-	AdminPassword: whereHelperstring{field: "\"gateways\".\"admin_password\""},
-	Disabled:      whereHelperbool{field: "\"gateways\".\"disabled\""},
-	Properties:    whereHelpernull_JSON{field: "\"gateways\".\"properties\""},
-	CreatedAt:     whereHelpertime_Time{field: "\"gateways\".\"created_at\""},
-	UpdatedAt:     whereHelpernull_Time{field: "\"gateways\".\"updated_at\""},
-	RemovedAt:     whereHelpernull_Time{field: "\"gateways\".\"removed_at\""},
+	ID:             whereHelperint64{field: "\"gateways\".\"id\""},
+	Name:           whereHelperstring{field: "\"gateways\".\"name\""},
+	Description:    whereHelpernull_String{field: "\"gateways\".\"description\""},
+	URL:            whereHelperstring{field: "\"gateways\".\"url\""},
+	AdminURL:       whereHelperstring{field: "\"gateways\".\"admin_url\""},
+	AdminPassword:  whereHelperstring{field: "\"gateways\".\"admin_password\""},
+	Disabled:       whereHelperbool{field: "\"gateways\".\"disabled\""},
+	Properties:     whereHelpernull_JSON{field: "\"gateways\".\"properties\""},
+	CreatedAt:      whereHelpertime_Time{field: "\"gateways\".\"created_at\""},
+	UpdatedAt:      whereHelpernull_Time{field: "\"gateways\".\"updated_at\""},
+	RemovedAt:      whereHelpernull_Time{field: "\"gateways\".\"removed_at\""},
+	EventsPassword: whereHelperstring{field: "\"gateways\".\"events_password\""},
 }
 
 // GatewayRels is where relationship names are stored.
@@ -196,9 +201,9 @@ func (*gatewayR) NewStruct() *gatewayR {
 type gatewayL struct{}
 
 var (
-	gatewayAllColumns            = []string{"id", "name", "description", "url", "admin_url", "admin_password", "disabled", "properties", "created_at", "updated_at", "removed_at"}
+	gatewayAllColumns            = []string{"id", "name", "description", "url", "admin_url", "admin_password", "disabled", "properties", "created_at", "updated_at", "removed_at", "events_password"}
 	gatewayColumnsWithoutDefault = []string{"name", "description", "url", "admin_url", "admin_password", "properties", "updated_at", "removed_at"}
-	gatewayColumnsWithDefault    = []string{"id", "disabled", "created_at"}
+	gatewayColumnsWithDefault    = []string{"id", "disabled", "created_at", "events_password"}
 	gatewayPrimaryKeyColumns     = []string{"id"}
 )
 
@@ -638,7 +643,7 @@ func (o *Gateway) AddCompositesRooms(exec boil.Executor, insert bool, related ..
 				strmangle.SetParamNames("\"", "\"", 1, []string{"gateway_id"}),
 				strmangle.WhereClause("\"", "\"", 2, compositesRoomPrimaryKeyColumns),
 			)
-			values := []interface{}{o.ID, rel.CompositeID, rel.RoomID, rel.GatewayID}
+			values := []interface{}{o.ID, rel.CompositeID, rel.RoomID, rel.GatewayID, rel.Position}
 
 			if boil.DebugMode {
 				fmt.Fprintln(boil.DebugWriter, updateQuery)

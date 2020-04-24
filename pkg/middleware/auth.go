@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/coreos/go-oidc"
+	pkgerr "github.com/pkg/errors"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
 )
@@ -56,42 +58,45 @@ func (c *IDTokenClaims) HasRole(role string) bool {
 	return ok
 }
 
-func AuthenticationMiddleware(tokenVerifier *oidc.IDTokenVerifier, disabled bool) func(http.Handler) http.Handler {
+func AuthenticationMiddleware(tokenVerifier *oidc.IDTokenVerifier, gwPwd func(string) (string, bool), skipApi, skipGateway bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if disabled {
-				next.ServeHTTP(w, r)
-				return
-			}
-
-			// We start without auth on these endpoints until we retire gxyd
 			if r.URL.Path == "/event" || r.URL.Path == "/protocol" {
-				next.ServeHTTP(w, r)
-				return
-			}
+				if skipGateway {
+					next.ServeHTTP(w, r)
+					return
+				} else {
+					username, password, ok := r.BasicAuth()
+					if !ok {
+						httputil.NewUnauthorizedError(pkgerr.Errorf("no `Authorization` header set")).Abort(w, r)
+						return
+					}
 
-			//// Janus events and protocol room are using basic auth
-			//if r.URL.Path == "/event" || r.URL.Path == "/protocol" {
-			//	username, password, ok := r.BasicAuth()
-			//	if !ok {
-			//		httputil.NewBadRequestError(nil, "no `Authorization` header set").Abort(w, r)
-			//		return
-			//	}
-			//
-			//	if username != "replace_me" || password != "replace_me" {
-			//		httputil.NewUnauthorizedError(errors.New("wrong username password")).Abort(w, r)
-			//		return
-			//	}
-			//
-			//	next.ServeHTTP(w, r)
-			//	return
-			//}
+					hPwd, ok := gwPwd(username)
+					if !ok {
+						httputil.NewUnauthorizedError(pkgerr.Errorf("unknown gateway: %s", username)).Abort(w, r)
+						return
+					}
+
+					if err := bcrypt.CompareHashAndPassword([]byte(hPwd), []byte(password)); err != nil {
+						httputil.NewUnauthorizedError(pkgerr.Errorf("wrong password: %s", password)).Abort(w, r)
+						return
+					}
+
+					next.ServeHTTP(w, r)
+					return
+				}
+			}
 
 			// APIs are using JWT
+			if skipApi {
+				next.ServeHTTP(w, r)
+				return
+			}
 
 			auth := parseToken(r)
 			if auth == "" {
-				httputil.NewBadRequestError(nil, "no `Authorization` header set").Abort(w, r)
+				httputil.NewUnauthorizedError(pkgerr.Errorf("no `Authorization` header set")).Abort(w, r)
 				return
 			}
 

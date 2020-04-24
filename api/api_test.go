@@ -15,6 +15,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
@@ -30,7 +31,7 @@ type ApiTestSuite struct {
 func (s *ApiTestSuite) SetupSuite() {
 	s.Require().NoError(s.InitTestDB())
 	s.app = new(App)
-	s.app.InitializeWithDB(s.DB, "", true)
+	s.app.InitializeWithDB(s.DB, "", true, false)
 }
 
 func (s *ApiTestSuite) TearDownSuite() {
@@ -716,14 +717,46 @@ func (s *ApiTestSuite) TestUpdateCompositeDuplicateRoom() {
 	}
 }
 
+func (s *ApiTestSuite) TestHandleGatewayUnauthorized() {
+	for _, endpoint := range [...]string{"/event", "/protocol"} {
+		req, _ := http.NewRequest("POST", endpoint, bytes.NewBuffer([]byte("{}")))
+		resp := s.request(req)
+		s.Equal(http.StatusUnauthorized, resp.Code, "%s no header", endpoint)
+
+		req.SetBasicAuth("", "")
+		resp = s.request(req)
+		s.Equal(http.StatusUnauthorized, resp.Code, "%s no username password", endpoint)
+
+		req.SetBasicAuth("username", "")
+		resp = s.request(req)
+		s.Equal(http.StatusUnauthorized, resp.Code, "%s no password", endpoint)
+
+		req.SetBasicAuth("", "password")
+		resp = s.request(req)
+		s.Equal(http.StatusUnauthorized, resp.Code, "%s no username", endpoint)
+
+		req.SetBasicAuth("username", "password")
+		resp = s.request(req)
+		s.Equal(http.StatusUnauthorized, resp.Code, "%s wrong username password", endpoint)
+	}
+}
+
 func (s *ApiTestSuite) TestHandleEventBadJSON() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
 	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
 
 func (s *ApiTestSuite) TestHandleEventUnknownType() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
 	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer([]byte("{\"type\":7}")))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -757,6 +790,7 @@ func (s *ApiTestSuite) TestHandleEventVideoroomLeaving() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	s.Require().NoError(session.Reload(s.DB))
@@ -793,6 +827,7 @@ func (s *ApiTestSuite) TestHandleEventVideoroomLeavingUnknownUser() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/event", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	// no changes to existing sessions as we expect a noop
@@ -809,18 +844,29 @@ func (s *ApiTestSuite) TestHandleEventVideoroomLeavingUnknownUser() {
 }
 
 func (s *ApiTestSuite) TestHandleProtocolBadJSON() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
 
 func (s *ApiTestSuite) TestHandleProtocolUnknownType() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer([]byte("{\"type\":7}")))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
 
 func (s *ApiTestSuite) TestHandleProtocolBadTextJSON() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
 	event := janus.TextroomPostMsg{
 		Textroom: "message",
 		Room:     1000,
@@ -832,12 +878,15 @@ func (s *ApiTestSuite) TestHandleProtocolBadTextJSON() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
 
 func (s *ApiTestSuite) TestHandleProtocolUnknownGateway() {
 	user := s.createUser()
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(nil, nil, user)
 	payload := map[string]interface{}{
@@ -858,6 +907,7 @@ func (s *ApiTestSuite) TestHandleProtocolUnknownGateway() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -886,6 +936,7 @@ func (s *ApiTestSuite) TestHandleProtocolUnknownRoom() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -917,6 +968,7 @@ func (s *ApiTestSuite) TestHandleProtocolEnter() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -954,6 +1006,7 @@ func (s *ApiTestSuite) TestHandleProtocolEnterUnknownUser() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", "/users/some_new_user_id", nil)
@@ -991,6 +1044,7 @@ func (s *ApiTestSuite) TestHandleProtocolEnterExistingSession() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1031,6 +1085,7 @@ func (s *ApiTestSuite) TestHandleProtocolQuestion() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1047,6 +1102,7 @@ func (s *ApiTestSuite) TestHandleProtocolQuestion() {
 	b, _ = json.Marshal(event)
 
 	req, _ = http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1087,6 +1143,7 @@ func (s *ApiTestSuite) TestHandleProtocolCamera() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1103,6 +1160,7 @@ func (s *ApiTestSuite) TestHandleProtocolCamera() {
 	b, _ = json.Marshal(event)
 
 	req, _ = http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1143,6 +1201,7 @@ func (s *ApiTestSuite) TestHandleProtocolSoundTest() {
 	b, _ := json.Marshal(event)
 
 	req, _ := http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1159,6 +1218,7 @@ func (s *ApiTestSuite) TestHandleProtocolSoundTest() {
 	b, _ = json.Marshal(event)
 
 	req, _ = http.NewRequest("POST", "/protocol", bytes.NewBuffer(b))
+	req.SetBasicAuth(gateway.Name, gateway.Name)
 	s.request200json(req)
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
@@ -1229,13 +1289,20 @@ func (s *ApiTestSuite) assertV1User(v1User *V1User, body map[string]interface{})
 }
 
 func (s *ApiTestSuite) createGateway() *models.Gateway {
+	name := fmt.Sprintf("gateway_%s", stringutil.GenerateName(4))
+	pwdHash, err := bcrypt.GenerateFromPassword([]byte(name), bcrypt.MinCost)
+	s.Require().NoError(err)
+
 	gateway := &models.Gateway{
-		Name:          fmt.Sprintf("gateway_%s", stringutil.GenerateName(4)),
-		URL:           "url",
-		AdminURL:      "admin_url",
-		AdminPassword: "admin_password",
+		Name:           name,
+		URL:            "url",
+		AdminURL:       "admin_url",
+		AdminPassword:  "admin_password",
+		EventsPassword: string(pwdHash),
 	}
+
 	s.Require().NoError(gateway.Insert(s.DB, boil.Infer()))
+
 	return gateway
 }
 
