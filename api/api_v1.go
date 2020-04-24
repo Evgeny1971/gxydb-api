@@ -419,7 +419,7 @@ func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
 			cRooms[i] = &models.CompositesRoom{
 				RoomID:    room.ID,
 				GatewayID: gateway.ID,
-				Position:  item.Position,
+				Position:  i + 1,
 			}
 		}
 
