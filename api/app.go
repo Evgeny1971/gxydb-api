@@ -40,17 +40,17 @@ func (a *App) initOidc(issuer string) {
 	})
 }
 
-func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth bool) {
+func (a *App) Initialize(dbUrl, accountsUrl string, skipAuth, skipEventsAuth bool) {
 	log.Info().Msg("initializing app")
 	db, err := sql.Open("postgres", dbUrl)
 	if err != nil {
 		log.Fatal().Err(err).Msg("sql.Open")
 	}
 
-	a.InitializeWithDB(db, accountsUrl, skipAuth)
+	a.InitializeWithDB(db, accountsUrl, skipAuth, skipEventsAuth)
 }
 
-func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool) {
+func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth, skipEventsAuth bool) {
 	a.DB = db
 
 	a.Router = mux.NewRouter()
@@ -60,24 +60,33 @@ func (a *App) InitializeWithDB(db DBInterface, accountsUrl string, skipAuth bool
 		a.initOidc(accountsUrl)
 	}
 
-	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Content-Length", "Accept-Encoding", "Content-Range", "Content-Disposition", "Authorization"})
-	originsOk := handlers.AllowedOrigins([]string{"*"})
-	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT", "OPTIONS"})
-	cors := handlers.CORS(originsOk, headersOk, methodsOk)
-
-	a.Handler = middleware.ContextMiddleware(
-		middleware.LoggingMiddleware(
-			middleware.RecoveryMiddleware(
-				middleware.RealIPMiddleware(
-					middleware.AuthenticationMiddleware(a.tokenVerifier, skipAuth)(
-						cors(a.Router))))))
-
 	a.cache = new(AppCache)
 	if err := a.cache.Init(db); err != nil {
 		log.Fatal().Err(err).Msg("initialize app cache")
 	}
 
 	a.sessionManager = NewV1SessionManager(a.DB, a.cache)
+
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Content-Length", "Accept-Encoding", "Content-Range", "Content-Disposition", "Authorization"})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "DELETE", "POST", "PUT", "OPTIONS"})
+	cors := handlers.CORS(originsOk, headersOk, methodsOk)
+
+	// this is declared here to abstract away the cache from auth middleware
+	gatewayPwd := func(name string) (string, bool) {
+		g, ok := a.cache.gateways.ByName(name)
+		if ok {
+			return g.EventsPassword, true
+		}
+		return "", false
+	}
+
+	a.Handler = middleware.ContextMiddleware(
+		middleware.LoggingMiddleware(
+			middleware.RecoveryMiddleware(
+				middleware.RealIPMiddleware(
+					middleware.AuthenticationMiddleware(a.tokenVerifier, gatewayPwd, skipAuth, skipEventsAuth)(
+						cors(a.Router))))))
 }
 
 func (a *App) Run(listenAddr string) {

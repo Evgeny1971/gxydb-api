@@ -103,7 +103,7 @@ var (
 	compositesRoomAllColumns            = []string{"composite_id", "room_id", "gateway_id", "position"}
 	compositesRoomColumnsWithoutDefault = []string{"composite_id", "room_id", "gateway_id"}
 	compositesRoomColumnsWithDefault    = []string{"position"}
-	compositesRoomPrimaryKeyColumns     = []string{"composite_id", "room_id", "gateway_id"}
+	compositesRoomPrimaryKeyColumns     = []string{"composite_id", "room_id", "gateway_id", "position"}
 )
 
 type (
@@ -534,7 +534,7 @@ func (o *CompositesRoom) SetComposite(exec boil.Executor, insert bool, related *
 		strmangle.SetParamNames("\"", "\"", 1, []string{"composite_id"}),
 		strmangle.WhereClause("\"", "\"", 2, compositesRoomPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.CompositeID, o.RoomID, o.GatewayID}
+	values := []interface{}{related.ID, o.CompositeID, o.RoomID, o.GatewayID, o.Position}
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, updateQuery)
@@ -580,7 +580,7 @@ func (o *CompositesRoom) SetGateway(exec boil.Executor, insert bool, related *Ga
 		strmangle.SetParamNames("\"", "\"", 1, []string{"gateway_id"}),
 		strmangle.WhereClause("\"", "\"", 2, compositesRoomPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.CompositeID, o.RoomID, o.GatewayID}
+	values := []interface{}{related.ID, o.CompositeID, o.RoomID, o.GatewayID, o.Position}
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, updateQuery)
@@ -626,7 +626,7 @@ func (o *CompositesRoom) SetRoom(exec boil.Executor, insert bool, related *Room)
 		strmangle.SetParamNames("\"", "\"", 1, []string{"room_id"}),
 		strmangle.WhereClause("\"", "\"", 2, compositesRoomPrimaryKeyColumns),
 	)
-	values := []interface{}{related.ID, o.CompositeID, o.RoomID, o.GatewayID}
+	values := []interface{}{related.ID, o.CompositeID, o.RoomID, o.GatewayID, o.Position}
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, updateQuery)
@@ -664,7 +664,7 @@ func CompositesRooms(mods ...qm.QueryMod) compositesRoomQuery {
 
 // FindCompositesRoom retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindCompositesRoom(exec boil.Executor, compositeID int64, roomID int64, gatewayID int64, selectCols ...string) (*CompositesRoom, error) {
+func FindCompositesRoom(exec boil.Executor, compositeID int64, roomID int64, gatewayID int64, position int, selectCols ...string) (*CompositesRoom, error) {
 	compositesRoomObj := &CompositesRoom{}
 
 	sel := "*"
@@ -672,10 +672,10 @@ func FindCompositesRoom(exec boil.Executor, compositeID int64, roomID int64, gat
 		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
 	}
 	query := fmt.Sprintf(
-		"select %s from \"composites_rooms\" where \"composite_id\"=$1 AND \"room_id\"=$2 AND \"gateway_id\"=$3", sel,
+		"select %s from \"composites_rooms\" where \"composite_id\"=$1 AND \"room_id\"=$2 AND \"gateway_id\"=$3 AND \"position\"=$4", sel,
 	)
 
-	q := queries.Raw(query, compositeID, roomID, gatewayID)
+	q := queries.Raw(query, compositeID, roomID, gatewayID, position)
 
 	err := q.Bind(nil, exec, compositesRoomObj)
 	if err != nil {
@@ -1000,7 +1000,7 @@ func (o *CompositesRoom) Delete(exec boil.Executor) (int64, error) {
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), compositesRoomPrimaryKeyMapping)
-	sql := "DELETE FROM \"composites_rooms\" WHERE \"composite_id\"=$1 AND \"room_id\"=$2 AND \"gateway_id\"=$3"
+	sql := "DELETE FROM \"composites_rooms\" WHERE \"composite_id\"=$1 AND \"room_id\"=$2 AND \"gateway_id\"=$3 AND \"position\"=$4"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -1075,7 +1075,7 @@ func (o CompositesRoomSlice) DeleteAll(exec boil.Executor) (int64, error) {
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *CompositesRoom) Reload(exec boil.Executor) error {
-	ret, err := FindCompositesRoom(exec, o.CompositeID, o.RoomID, o.GatewayID)
+	ret, err := FindCompositesRoom(exec, o.CompositeID, o.RoomID, o.GatewayID, o.Position)
 	if err != nil {
 		return err
 	}
@@ -1114,15 +1114,15 @@ func (o *CompositesRoomSlice) ReloadAll(exec boil.Executor) error {
 }
 
 // CompositesRoomExists checks if the CompositesRoom row exists.
-func CompositesRoomExists(exec boil.Executor, compositeID int64, roomID int64, gatewayID int64) (bool, error) {
+func CompositesRoomExists(exec boil.Executor, compositeID int64, roomID int64, gatewayID int64, position int) (bool, error) {
 	var exists bool
-	sql := "select exists(select 1 from \"composites_rooms\" where \"composite_id\"=$1 AND \"room_id\"=$2 AND \"gateway_id\"=$3 limit 1)"
+	sql := "select exists(select 1 from \"composites_rooms\" where \"composite_id\"=$1 AND \"room_id\"=$2 AND \"gateway_id\"=$3 AND \"position\"=$4 limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, compositeID, roomID, gatewayID)
+		fmt.Fprintln(boil.DebugWriter, compositeID, roomID, gatewayID, position)
 	}
-	row := exec.QueryRow(sql, compositeID, roomID, gatewayID)
+	row := exec.QueryRow(sql, compositeID, roomID, gatewayID, position)
 
 	err := row.Scan(&exists)
 	if err != nil {

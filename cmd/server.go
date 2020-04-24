@@ -23,8 +23,9 @@ func serverFn(cmd *cobra.Command, args []string) {
 	dbUrl := os.Getenv("DB_URL")
 	accountsUrl := os.Getenv("ACC_URL")
 	skipAuth := os.Getenv("SKIP_AUTH") == "true"
+	skipEventsAuth := os.Getenv("SKIP_EVENTS_AUTH") == "true"
 
 	a := api.App{}
-	a.Initialize(dbUrl, accountsUrl, skipAuth)
+	a.Initialize(dbUrl, accountsUrl, skipAuth, skipEventsAuth)
 	a.Run(listenAddress)
 }
