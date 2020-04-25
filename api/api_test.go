@@ -484,12 +484,14 @@ func (s *ApiTestSuite) TestGetComposite() {
 	gateway := s.createGateway()
 	rooms := make([]*models.Room, 4)
 	sessions := make([][]*models.Session, len(rooms))
+	sessionsByID := make(map[string]*models.Session)
 	for i := 0; i < 4; i++ {
 		rooms[i] = s.createRoom(gateway)
 		sessions[i] = make([]*models.Session, i+1)
 		for j := 0; j < i+1; j++ {
 			user := s.createUser()
 			sessions[i][j] = s.createSession(user, gateway, rooms[i])
+			sessionsByID[user.AccountsID] = sessions[i][j]
 		}
 	}
 	composite := s.createComposite(rooms)
@@ -510,6 +512,15 @@ func (s *ApiTestSuite) TestGetComposite() {
 		s.Equal(rooms[i].Name, croom["description"], "description")
 		s.False(croom["questions"].(bool), "questions")
 		s.Equal(i+1, int(croom["num_users"].(float64)), "num_users")
+
+		// verify room's user sessions
+		s.Equal(i+1, len(croom["users"].([]interface{})), "users count")
+		for j, respUser := range croom["users"].([]interface{}) {
+			data := respUser.(map[string]interface{})
+			session, ok := sessionsByID[data["id"].(string)]
+			s.Require().True(ok, "unknown session [%d][%d] %v", i, j, data["id"])
+			s.assertV1Session(session, data)
+		}
 	}
 
 	// turn on question mark on some session
@@ -537,19 +548,17 @@ func (s *ApiTestSuite) TestListComposites() {
 	}
 	gateways := make(map[int64]*models.Gateway, counts.gateways)
 	rooms := make([][]*models.Room, counts.gateways)
-	sessions := make([][][]*models.Session, counts.gateways)
+	sessions := make(map[string]*models.Session)
 	for i := 0; i < counts.gateways; i++ {
 		gateway := s.createGateway()
 		gateways[gateway.ID] = gateway
 		rooms[i] = make([]*models.Room, counts.roomPerGateway)
-		sessions[i] = make([][]*models.Session, counts.roomPerGateway)
 		for j := 0; j < counts.roomPerGateway; j++ {
 			room := s.createRoom(gateway)
 			rooms[i][j] = room
-			sessions[i][j] = make([]*models.Session, j%4+1)
 			for k := 0; k < j%4+1; k++ {
 				user := s.createUser()
-				sessions[i][j][k] = s.createSession(user, gateway, room)
+				sessions[user.AccountsID] = s.createSession(user, gateway, room)
 			}
 		}
 	}
@@ -594,6 +603,15 @@ func (s *ApiTestSuite) TestListComposites() {
 			s.Equal(room.Name, croom["description"], "description")
 			s.False(croom["questions"].(bool), "questions")
 			s.Equal(i+1, int(croom["num_users"].(float64)), "num_users")
+
+			// verify room's user sessions
+			s.Equal(i+1, len(croom["users"].([]interface{})), "users count")
+			for j, respUser := range croom["users"].([]interface{}) {
+				data := respUser.(map[string]interface{})
+				session, ok := sessions[data["id"].(string)]
+				s.Require().True(ok, "unknown session [%s][%d][%d] %v", name, i, j, data["id"])
+				s.assertV1Session(session, data)
+			}
 		}
 	}
 }

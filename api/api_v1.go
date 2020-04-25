@@ -329,7 +329,9 @@ func (a *App) V1ListComposites(w http.ResponseWriter, r *http.Request) {
 			models.RoomWhere.Disabled.EQ(false),
 			models.RoomWhere.RemovedAt.IsNull()),
 		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions),
-			models.SessionWhere.RemovedAt.IsNull()),
+			models.SessionWhere.RemovedAt.IsNull(), qm.OrderBy(models.SessionColumns.CreatedAt)),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions, models.SessionRels.User)),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions, models.SessionRels.Gateway)),
 	).All(a.DB)
 
 	if err != nil {
@@ -361,6 +363,8 @@ func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
 			models.RoomWhere.RemovedAt.IsNull()),
 		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions),
 			models.SessionWhere.RemovedAt.IsNull(), qm.OrderBy(models.SessionColumns.CreatedAt)),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions, models.SessionRels.User)),
+		qm.Load(qm.Rels(models.CompositeRels.CompositesRooms, models.CompositesRoomRels.Room, models.RoomRels.Sessions, models.SessionRels.Gateway)),
 	).One(a.DB)
 
 	if err != nil {
@@ -547,15 +551,16 @@ func (a *App) makeV1Composite(composite *models.Composite) *V1Composite {
 					Description: room.Name,
 				},
 				NumUsers: len(room.R.Sessions),
+				Users:    make([]*V1User, len(room.R.Sessions)),
 			},
 			Position: cRoom.Position,
 		}
 
-		for _, session := range room.R.Sessions {
+		for i, session := range room.R.Sessions {
 			if session.Question {
 				respRoom.Questions = true
-				break
 			}
+			respRoom.Users[i] = a.makeV1User(room, session)
 		}
 
 		respComposite.VQuad[j] = respRoom
