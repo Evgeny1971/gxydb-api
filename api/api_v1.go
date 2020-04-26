@@ -322,6 +322,34 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondWithJSON(w, http.StatusOK, a.makeV1User(session.R.Room, session))
 }
 
+func (a *App) V1UpdateSession(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	if len(id) > 36 {
+		httputil.NewBadRequestError(nil, "malformed id").Abort(w, r)
+		return
+	}
+
+	var data *V1User
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w, r)
+		return
+	}
+	a.requestContext(r).Params = data
+
+	if err := a.sessionManager.UpsertSession(r.Context(), data); err != nil {
+		var pErr *ProtocolError
+		if errors.As(err, &pErr) {
+			httputil.NewBadRequestError(err, "protocol error").Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
+
+	httputil.RespondSuccess(w)
+}
+
 func (a *App) V1ListComposites(w http.ResponseWriter, r *http.Request) {
 	composites, err := models.Composites(
 		qm.Load(models.CompositeRels.CompositesRooms, qm.OrderBy(models.CompositesRoomColumns.Position)),

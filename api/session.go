@@ -22,6 +22,7 @@ import (
 type SessionManager interface {
 	HandleEvent(context.Context, interface{}) error
 	HandleProtocol(context.Context, *janus.TextroomPostMsg) error
+	UpsertSession(context.Context, *V1User) error
 }
 
 type V1SessionManager struct {
@@ -91,6 +92,12 @@ func (sm *V1SessionManager) HandleProtocol(ctx context.Context, msg *janus.Textr
 		}
 
 		return nil
+	})
+}
+
+func (sm *V1SessionManager) UpsertSession(ctx context.Context, user *V1User) error {
+	return sqlutil.InTx(ctx, sm.db, func(tx *sql.Tx) error {
+		return sm.upsertSession(ctx, tx, user)
 	})
 }
 

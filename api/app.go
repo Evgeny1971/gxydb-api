@@ -109,6 +109,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")
 	a.Router.HandleFunc("/users", a.V1ListUsers).Methods("GET")
 	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET")
+	a.Router.HandleFunc("/users/{id}", a.V1UpdateSession).Methods("PUT")
 	a.Router.HandleFunc("/qids", a.V1ListComposites).Methods("GET")
 	a.Router.HandleFunc("/qids/{id}", a.V1GetComposite).Methods("GET")
 	a.Router.HandleFunc("/program/{id}", a.V1GetComposite).Methods("GET")
@@ -116,7 +117,7 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/event", a.V1HandleEvent).Methods("POST")
 	a.Router.HandleFunc("/protocol", a.V1HandleProtocol).Methods("POST")
 
-	// api v2
+	// api v2 (next)
 	//a.Router.HandleFunc("/groups", a.getGroups).Methods("GET")
 	//a.Router.HandleFunc("/rooms", a.getRooms).Methods("GET") 	 			// Current
 	//a.Router.HandleFunc("/room/{id}", a.getRoom).Methods("GET")			// Current

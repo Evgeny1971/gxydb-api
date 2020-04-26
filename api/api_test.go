@@ -468,6 +468,67 @@ func (s *ApiTestSuite) TestListUsers() {
 	}
 }
 
+func (s *ApiTestSuite) TestUpdateSessionMalformedID() {
+	req, _ := http.NewRequest("PUT", "/users/1234567890123456789012345678901234567890", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateSessionBadJSON() {
+	req, _ := http.NewRequest("PUT", "/users/12345678901234567890", bytes.NewBuffer([]byte("{\"bad\":\"json")))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateSessionUnknownGateway() {
+	user := s.createUser()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	v1User := s.makeV1user(nil, nil, user)
+	payloadJson, _ := json.Marshal(v1User)
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.AccountsID), bytes.NewBuffer(payloadJson))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateSessionUnknownRoom() {
+	user := s.createUser()
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	v1User := s.makeV1user(gateway, nil, user)
+	payloadJson, _ := json.Marshal(v1User)
+
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.AccountsID), bytes.NewBuffer(payloadJson))
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateSession() {
+	gateway := s.createGateway()
+	room := s.createRoom(gateway)
+	user := s.createUser()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	v1User := s.makeV1user(gateway, room, user)
+	payloadJson, _ := json.Marshal(v1User)
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.AccountsID), bytes.NewBuffer(payloadJson))
+	s.request200json(req)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body := s.request200json(req)
+	s.assertV1User(v1User, body)
+
+	v1User.Question = true
+	v1User.Camera = true
+	payloadJson, _ = json.Marshal(v1User)
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.AccountsID), bytes.NewBuffer(payloadJson))
+	s.request200json(req)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
+	body = s.request200json(req)
+	s.assertV1User(v1User, body)
+}
+
 func (s *ApiTestSuite) TestGetCompositeMalformedID() {
 	req, _ := http.NewRequest("GET", "/qids/12345678901234567890", nil)
 	resp := s.request(req)
