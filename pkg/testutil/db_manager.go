@@ -3,7 +3,6 @@ package testutil
 import (
 	"database/sql"
 	"fmt"
-	"os"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -17,6 +16,7 @@ import (
 	"gopkg.in/khaiql/dbcleaner.v2"
 	"gopkg.in/khaiql/dbcleaner.v2/engine"
 
+	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
 )
@@ -34,7 +34,7 @@ func (m *TestDBManager) InitTestDB() error {
 	fmt.Println("Initializing test DB: ", m.testDB)
 
 	// Open connection
-	db, err := sql.Open("postgres", os.Getenv("DB_URL"))
+	db, err := sql.Open("postgres", common.Config.DBUrl)
 	if err != nil {
 		return err
 	}
@@ -85,7 +85,7 @@ func (m *TestDBManager) DestroyTestDB() error {
 	}
 
 	// Connect to main dev DB
-	db, err := sql.Open("postgres", os.Getenv("DB_URL"))
+	db, err := sql.Open("postgres", common.Config.DBUrl)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func (m *TestDBManager) runMigrations(dsn string) error {
 }
 
 func (m *TestDBManager) replaceDBName(tempName string) (string, error) {
-	paramsStr, err := pq.ParseURL(os.Getenv("DB_URL"))
+	paramsStr, err := pq.ParseURL(common.Config.DBUrl)
 	if err != nil {
 		return "", err
 	}

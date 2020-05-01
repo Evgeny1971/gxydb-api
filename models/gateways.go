@@ -35,6 +35,7 @@ type Gateway struct {
 	UpdatedAt      null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
 	RemovedAt      null.Time   `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
 	EventsPassword string      `boil:"events_password" json:"events_password" toml:"events_password" yaml:"events_password"`
+	Type           string      `boil:"type" json:"type" toml:"type" yaml:"type"`
 
 	R *gatewayR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L gatewayL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -53,6 +54,7 @@ var GatewayColumns = struct {
 	UpdatedAt      string
 	RemovedAt      string
 	EventsPassword string
+	Type           string
 }{
 	ID:             "id",
 	Name:           "name",
@@ -66,6 +68,7 @@ var GatewayColumns = struct {
 	UpdatedAt:      "updated_at",
 	RemovedAt:      "removed_at",
 	EventsPassword: "events_password",
+	Type:           "type",
 }
 
 // Generated where
@@ -159,6 +162,7 @@ var GatewayWhere = struct {
 	UpdatedAt      whereHelpernull_Time
 	RemovedAt      whereHelpernull_Time
 	EventsPassword whereHelperstring
+	Type           whereHelperstring
 }{
 	ID:             whereHelperint64{field: "\"gateways\".\"id\""},
 	Name:           whereHelperstring{field: "\"gateways\".\"name\""},
@@ -172,6 +176,7 @@ var GatewayWhere = struct {
 	UpdatedAt:      whereHelpernull_Time{field: "\"gateways\".\"updated_at\""},
 	RemovedAt:      whereHelpernull_Time{field: "\"gateways\".\"removed_at\""},
 	EventsPassword: whereHelperstring{field: "\"gateways\".\"events_password\""},
+	Type:           whereHelperstring{field: "\"gateways\".\"type\""},
 }
 
 // GatewayRels is where relationship names are stored.
@@ -201,9 +206,9 @@ func (*gatewayR) NewStruct() *gatewayR {
 type gatewayL struct{}
 
 var (
-	gatewayAllColumns            = []string{"id", "name", "description", "url", "admin_url", "admin_password", "disabled", "properties", "created_at", "updated_at", "removed_at", "events_password"}
+	gatewayAllColumns            = []string{"id", "name", "description", "url", "admin_url", "admin_password", "disabled", "properties", "created_at", "updated_at", "removed_at", "events_password", "type"}
 	gatewayColumnsWithoutDefault = []string{"name", "description", "url", "admin_url", "admin_password", "properties", "updated_at", "removed_at"}
-	gatewayColumnsWithDefault    = []string{"id", "disabled", "created_at", "events_password"}
+	gatewayColumnsWithDefault    = []string{"id", "disabled", "created_at", "events_password", "type"}
 	gatewayPrimaryKeyColumns     = []string{"id"}
 )
 
