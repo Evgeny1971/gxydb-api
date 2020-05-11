@@ -50,7 +50,7 @@ func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) V1CreateGroup(w http.ResponseWriter, r *http.Request) {
-	if !middleware.RequestHasRole(r, common.RoleRoot) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
 		httputil.NewForbiddenError().Abort(w, r)
 		return
 	}
@@ -362,7 +362,7 @@ func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
-	if !middleware.RequestHasRole(r, common.RoleShidur) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleShidur) {
 		httputil.NewForbiddenError().Abort(w, r)
 		return
 	}
