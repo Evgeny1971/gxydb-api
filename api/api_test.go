@@ -22,6 +22,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
+	"github.com/Bnei-Baruch/gxydb-api/middleware"
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/testutil"
@@ -50,9 +51,7 @@ func (s *ApiTestSuite) SetupTest() {
 }
 
 func (s *ApiTestSuite) TearDownTest() {
-	s.tokenVerifier.AssertExpectations(s.T())
-	s.tokenVerifier.ExpectedCalls = nil
-	s.tokenVerifier.Calls = nil
+	s.assertTokenVerifier()
 	s.DBCleaner.Clean(s.AllTables()...)
 }
 
@@ -98,14 +97,14 @@ func (s *ApiTestSuite) TestListGroups() {
 
 func (s *ApiTestSuite) TestCreateGroupMalformedID() {
 	req, _ := http.NewRequest("PUT", "/group/id", nil)
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleRoot})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
 
 func (s *ApiTestSuite) TestCreateGroupBadJSON() {
 	req, _ := http.NewRequest("PUT", "/group/1234", bytes.NewBuffer([]byte("{\"bad\":\"json")))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleRoot})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -119,7 +118,7 @@ func (s *ApiTestSuite) TestCreateGroupUnknownGateway() {
 
 	b, _ := json.Marshal(roomInfo)
 	req, _ := http.NewRequest("PUT", "/group/1234", bytes.NewBuffer(b))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleRoot})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -136,7 +135,7 @@ func (s *ApiTestSuite) TestCreateGroup() {
 
 	b, _ := json.Marshal(roomInfo)
 	req, _ := http.NewRequest("PUT", "/group/1234", bytes.NewBuffer(b))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleRoot})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusOK, resp.Code)
 
@@ -165,7 +164,7 @@ func (s *ApiTestSuite) TestCreateGroupExiting() {
 
 	b, _ := json.Marshal(roomInfo)
 	req, _ := http.NewRequest("PUT", fmt.Sprintf("/group/%d", roomInfo.Room), bytes.NewBuffer(b))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleRoot})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusOK, resp.Code)
 
@@ -721,7 +720,7 @@ func (s *ApiTestSuite) TestListComposites() {
 
 func (s *ApiTestSuite) TestUpdateCompositeMalformedID() {
 	req, _ := http.NewRequest("PUT", "/qids/12345678901234567890", nil)
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleShidur})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -729,14 +728,14 @@ func (s *ApiTestSuite) TestUpdateCompositeMalformedID() {
 func (s *ApiTestSuite) TestUpdateCompositeNotFound() {
 	b, _ := json.Marshal(V1Composite{})
 	req, _ := http.NewRequest("PUT", "/qids/q1", bytes.NewBuffer(b))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleShidur})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
 }
 
 func (s *ApiTestSuite) TestUpdateCompositeBadJSON() {
 	req, _ := http.NewRequest("PUT", "/qids/q1", bytes.NewBuffer([]byte("{\"bad\":\"json")))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleShidur})
 	resp := s.request(req)
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 }
@@ -753,6 +752,7 @@ func (s *ApiTestSuite) TestUpdateComposite() {
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
 	s.apiAuth(req)
 	body := s.request200json(req)
+	s.assertTokenVerifier()
 
 	rooms[0] = s.createRoom(gateway)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
@@ -761,7 +761,7 @@ func (s *ApiTestSuite) TestUpdateComposite() {
 	body["vquad"].([]interface{})[0].(map[string]interface{})["queue"] = 5
 	b, _ := json.Marshal(body)
 	req, _ = http.NewRequest("PUT", fmt.Sprintf("/qids/%s", composite.Name), bytes.NewBuffer(b))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleShidur})
 	body = s.request200json(req)
 	s.Equal("success", body["result"], "PUT result")
 
@@ -793,7 +793,7 @@ func (s *ApiTestSuite) TestUpdateCompositeClear() {
 	composite := s.createComposite(rooms)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 	req, _ := http.NewRequest("PUT", fmt.Sprintf("/qids/%s", composite.Name), bytes.NewBuffer([]byte("{\"vquad\":[]}")))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleShidur})
 	body := s.request200json(req)
 	s.Equal("success", body["result"], "PUT result")
 
@@ -819,6 +819,7 @@ func (s *ApiTestSuite) TestUpdateCompositeDuplicateRoom() {
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/qids/%s", composite.Name), nil)
 	s.apiAuth(req)
 	body := s.request200json(req)
+	s.assertTokenVerifier()
 	bodyArr := body["vquad"].([]interface{})
 	for i := 0; i < 4; i++ {
 		bodyArr[i].(map[string]interface{})["room"] = rooms[0].GatewayUID
@@ -826,7 +827,7 @@ func (s *ApiTestSuite) TestUpdateCompositeDuplicateRoom() {
 	}
 	b, _ := json.Marshal(body)
 	req, _ = http.NewRequest("PUT", fmt.Sprintf("/qids/%s", composite.Name), bytes.NewBuffer(b))
-	s.apiAuth(req)
+	s.apiAuthP(req, []string{common.RoleShidur})
 	body = s.request200json(req)
 	s.Equal("success", body["result"], "PUT result")
 
@@ -869,6 +870,21 @@ func (s *ApiTestSuite) TestHandleApiUnauthorized() {
 	req.SetBasicAuth("username", "password")
 	resp = s.request(req)
 	s.Equal(http.StatusUnauthorized, resp.Code, "wrong username password")
+}
+
+func (s *ApiTestSuite) TestHandleApiForbidden() {
+	for _, role := range common.AllRoles {
+		req, _ := http.NewRequest("GET", "/v2/config", nil)
+		s.apiAuthP(req, []string{role})
+		s.request200json(req)
+		s.assertTokenVerifier()
+	}
+
+	req, _ := http.NewRequest("GET", "/v2/config", nil)
+	s.apiAuthP(req, []string{"some_role"})
+	resp := s.request(req)
+	s.Equal(http.StatusForbidden, resp.Code, "unknown role")
+	s.assertTokenVerifier()
 }
 
 func (s *ApiTestSuite) TestHandleGatewayUnauthorized() {
@@ -1415,6 +1431,8 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		s.Equal(gateway.Name, data["name"], "name")
 		s.Equal(gateway.URL, data["url"], "url")
 		s.Equal(gateway.Type, data["type"], "type")
+		s.Empty(data["admin_url"], "admin_url")
+		s.Empty(data["admin_password"], "admin_password")
 	}
 	for name, respGateway := range gateways[common.GatewayTypeStreaming].(map[string]interface{}) {
 		gateway, ok := streamingGateways[name]
@@ -1423,12 +1441,34 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		s.Equal(gateway.Name, data["name"], "name")
 		s.Equal(gateway.URL, data["url"], "url")
 		s.Equal(gateway.Type, data["type"], "type")
+		s.Empty(data["admin_url"], "admin_url")
+		s.Empty(data["admin_password"], "admin_password")
 	}
 
 	iceServers := body["ice_servers"].(map[string]interface{})
 
 	s.ElementsMatch(common.Config.IceServers[common.GatewayTypeRooms], iceServers[common.GatewayTypeRooms], "rooms ice servers")
 	s.ElementsMatch(common.Config.IceServers[common.GatewayTypeStreaming], iceServers[common.GatewayTypeStreaming], "streaming ice servers")
+}
+
+func (s *ApiTestSuite) TestV2GetConfigWithAdmin() {
+	gateway := s.createGateway()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	for _, role := range []string{common.RoleAdmin, common.RoleRoot} {
+		req, _ := http.NewRequest("GET", "/v2/config", nil)
+		s.apiAuthP(req, []string{role})
+		body := s.request200json(req)
+		gateways := body["gateways"].(map[string]interface{})
+		for _, respGateway := range gateways[common.GatewayTypeRooms].(map[string]interface{}) {
+			data := respGateway.(map[string]interface{})
+			s.Equal(gateway.Name, data["name"], "name")
+			s.Equal(gateway.URL, data["url"], "url")
+			s.Equal(gateway.Type, data["type"], "type")
+			s.Equal(gateway.AdminURL, data["admin_url"], "admin_url")
+			s.Equal(gateway.AdminPassword, data["admin_password"], "admin_password")
+		}
+	}
 }
 
 func (s *ApiTestSuite) request(req *http.Request) *httptest.ResponseRecorder {
@@ -1446,6 +1486,10 @@ func (s *ApiTestSuite) request200json(req *http.Request) map[string]interface{} 
 }
 
 func (s *ApiTestSuite) apiAuth(req *http.Request) {
+	s.apiAuthP(req, []string{common.RoleUser})
+}
+
+func (s *ApiTestSuite) apiAuthP(req *http.Request, roles []string) {
 	req.Header.Set("Authorization", "Bearer token")
 
 	oidcIDToken := &oidc.IDToken{
@@ -1458,12 +1502,26 @@ func (s *ApiTestSuite) apiAuth(req *http.Request) {
 		AccessTokenHash: "access_token_hash",
 	}
 
+	claims := middleware.IDTokenClaims{
+		Aud: oidcIDToken.Audience,
+		Exp: int(oidcIDToken.Expiry.Unix()),
+		Iat: int(oidcIDToken.IssuedAt.Unix()),
+		Iss: oidcIDToken.Issuer,
+		RealmAccess: middleware.Roles{
+			Roles: roles,
+		},
+		Sub: oidcIDToken.Subject,
+	}
+
+	b, err := json.Marshal(claims)
+	s.Require().NoError(err, "json.Marshal(claims)")
+
 	pointerVal := reflect.ValueOf(oidcIDToken)
 	val := reflect.Indirect(pointerVal)
 	member := val.FieldByName("claims")
 	ptrToY := unsafe.Pointer(member.UnsafeAddr())
 	realPtrToY := (*[]byte)(ptrToY)
-	*realPtrToY = []byte("{}")
+	*realPtrToY = b
 
 	s.tokenVerifier.On("Verify", mock.Anything, "token").Return(oidcIDToken, nil)
 }
@@ -1628,6 +1686,12 @@ func (s *ApiTestSuite) makeV1user(gateway *models.Gateway, room *models.Room, us
 	}
 
 	return v1User
+}
+
+func (s *ApiTestSuite) assertTokenVerifier() {
+	s.tokenVerifier.AssertExpectations(s.T())
+	s.tokenVerifier.ExpectedCalls = nil
+	s.tokenVerifier.Calls = nil
 }
 
 func TestApiTestSuite(t *testing.T) {

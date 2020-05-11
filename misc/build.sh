@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # run misc/build.sh from project root
-set +e
+set -e
 set -x
 
 docker image build -t gxydb-api:latest .

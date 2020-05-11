@@ -11,6 +11,7 @@ type config struct {
 	AccountsUrl      string
 	SkipAuth         bool
 	SkipEventsAuth   bool
+	SkipPermissions  bool
 	IceServers       map[string][]string
 	ServicePasswords []string
 }
@@ -22,6 +23,7 @@ func newConfig() *config {
 		AccountsUrl:      "https://accounts.kbb1.com/auth/realms/main",
 		SkipAuth:         false,
 		SkipEventsAuth:   false,
+		SkipPermissions:  false,
 		IceServers:       make(map[string][]string),
 		ServicePasswords: make([]string, 0),
 	}
@@ -46,6 +48,9 @@ func Init() {
 	}
 	if val := os.Getenv("SKIP_EVENTS_AUTH"); val != "" {
 		Config.SkipEventsAuth = val == "true"
+	}
+	if val := os.Getenv("SKIP_PERMISSIONS"); val != "" {
+		Config.SkipPermissions = val == "true"
 	}
 	if val := os.Getenv("ICE_SERVERS_ROOMS"); val != "" {
 		Config.IceServers["rooms"] = strings.Split(val, ",")

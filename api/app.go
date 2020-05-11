@@ -13,7 +13,7 @@ import (
 	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
-	"github.com/Bnei-Baruch/gxydb-api/pkg/middleware"
+	"github.com/Bnei-Baruch/gxydb-api/middleware"
 )
 
 type DBInterface interface {
@@ -97,7 +97,8 @@ func (a *App) InitializeWithDeps(db DBInterface, tokenVerifier middleware.OIDCTo
 				middleware.RealIPMiddleware(
 					corsMiddleware.Handler(
 						middleware.AuthenticationMiddleware(tokenVerifier, gatewayPwd)(
-							a.Router))))))
+							middleware.MinimalPermissionMiddleware(
+								a.Router)))))))
 }
 
 func (a *App) Run() {

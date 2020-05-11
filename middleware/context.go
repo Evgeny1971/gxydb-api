@@ -6,9 +6,10 @@ import (
 )
 
 type RequestContext struct {
-	IP       string
-	IDClaims *IDTokenClaims
-	Params   interface{}
+	IP          string
+	IDClaims    *IDTokenClaims
+	ServiceUser bool
+	Params      interface{}
 }
 
 type requestCtx struct{}

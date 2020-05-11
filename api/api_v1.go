@@ -16,9 +16,10 @@ import (
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
+	"github.com/Bnei-Baruch/gxydb-api/common"
+	"github.com/Bnei-Baruch/gxydb-api/middleware"
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
-	"github.com/Bnei-Baruch/gxydb-api/pkg/middleware"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/sqlutil"
 )
 
@@ -49,6 +50,11 @@ func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) V1CreateGroup(w http.ResponseWriter, r *http.Request) {
+	if !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -356,6 +362,11 @@ func (a *App) V1GetComposite(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) V1UpdateComposite(w http.ResponseWriter, r *http.Request) {
+	if !middleware.RequestHasRole(r, common.RoleShidur) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 	if len(id) > 16 {

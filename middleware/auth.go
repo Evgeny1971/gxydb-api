@@ -22,7 +22,7 @@ type Roles struct {
 type IDTokenClaims struct {
 	Acr               string           `json:"acr"`
 	AllowedOrigins    []string         `json:"allowed-origins"`
-	Aud               string           `json:"aud"`
+	Aud               interface{}      `json:"aud"`
 	AuthTime          int              `json:"auth_time"`
 	Azp               string           `json:"azp"`
 	Email             string           `json:"email"`
@@ -45,7 +45,7 @@ type IDTokenClaims struct {
 	rolesMap map[string]struct{}
 }
 
-func (c *IDTokenClaims) HasRole(role string) bool {
+func (c *IDTokenClaims) initRoleMap() {
 	if c.rolesMap == nil {
 		c.rolesMap = make(map[string]struct{})
 		if c.RealmAccess.Roles != nil {
@@ -54,9 +54,16 @@ func (c *IDTokenClaims) HasRole(role string) bool {
 			}
 		}
 	}
+}
 
-	_, ok := c.rolesMap[role]
-	return ok
+func (c *IDTokenClaims) HasAnyRole(roles ...string) bool {
+	c.initRoleMap()
+	for _, role := range roles {
+		if _, ok := c.rolesMap[role]; ok {
+			return true
+		}
+	}
+	return false
 }
 
 type OIDCTokenVerifier interface {
@@ -119,6 +126,11 @@ func AuthenticationMiddleware(tokenVerifier OIDCTokenVerifier, gwPwd func(string
 				if !success {
 					httputil.NewUnauthorizedError(pkgerr.Errorf("wrong password: %s", password)).Abort(w, r)
 					return
+				}
+
+				rCtx, ok := ContextFromRequest(r)
+				if ok {
+					rCtx.ServiceUser = true
 				}
 
 				next.ServeHTTP(w, r)
