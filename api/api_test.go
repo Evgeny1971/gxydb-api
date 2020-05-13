@@ -92,6 +92,54 @@ func (s *ApiTestSuite) TestListGroups() {
 		s.Equal(room.Name, data["description"], "description")
 		s.GreaterOrEqual(data["description"], lastDescription, "order by")
 		lastDescription = data["description"].(string)
+		s.EqualValues(0, data["num_users"], "num_users")
+	}
+}
+
+func (s *ApiTestSuite) TestListGroupsWithNumUsers() {
+	counts := struct {
+		gateways       int
+		roomPerGateway int
+	}{
+		gateways:       3,
+		roomPerGateway: 5,
+	}
+	gateways := make(map[int64]*models.Gateway, counts.gateways)
+	rooms := make(map[int]*models.Room, counts.gateways*counts.roomPerGateway)
+	roomNumUsers := make(map[int]int)
+	for i := 0; i < counts.gateways; i++ {
+		gateway := s.createGateway()
+		gateways[gateway.ID] = gateway
+		for j := 0; j < counts.roomPerGateway; j++ {
+			room := s.createRoom(gateway)
+			rooms[room.GatewayUID] = room
+			roomNumUsers[room.GatewayUID] = j
+			for k := 0; k < j; k++ {
+				user := s.createUser()
+				s.createSession(user, gateway, room)
+			}
+		}
+	}
+
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	req, _ := http.NewRequest("GET", "/groups?with_num_users=true", nil)
+	s.apiAuth(req)
+	body := s.request200json(req)
+	respRooms, ok := body["rooms"].([]interface{})
+	s.Require().True(ok, "rooms is array")
+	s.Equal(counts.gateways*counts.roomPerGateway, len(respRooms), "group count")
+
+	lastDescription := ""
+	for i, respRoom := range respRooms {
+		data := respRoom.(map[string]interface{})
+		room, ok := rooms[int(data["room"].(float64))]
+		s.Require().True(ok, "unknown room [%d] %v", i, data["room"])
+		s.Equal(gateways[room.DefaultGatewayID].Name, data["janus"], "Janus")
+		s.Equal(room.Name, data["description"], "description")
+		s.GreaterOrEqual(data["description"], lastDescription, "order by")
+		lastDescription = data["description"].(string)
+		s.EqualValues(roomNumUsers[room.GatewayUID], data["num_users"], "num_users")
 	}
 }
 
