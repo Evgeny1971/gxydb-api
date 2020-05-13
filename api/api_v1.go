@@ -24,8 +24,41 @@ import (
 )
 
 func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
+	params := r.URL.Query()
+
+	roomCounts := make(map[int64]int)
+	if withNumUsers := params.Get("with_num_users"); withNumUsers == "true" {
+		// fetch num_users for each room from sessions table
+		rows, err := models.Sessions(
+			qm.Select(models.SessionColumns.RoomID, "count(*) as num_users"),
+			models.SessionWhere.RemovedAt.IsNull(),
+			qm.GroupBy(models.SessionColumns.RoomID),
+		).Query.Query(a.DB)
+
+		if err != nil {
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
+			return
+		}
+
+		for rows.Next() {
+			var roomID int64
+			var numUsers int
+			if err := rows.Scan(&roomID, &numUsers); err != nil {
+				httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
+				return
+			}
+			roomCounts[roomID] = numUsers
+		}
+
+		if err := rows.Err(); err != nil {
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
+			return
+		}
+	}
+
+	// get rooms from cache
 	rooms := a.cache.rooms.Values()
-	roomInfos := make([]*V1RoomInfo, len(rooms))
+	roomInfos := make([]*V1Room, len(rooms))
 	for i := range rooms {
 		room := rooms[i]
 
@@ -35,10 +68,13 @@ func (a *App) V1ListGroups(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		roomInfos[i] = &V1RoomInfo{
-			Room:        room.GatewayUID,
-			Janus:       gateway.Name,
-			Description: room.Name,
+		roomInfos[i] = &V1Room{
+			V1RoomInfo: V1RoomInfo{
+				Room:        room.GatewayUID,
+				Janus:       gateway.Name,
+				Description: room.Name,
+			},
+			NumUsers: roomCounts[room.ID],
 		}
 	}
 
