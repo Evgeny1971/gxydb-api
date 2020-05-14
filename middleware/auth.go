@@ -73,6 +73,11 @@ type OIDCTokenVerifier interface {
 func AuthenticationMiddleware(tokenVerifier OIDCTokenVerifier, gwPwd func(string) (string, bool)) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// health_check needs no auth
+			if r.URL.Path == "/health_check" {
+				next.ServeHTTP(w, r)
+				return
+			}
 
 			// gateways are using basic auth
 			if r.URL.Path == "/event" || r.URL.Path == "/protocol" {

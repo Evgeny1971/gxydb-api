@@ -14,8 +14,8 @@ func MinimalPermissionMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		// skip permissions check on gateway event handlers
-		if r.URL.Path == "/event" || r.URL.Path == "/protocol" {
+		// skip permissions check on health_check and gateway event handlers
+		if r.URL.Path == "/health_check" || r.URL.Path == "/event" || r.URL.Path == "/protocol" {
 			next.ServeHTTP(w, r)
 			return
 		}
