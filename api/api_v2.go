@@ -1,7 +1,11 @@
 package api
 
 import (
+	"context"
+	"database/sql"
+	"fmt"
 	"net/http"
+	"time"
 
 	pkgerr "github.com/pkg/errors"
 
@@ -55,4 +59,22 @@ func (a *App) ListRooms(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httputil.RespondWithJSON(w, http.StatusOK, rooms)
+}
+
+func (a *App) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second)
+	defer cancel()
+
+	err := a.DB.(*sql.DB).PingContext(ctx)
+	if err != nil {
+		httputil.RespondWithError(w, http.StatusFailedDependency, fmt.Sprintf("DB ping: %s", err.Error()))
+		return
+	}
+
+	if ctx.Err() == context.DeadlineExceeded {
+		httputil.RespondWithError(w, http.StatusServiceUnavailable, "timeout")
+		return
+	}
+
+	httputil.RespondSuccess(w)
 }

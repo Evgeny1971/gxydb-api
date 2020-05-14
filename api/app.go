@@ -110,6 +110,8 @@ func (a *App) Run() {
 }
 
 func (a *App) initializeRoutes() {
+	a.Router.HandleFunc("/health_check", a.HealthCheck).Methods("GET")
+
 	// api v1 (current)
 	a.Router.HandleFunc("/groups", a.V1ListGroups).Methods("GET")
 	a.Router.HandleFunc("/group/{id}", a.V1CreateGroup).Methods("PUT")
