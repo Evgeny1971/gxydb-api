@@ -11,7 +11,7 @@ require (
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/edoshor/janus-go v0.0.0-20200417022012-32c4225085f8
+	github.com/edoshor/janus-go v0.0.0-20200527013701-c18b0d5566c9
 	github.com/friendsofgo/errors v0.9.2
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
@@ -44,4 +44,4 @@ require (
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
 
-//replace github.com/edoshor/janus-go => /Users/edoshor/projects/janus-go
+// replace github.com/edoshor/janus-go => /Users/edoshor/projects/janus-go

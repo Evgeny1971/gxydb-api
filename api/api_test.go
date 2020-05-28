@@ -22,22 +22,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
+	"github.com/Bnei-Baruch/gxydb-api/domain"
 	"github.com/Bnei-Baruch/gxydb-api/middleware"
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/testutil"
+	"github.com/Bnei-Baruch/gxydb-api/pkg/testutil/mocks"
 )
 
 type ApiTestSuite struct {
 	suite.Suite
 	testutil.TestDBManager
 	app           *App
-	tokenVerifier *testutil.OIDCTokenVerifier
+	tokenVerifier *mocks.OIDCTokenVerifier
 }
 
 func (s *ApiTestSuite) SetupSuite() {
 	s.Require().NoError(s.InitTestDB())
-	s.tokenVerifier = new(testutil.OIDCTokenVerifier)
+	s.tokenVerifier = new(mocks.OIDCTokenVerifier)
 	s.app = new(App)
 	s.app.InitializeWithDeps(s.DB, s.tokenVerifier)
 }
@@ -1457,14 +1459,22 @@ func (s *ApiTestSuite) TestHandleProtocolSoundTest() {
 }
 
 func (s *ApiTestSuite) TestV2GetConfig() {
+	janusAdminAPI := new(mocks.AdminAPI)
 	roomsGateways := make(map[string]*models.Gateway)
 	streamingGateways := make(map[string]*models.Gateway)
 	for i := 0; i < 3; i++ {
 		gateway := s.createGateway()
 		roomsGateways[gateway.Name] = gateway
+		domain.GatewayAdminAPIRegistry.Set(gateway, janusAdminAPI)
 		gateway = s.createGatewayP(common.GatewayTypeStreaming)
 		streamingGateways[gateway.Name] = gateway
+		domain.GatewayAdminAPIRegistry.Set(gateway, janusAdminAPI)
 	}
+
+	janusAdminAPI.On("AddToken", mock.Anything, mock.Anything).Return(nil, nil)
+	err := domain.NewGatewayTokensManager(s.DB, 1).RotateAll()
+	s.Require().NoError(err, "tm.RotateAll")
+
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", "/v2/config", nil)
@@ -1479,8 +1489,7 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		s.Equal(gateway.Name, data["name"], "name")
 		s.Equal(gateway.URL, data["url"], "url")
 		s.Equal(gateway.Type, data["type"], "type")
-		s.Empty(data["admin_url"], "admin_url")
-		s.Empty(data["admin_password"], "admin_password")
+		s.NotEmpty(data["token"], "token")
 	}
 	for name, respGateway := range gateways[common.GatewayTypeStreaming].(map[string]interface{}) {
 		gateway, ok := streamingGateways[name]
@@ -1489,34 +1498,15 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		s.Equal(gateway.Name, data["name"], "name")
 		s.Equal(gateway.URL, data["url"], "url")
 		s.Equal(gateway.Type, data["type"], "type")
-		s.Empty(data["admin_url"], "admin_url")
-		s.Empty(data["admin_password"], "admin_password")
+		s.NotEmpty(data["token"], "token")
 	}
 
 	iceServers := body["ice_servers"].(map[string]interface{})
 
 	s.ElementsMatch(common.Config.IceServers[common.GatewayTypeRooms], iceServers[common.GatewayTypeRooms], "rooms ice servers")
 	s.ElementsMatch(common.Config.IceServers[common.GatewayTypeStreaming], iceServers[common.GatewayTypeStreaming], "streaming ice servers")
-}
 
-func (s *ApiTestSuite) TestV2GetConfigWithAdmin() {
-	gateway := s.createGateway()
-	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
-
-	for _, role := range []string{common.RoleAdmin, common.RoleRoot} {
-		req, _ := http.NewRequest("GET", "/v2/config", nil)
-		s.apiAuthP(req, []string{role})
-		body := s.request200json(req)
-		gateways := body["gateways"].(map[string]interface{})
-		for _, respGateway := range gateways[common.GatewayTypeRooms].(map[string]interface{}) {
-			data := respGateway.(map[string]interface{})
-			s.Equal(gateway.Name, data["name"], "name")
-			s.Equal(gateway.URL, data["url"], "url")
-			s.Equal(gateway.Type, data["type"], "type")
-			s.Equal(gateway.AdminURL, data["admin_url"], "admin_url")
-			s.Equal(gateway.AdminPassword, data["admin_password"], "admin_password")
-		}
-	}
+	janusAdminAPI.AssertNumberOfCalls(s.T(), "AddToken", 2*len(roomsGateways))
 }
 
 func (s *ApiTestSuite) request(req *http.Request) *httptest.ResponseRecorder {

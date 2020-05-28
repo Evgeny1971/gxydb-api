@@ -14,6 +14,7 @@ import (
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 
+	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/models"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/errs"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/sqlutil"
@@ -26,11 +27,11 @@ type SessionManager interface {
 }
 
 type V1SessionManager struct {
-	db    DBInterface
+	db    common.DBInterface
 	cache *AppCache
 }
 
-func NewV1SessionManager(db DBInterface, cache *AppCache) SessionManager {
+func NewV1SessionManager(db common.DBInterface, cache *AppCache) SessionManager {
 	return &V1SessionManager{
 		db:    db,
 		cache: cache,
@@ -113,7 +114,7 @@ func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, 
 	}
 
 	logger := log.Ctx(ctx)
-	logger.Info().Msgf("%s has left room %d", v1User.ID, v1User.Room)
+	logger.Info().Msgf("%s has left room %v", v1User.ID, event.Event.Data["room"])
 
 	userID, err := sm.getInternalUserID(ctx, tx, &v1User)
 	if err != nil {

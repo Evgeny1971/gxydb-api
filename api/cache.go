@@ -3,31 +3,61 @@ package api
 import (
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/hashicorp/golang-lru"
 	pkgerr "github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/rs/zerolog/log"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
+	"github.com/Bnei-Baruch/gxydb-api/common"
+	"github.com/Bnei-Baruch/gxydb-api/domain"
 	"github.com/Bnei-Baruch/gxydb-api/models"
 )
 
 type AppCache struct {
-	gateways *GatewayCache
-	rooms    *RoomCache
-	users    *UserCache
+	db            common.DBInterface
+	gateways      *GatewayCache
+	gatewayTokens *GatewayTokenCache
+	rooms         *RoomCache
+	users         *UserCache
+	ticker        *time.Ticker
+	ticks         int64
 }
 
-func (c *AppCache) Init(db boil.Executor) error {
+func (c *AppCache) Init(db common.DBInterface) error {
+	c.db = db
 	c.gateways = new(GatewayCache)
+	c.gatewayTokens = new(GatewayTokenCache)
 	c.rooms = new(RoomCache)
 	c.users = new(UserCache)
+
+	c.ticker = time.NewTicker(time.Second)
+	go func() {
+		for range c.ticker.C {
+			c.ticks++
+			if c.ticks%3600 == 0 {
+				if err := c.gatewayTokens.Reload(c.db); err != nil {
+					log.Error().Err(err).Msg("gatewayTokens.Reload")
+				}
+			}
+		}
+	}()
+
 	return c.ReloadAll(db)
 }
 
-func (c *AppCache) ReloadAll(db boil.Executor) error {
+func (c *AppCache) Close() {
+	c.ticker.Stop()
+}
+
+func (c *AppCache) ReloadAll(db common.DBInterface) error {
 	if err := c.gateways.Reload(db); err != nil {
 		return pkgerr.Wrap(err, "reload gateways")
+	}
+
+	if err := c.gatewayTokens.Reload(db); err != nil {
+		return pkgerr.Wrap(err, "reload gateway_tokens")
 	}
 
 	if err := c.rooms.Reload(db); err != nil {
@@ -47,7 +77,7 @@ type GatewayCache struct {
 	lock   sync.RWMutex
 }
 
-func (c *GatewayCache) Reload(db boil.Executor) error {
+func (c *GatewayCache) Reload(db common.DBInterface) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -101,12 +131,46 @@ func (c *GatewayCache) Values() []*models.Gateway {
 	return values
 }
 
+type GatewayTokenCache struct {
+	byID map[int64]string
+	lock sync.RWMutex
+}
+
+func (c *GatewayTokenCache) Reload(db common.DBInterface) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	tm := domain.NewGatewayTokensManager(db, 1)
+
+	gateways, err := models.Gateways().All(db)
+	if err != nil {
+		return pkgerr.WithStack(err)
+	}
+
+	c.byID = make(map[int64]string, len(gateways))
+	for _, gateway := range gateways {
+		c.byID[gateway.ID], err = tm.ActiveToken(gateway)
+		if err != nil {
+			return pkgerr.WithMessagef(err, "tm.ActiveToken %s", gateway.Name)
+		}
+	}
+
+	return nil
+}
+
+func (c *GatewayTokenCache) ByID(id int64) (string, bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	token, ok := c.byID[id]
+	return token, ok
+}
+
 type RoomCache struct {
 	m    map[int]*models.Room
 	lock sync.RWMutex
 }
 
-func (c *RoomCache) Reload(db boil.Executor) error {
+func (c *RoomCache) Reload(db common.DBInterface) error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
@@ -157,7 +221,7 @@ type UserCache struct {
 	cache *lru.ARCCache
 }
 
-func (c *UserCache) Reload(db boil.Executor) error {
+func (c *UserCache) Reload(db common.DBInterface) error {
 	users, err := models.Users(
 		models.UserWhere.Disabled.EQ(false),
 		models.UserWhere.RemovedAt.IsNull(),

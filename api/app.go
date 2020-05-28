@@ -10,21 +10,15 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
-	"github.com/volatiletech/sqlboiler/boil"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/middleware"
 )
 
-type DBInterface interface {
-	boil.Executor
-	boil.Beginner
-}
-
 type App struct {
 	Router         *mux.Router
 	Handler        http.Handler
-	DB             DBInterface
+	DB             common.DBInterface
 	cache          *AppCache
 	sessionManager SessionManager
 }
@@ -56,7 +50,7 @@ func (a *App) Initialize() {
 	a.InitializeWithDeps(db, tokenVerifier)
 }
 
-func (a *App) InitializeWithDeps(db DBInterface, tokenVerifier middleware.OIDCTokenVerifier) {
+func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware.OIDCTokenVerifier) {
 	a.DB = db
 
 	a.Router = mux.NewRouter()
@@ -102,11 +96,20 @@ func (a *App) InitializeWithDeps(db DBInterface, tokenVerifier middleware.OIDCTo
 }
 
 func (a *App) Run() {
+	defer a.Shutdown()
+
 	addr := common.Config.ListenAddress
 	log.Info().Msgf("app run %s", addr)
 	if err := http.ListenAndServe(addr, a.Handler); err != nil {
 		log.Fatal().Err(err).Msg("http.ListenAndServe")
 	}
+}
+
+func (a *App) Shutdown() {
+	if err := a.DB.Close(); err != nil {
+		log.Error().Err(err).Msg("DB.close")
+	}
+	a.cache.Close()
 }
 
 func (a *App) initializeRoutes() {

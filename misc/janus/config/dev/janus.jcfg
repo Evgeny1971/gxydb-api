@@ -32,7 +32,7 @@ general: {
 									# where you do the things your way) and you
 									# don't want other application to mess with
 									# this Janus instance.
-	#token_auth = true				# Enable a token based authentication
+	token_auth = true				# Enable a token based authentication
 									# mechanism to force users to always provide
 									# a valid token in all requests. Useful if
 									# you want to authenticate requests from web
@@ -64,7 +64,7 @@ general: {
 									# them (default=45s). Notice that setting this
 									# to 0 will NOT disable the timeout, but will
 									# be considered an invalid value and ignored.
-	#reclaim_session_timeout = 0	# How long (in seconds) we should wait for a
+	#reclaim_session_timeout = 30	# How long (in seconds) we should wait for a
 									# janus session to be reclaimed after the transport
 									# is gone. After the transport is gone, a session
 									# times out when no request is received for

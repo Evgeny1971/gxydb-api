@@ -1,0 +1,2 @@
+55 22 * * * root /opt/gxydb/rotate_tokens.sh
+0 23 * * * root /opt/gxydb/reset_sessions.sh
