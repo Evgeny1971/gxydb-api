@@ -17,7 +17,7 @@ services:
       - ./misc/janus/config/dev:/usr/janusgxy/etc/janus
     ports:
       - 8088:8088
-      - 8188:8188
+      - 7088:7088
   app:
     build: .
     environment:

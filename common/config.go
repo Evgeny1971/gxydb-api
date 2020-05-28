@@ -14,6 +14,7 @@ type config struct {
 	SkipPermissions  bool
 	IceServers       map[string][]string
 	ServicePasswords []string
+	Secret           string
 }
 
 func newConfig() *config {
@@ -60,5 +61,8 @@ func Init() {
 	}
 	if val := os.Getenv("SERVICE_PASSWORDS"); val != "" {
 		Config.ServicePasswords = strings.Split(val, ",")
+	}
+	if val := os.Getenv("SECRET"); val != "" {
+		Config.Secret = val
 	}
 }
