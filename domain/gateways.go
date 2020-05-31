@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/edoshor/janus-go"
-	"github.com/pkg/errors"
+	pkgerr "github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -45,7 +45,7 @@ func (tm *GatewayTokensManager) ActiveToken(gateway *models.Gateway) (string, er
 
 	var props map[string]interface{}
 	if err := json.Unmarshal(gateway.Properties.JSON, &props); err != nil {
-		return "", errors.Wrap(err, "json.Unmarshal gateway.Properties")
+		return "", pkgerr.Wrap(err, "json.Unmarshal gateway.Properties")
 	}
 
 	tokensProp, ok := props["tokens"]
@@ -55,12 +55,12 @@ func (tm *GatewayTokensManager) ActiveToken(gateway *models.Gateway) (string, er
 
 	b, err := json.Marshal(tokensProp)
 	if err != nil {
-		return "", errors.Wrap(err, "json.Marshal tokens property")
+		return "", pkgerr.Wrap(err, "json.Marshal tokens property")
 	}
 
 	var tokens []*GatewayToken
 	if err := json.Unmarshal(b, &tokens); err != nil {
-		return "", errors.Wrap(err, "json.Unmarshal tokens")
+		return "", pkgerr.Wrap(err, "json.Unmarshal tokens")
 	}
 
 	if len(tokens) == 0 {
@@ -70,11 +70,11 @@ func (tm *GatewayTokensManager) ActiveToken(gateway *models.Gateway) (string, er
 	token := tokens[len(tokens)-1]
 	decTokenB, err := base64.StdEncoding.DecodeString(token.Token)
 	if err != nil {
-		return "", errors.Wrap(err, "base64 decode token")
+		return "", pkgerr.Wrap(err, "base64 decode token")
 	}
 	decToken, err := crypt.Decrypt(decTokenB, common.Config.Secret)
 	if err != nil {
-		return "", errors.Wrap(err, "crypt.Decrypt")
+		return "", pkgerr.Wrap(err, "crypt.Decrypt")
 	}
 
 	return decToken, nil
@@ -86,7 +86,7 @@ func (tm *GatewayTokensManager) RotateAll() error {
 		models.GatewayWhere.RemovedAt.IsNull()).
 		All(tm.db)
 	if err != nil {
-		return errors.WithStack(err)
+		return pkgerr.WithStack(err)
 	}
 	log.Info().Msgf("got %d gateways from DB", len(gateways))
 
@@ -105,7 +105,7 @@ func (tm *GatewayTokensManager) rotateGatewayTokens(gateway *models.Gateway) err
 	var props map[string]interface{}
 	if gateway.Properties.Valid {
 		if err := json.Unmarshal(gateway.Properties.JSON, &props); err != nil {
-			return errors.Wrap(err, "json.Unmarshal gateway.Properties")
+			return pkgerr.Wrap(err, "json.Unmarshal gateway.Properties")
 		}
 	} else {
 		props = make(map[string]interface{})
@@ -116,10 +116,10 @@ func (tm *GatewayTokensManager) rotateGatewayTokens(gateway *models.Gateway) err
 	if ok {
 		b, err := json.Marshal(tokensProp)
 		if err != nil {
-			return errors.Wrap(err, "json.Marshal tokens property")
+			return pkgerr.Wrap(err, "json.Marshal tokens property")
 		}
 		if err := json.Unmarshal(b, &tokens); err != nil {
-			return errors.Wrap(err, "json.Unmarshal tokens")
+			return pkgerr.Wrap(err, "json.Unmarshal tokens")
 		}
 
 		log.Info().Msgf("gateway %s has %d tokens", gateway.Name, len(tokens))
@@ -143,7 +143,7 @@ func (tm *GatewayTokensManager) rotateGatewayTokens(gateway *models.Gateway) err
 	// create new token
 	token, err := tm.createToken(gateway)
 	if err != nil {
-		return errors.WithMessage(err, "create token")
+		return pkgerr.WithMessage(err, "create token")
 	}
 	tokensToSave = append(tokensToSave, token)
 
@@ -151,11 +151,11 @@ func (tm *GatewayTokensManager) rotateGatewayTokens(gateway *models.Gateway) err
 	props["tokens"] = tokensToSave
 	b, err := json.Marshal(props)
 	if err != nil {
-		return errors.Wrap(err, "json.Marshal props")
+		return pkgerr.Wrap(err, "json.Marshal props")
 	}
 	gateway.Properties = null.JSONFrom(b)
 	if _, err := gateway.Update(tm.db, boil.Whitelist(models.GatewayColumns.Properties)); err != nil {
-		return errors.WithMessage(err, "gateway.Update")
+		return pkgerr.WithMessage(err, "gateway.Update")
 	}
 
 	return nil
@@ -179,16 +179,16 @@ func (tm *GatewayTokensManager) createToken(gateway *models.Gateway) (*GatewayTo
 
 	api, err := GatewayAdminAPIRegistry.For(gateway)
 	if err != nil {
-		return nil, errors.WithMessage(err, "Admin API for gateway")
+		return nil, pkgerr.WithMessage(err, "Admin API for gateway")
 	}
 
 	if _, err := api.AddToken(token.Token, token.Plugins); err != nil {
-		return nil, errors.Wrap(err, "Admin API add token")
+		return nil, pkgerr.Wrap(err, "Admin API add token")
 	}
 
 	encToken, err := crypt.Encrypt([]byte(token.Token), common.Config.Secret)
 	if err != nil {
-		return nil, errors.Wrap(err, "crypt.Encrypt new token")
+		return nil, pkgerr.Wrap(err, "crypt.Encrypt new token")
 	}
 	token.Token = base64.StdEncoding.EncodeToString(encToken)
 
@@ -200,20 +200,20 @@ func (tm *GatewayTokensManager) removeToken(gateway *models.Gateway, token *Gate
 
 	decTokenB, err := base64.StdEncoding.DecodeString(token.Token)
 	if err != nil {
-		return errors.Wrap(err, "base64 decode token")
+		return pkgerr.Wrap(err, "base64 decode token")
 	}
 	decToken, err := crypt.Decrypt(decTokenB, common.Config.Secret)
 	if err != nil {
-		return errors.Wrap(err, "crypt.Decrypt")
+		return pkgerr.Wrap(err, "crypt.Decrypt")
 	}
 
 	api, err := GatewayAdminAPIRegistry.For(gateway)
 	if err != nil {
-		return errors.WithMessage(err, "Admin API for gateway")
+		return pkgerr.WithMessage(err, "Admin API for gateway")
 	}
 
 	if _, err := api.RemoveToken(decToken); err != nil {
-		return errors.Wrap(err, "Admin API remove token")
+		return pkgerr.Wrap(err, "Admin API remove token")
 	}
 
 	return nil
@@ -237,16 +237,16 @@ func (r *gatewayAdminAPIRegistry) For(gateway *models.Gateway) (janus.AdminAPI, 
 
 	aPwdB, err := base64.StdEncoding.DecodeString(gateway.AdminPassword)
 	if err != nil {
-		return nil, errors.Wrap(err, "base64 decode admin password")
+		return nil, pkgerr.Wrap(err, "base64 decode admin password")
 	}
 	adminPwd, err := crypt.Decrypt(aPwdB, common.Config.Secret)
 	if err != nil {
-		return nil, errors.Wrap(err, "decrypt admin password")
+		return nil, pkgerr.Wrap(err, "decrypt admin password")
 	}
 
 	api, err := janus.NewAdminAPI(gateway.AdminURL, adminPwd)
 	if err != nil {
-		return nil, errors.Wrap(err, "janus.NewAdminAPI")
+		return nil, pkgerr.Wrap(err, "janus.NewAdminAPI")
 	}
 
 	r.Set(gateway, api)

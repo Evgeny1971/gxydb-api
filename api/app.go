@@ -132,4 +132,13 @@ func (a *App) initializeRoutes() {
 
 	// api v2 (next)
 	a.Router.HandleFunc("/v2/config", a.V2GetConfig).Methods("GET")
+
+	// admin
+	a.Router.HandleFunc("/admin/gateways/{gateway_id}/sessions/{session_id}/handles/{handle_id}/info", a.AdminGatewaysHandleInfo).Methods("GET")
+
+	//a.Router.HandleFunc("admin/rooms", a.AdminListRooms).Methods("GET")
+	//a.Router.HandleFunc("admin/rooms", a.AdminCreateRoom).Methods("POST")
+	//a.Router.HandleFunc("admin/rooms/{id}", a.AdminGetRoom).Methods("GET")
+	//a.Router.HandleFunc("admin/rooms/{id}", a.AdminUpdateRoom).Methods("PUT")
+	//a.Router.HandleFunc("admin/rooms/{id}", a.AdminDeleteRoom).Methods("DELETE")
 }
