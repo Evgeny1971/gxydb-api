@@ -2,6 +2,7 @@ package api
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -25,6 +26,7 @@ import (
 	"github.com/Bnei-Baruch/gxydb-api/domain"
 	"github.com/Bnei-Baruch/gxydb-api/middleware"
 	"github.com/Bnei-Baruch/gxydb-api/models"
+	"github.com/Bnei-Baruch/gxydb-api/pkg/crypt"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/testutil"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/testutil/mocks"
@@ -33,6 +35,7 @@ import (
 type ApiTestSuite struct {
 	suite.Suite
 	testutil.TestDBManager
+	testutil.GatewayManager
 	app           *App
 	tokenVerifier *mocks.OIDCTokenVerifier
 }
@@ -42,10 +45,12 @@ func (s *ApiTestSuite) SetupSuite() {
 	s.tokenVerifier = new(mocks.OIDCTokenVerifier)
 	s.app = new(App)
 	s.app.InitializeWithDeps(s.DB, s.tokenVerifier)
+	s.GatewayManager.Init()
 }
 
 func (s *ApiTestSuite) TearDownSuite() {
 	s.Require().NoError(s.DestroyTestDB())
+	s.Require().NoError(s.GatewayManager.CloseGateway())
 }
 
 func (s *ApiTestSuite) SetupTest() {
@@ -54,6 +59,7 @@ func (s *ApiTestSuite) SetupTest() {
 
 func (s *ApiTestSuite) TearDownTest() {
 	s.assertTokenVerifier()
+	s.GatewayManager.DestroyGatewaySessions()
 	s.DBCleaner.Clean(s.AllTables()...)
 }
 
@@ -1466,7 +1472,7 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		gateway := s.createGateway()
 		roomsGateways[gateway.Name] = gateway
 		domain.GatewayAdminAPIRegistry.Set(gateway, janusAdminAPI)
-		gateway = s.createGatewayP(common.GatewayTypeStreaming)
+		gateway = s.createGatewayP(common.GatewayTypeStreaming, "admin_url", "janusoverlord")
 		streamingGateways[gateway.Name] = gateway
 		domain.GatewayAdminAPIRegistry.Set(gateway, janusAdminAPI)
 	}
@@ -1610,19 +1616,21 @@ func (s *ApiTestSuite) assertV1User(v1User *V1User, body map[string]interface{})
 }
 
 func (s *ApiTestSuite) createGateway() *models.Gateway {
-	return s.createGatewayP(common.GatewayTypeRooms)
+	return s.createGatewayP(common.GatewayTypeRooms, "admin_url", "janusoverlord")
 }
 
-func (s *ApiTestSuite) createGatewayP(gType string) *models.Gateway {
+func (s *ApiTestSuite) createGatewayP(gType string, adminUrl, adminPwd string) *models.Gateway {
 	name := fmt.Sprintf("gateway_%s", stringutil.GenerateName(4))
 	pwdHash, err := bcrypt.GenerateFromPassword([]byte(name), bcrypt.MinCost)
+	s.Require().NoError(err)
+	encAdminPwd, err := crypt.Encrypt([]byte(adminPwd), common.Config.Secret)
 	s.Require().NoError(err)
 
 	gateway := &models.Gateway{
 		Name:           name,
 		URL:            "url",
-		AdminURL:       "admin_url",
-		AdminPassword:  "admin_password",
+		AdminURL:       adminUrl,
+		AdminPassword:  base64.StdEncoding.EncodeToString(encAdminPwd),
 		EventsPassword: string(pwdHash),
 		Type:           gType,
 	}

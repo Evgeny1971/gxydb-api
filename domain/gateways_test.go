@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
@@ -21,14 +20,17 @@ import (
 type GatewaysTestSuite struct {
 	suite.Suite
 	testutil.TestDBManager
+	testutil.GatewayManager
 }
 
 func (s *GatewaysTestSuite) SetupSuite() {
 	s.Require().NoError(s.InitTestDB())
+	s.GatewayManager.Init()
 }
 
 func (s *GatewaysTestSuite) TearDownSuite() {
 	s.Require().NoError(s.DestroyTestDB())
+	s.Require().NoError(s.GatewayManager.CloseGateway())
 }
 
 func (s *GatewaysTestSuite) SetupTest() {
@@ -37,6 +39,7 @@ func (s *GatewaysTestSuite) SetupTest() {
 
 func (s *GatewaysTestSuite) TearDownTest() {
 	s.DBCleaner.Clean(models.TableNames.Gateways)
+	s.GatewayManager.DestroyGatewaySessions()
 }
 
 func (s *GatewaysTestSuite) TestActiveToken() {
@@ -83,7 +86,7 @@ func (s *GatewaysTestSuite) TestRotateTokensWrongAdminPwd() {
 }
 
 func (s *GatewaysTestSuite) createGateway() *models.Gateway {
-	return s.createGatewayP(common.GatewayTypeRooms, "janusoverlord")
+	return s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminSecret)
 }
 
 func (s *GatewaysTestSuite) createGatewayP(gType string, adminPwd string) *models.Gateway {
@@ -93,15 +96,10 @@ func (s *GatewaysTestSuite) createGatewayP(gType string, adminPwd string) *model
 	encAdminPwd, err := crypt.Encrypt([]byte(adminPwd), common.Config.Secret)
 	s.Require().NoError(err)
 
-	adminUrl := "http://localhost:7088/admin"
-	if val := os.Getenv("TEST_GATEWAY_ADMIN_URL"); val != "" {
-		adminUrl = val
-	}
-
 	gateway := &models.Gateway{
 		Name:           name,
 		URL:            "url",
-		AdminURL:       adminUrl,
+		AdminURL:       s.GatewayManager.Config.AdminURL,
 		AdminPassword:  base64.StdEncoding.EncodeToString(encAdminPwd),
 		EventsPassword: string(pwdHash),
 		Type:           gType,

@@ -82,9 +82,10 @@ RUN cd $BUILD_SRC \
 RUN cd $BUILD_SRC \
     && git clone git://git.libwebsockets.org/libwebsockets \
     && cd libwebsockets \
+    && git checkout v2.4-stable \
     && mkdir build \
     && cd build \
-    && cmake -DLWS_MAX_SMP=1 -DCMAKE_INSTALL_PREFIX:PATH=/usr -DCMAKE_C_FLAGS="-fpic" .. \
+    && cmake -DLWS_MAX_SMP=1 -DCMAKE_INSTALL_PREFIX:PATH=/usr -DLIB_SUFFIX=64 -DCMAKE_C_FLAGS="-fpic" .. \
     && make \
     && make install
 
@@ -117,7 +118,7 @@ RUN cd $BUILD_SRC \
     && git clone https://github.com/Bnei-Baruch/janus-gateway.git -b bb \
     && cd janus-gateway \
     && ./autogen.sh \
-    && ./configure --prefix=/usr/janusgxy --disable-rabbitmq --disable-mqtt --disable-docs --enable-boringssl --enable-dtls-settimeout \
+    && ./configure --prefix=/usr/janusgxy --disable-rabbitmq --disable-mqtt --disable-docs --enable-websockets --enable-boringssl --enable-dtls-settimeout \
     && make \
     && make install \
     && make configs \
@@ -126,6 +127,7 @@ RUN cd $BUILD_SRC \
 USER janus
 
 EXPOSE 7708
-EXPOSE 7608
+EXPOSE 8088
+EXPOSE 8188
 
 CMD ["/usr/janusgxy/bin/janus"]
