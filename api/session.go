@@ -105,7 +105,7 @@ func (sm *V1SessionManager) UpsertSession(ctx context.Context, user *V1User) err
 func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, event *janus.PluginEvent) error {
 	display, ok := event.Event.Data["display"].(string)
 	if !ok {
-		return pkgerr.New("missing or malformed display")
+		return nil // some service users don't set their display. ignore this event.
 	}
 
 	var v1User V1User
