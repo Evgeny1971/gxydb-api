@@ -235,7 +235,7 @@ func (sm *V1SessionManager) upsertSession(ctx context.Context, tx *sql.Tx, user 
 
 	err = session.Upsert(tx, true,
 		[]string{models.SessionColumns.UserID, models.SessionColumns.GatewayID, models.SessionColumns.GatewaySession},
-		boil.Infer(), boil.Blacklist(models.SessionColumns.UpdatedAt))
+		boil.Blacklist(models.SessionColumns.CreatedAt), boil.Infer())
 	if err != nil {
 		return pkgerr.Wrap(err, "db upsert")
 	}
