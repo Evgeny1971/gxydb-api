@@ -156,36 +156,9 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		gateway, ok := a.cache.gateways.ByID(room.DefaultGatewayID)
-		if !ok {
-			log.Ctx(r.Context()).Error().Msgf("gateways cache miss %d [room %d]", room.DefaultGatewayID, room.ID)
-			continue
-		}
-
-		respRoom := &V1Room{
-			V1RoomInfo: V1RoomInfo{
-				Room:        room.GatewayUID,
-				Janus:       gateway.Name,
-				Description: room.Name,
-			},
-			NumUsers: len(room.R.Sessions),
-			Users:    make([]*V1User, len(room.R.Sessions)),
-		}
-
-		for i, session := range room.R.Sessions {
-			if session.Question {
-				respRoom.Questions = true
-			}
-			if respRoom.firstSessionInRoom.IsZero() || respRoom.firstSessionInRoom.After(session.CreatedAt) {
-				respRoom.firstSessionInRoom = session.CreatedAt
-			}
-			respRoom.Users[i] = a.makeV1User(room, session)
-		}
-
-		respRooms = append(respRooms, respRoom)
+		respRooms = append(respRooms, a.makeV1Room(room, nil))
 	}
 
-	// TODO: maybe move to client ?!
 	sort.Slice(respRooms, func(i, j int) bool {
 		return respRooms[i].firstSessionInRoom.Before(respRooms[j].firstSessionInRoom)
 	})
@@ -211,7 +184,6 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 		models.RoomWhere.ID.EQ(cachedRoom.ID),
 		models.RoomWhere.Disabled.EQ(false),
 		models.RoomWhere.RemovedAt.IsNull(),
-		qm.Load(models.RoomRels.DefaultGateway),
 		qm.Load(models.RoomRels.Sessions, models.SessionWhere.RemovedAt.IsNull(), qm.OrderBy(models.SessionColumns.CreatedAt)),
 		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.User)),
 		qm.Load(qm.Rels(models.RoomRels.Sessions, models.SessionRels.Gateway)),
@@ -226,23 +198,7 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respRoom := &V1Room{
-		V1RoomInfo: V1RoomInfo{
-			Room:        room.GatewayUID,
-			Janus:       room.R.DefaultGateway.Name,
-			Description: room.Name,
-		},
-		NumUsers: len(room.R.Sessions),
-		Users:    make([]*V1User, len(room.R.Sessions)),
-	}
-
-	for i, session := range room.R.Sessions {
-		if session.Question {
-			respRoom.Questions = true
-		}
-		respRoom.Users[i] = a.makeV1User(room, session)
-	}
-
+	respRoom := a.makeV1Room(room, nil)
 	httputil.RespondWithJSON(w, http.StatusOK, respRoom)
 }
 
@@ -295,6 +251,7 @@ func (a *App) V1GetUser(w http.ResponseWriter, r *http.Request) {
 	session, err := models.Sessions(
 		models.SessionWhere.UserID.EQ(userID),
 		models.SessionWhere.RemovedAt.IsNull(),
+		qm.OrderBy(fmt.Sprintf("%s desc", models.SessionColumns.UpdatedAt)),
 		qm.Load(models.SessionRels.User),
 		qm.Load(models.SessionRels.Room),
 	).One(a.DB)
@@ -557,35 +514,70 @@ func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 	return user
 }
 
+func (a *App) makeV1Room(room *models.Room, gateway *models.Gateway) *V1Room {
+	if gateway == nil {
+		gateway, _ = a.cache.gateways.ByID(room.DefaultGatewayID)
+	}
+	respRoom := &V1Room{
+		V1RoomInfo: V1RoomInfo{
+			Room:        room.GatewayUID,
+			Janus:       gateway.Name,
+			Description: room.Name,
+		},
+	}
+
+	if room.R.Sessions != nil {
+		sessions := make(map[int64]*models.Session)
+		for _, session := range room.R.Sessions {
+			if s, ok := sessions[session.UserID]; ok {
+				// take most active session for user
+				tsA := s.CreatedAt
+				if s.UpdatedAt.Valid {
+					tsA = s.UpdatedAt.Time
+				}
+
+				tsB := session.CreatedAt
+				if session.UpdatedAt.Valid {
+					tsB = session.UpdatedAt.Time
+				}
+				if tsA.Before(tsB) {
+					sessions[session.UserID] = session
+				}
+			} else {
+				sessions[session.UserID] = session
+			}
+		}
+
+		respRoom.NumUsers = len(sessions)
+		respRoom.Users = make([]*V1User, respRoom.NumUsers)
+		i := 0
+		for _, session := range sessions {
+			if session.Question {
+				respRoom.Questions = true
+			}
+			if respRoom.firstSessionInRoom.IsZero() || respRoom.firstSessionInRoom.After(session.CreatedAt) {
+				respRoom.firstSessionInRoom = session.CreatedAt
+			}
+			respRoom.Users[i] = a.makeV1User(room, session)
+			i++
+		}
+	}
+
+	return respRoom
+}
+
 func (a *App) makeV1Composite(composite *models.Composite) *V1Composite {
 	respComposite := &V1Composite{
 		VQuad: make([]*V1CompositeRoom, len(composite.R.CompositesRooms)),
 	}
 
-	for j, cRoom := range composite.R.CompositesRooms {
+	for i, cRoom := range composite.R.CompositesRooms {
 		room := cRoom.R.Room
 		gateway, _ := a.cache.gateways.ByID(cRoom.GatewayID)
-		respRoom := &V1CompositeRoom{
-			V1Room: V1Room{
-				V1RoomInfo: V1RoomInfo{
-					Room:        room.GatewayUID,
-					Janus:       gateway.Name,
-					Description: room.Name,
-				},
-				NumUsers: len(room.R.Sessions),
-				Users:    make([]*V1User, len(room.R.Sessions)),
-			},
+		respComposite.VQuad[i] = &V1CompositeRoom{
+			V1Room:   *a.makeV1Room(room, gateway),
 			Position: cRoom.Position,
 		}
-
-		for i, session := range room.R.Sessions {
-			if session.Question {
-				respRoom.Questions = true
-			}
-			respRoom.Users[i] = a.makeV1User(room, session)
-		}
-
-		respComposite.VQuad[j] = respRoom
 	}
 
 	return respComposite
