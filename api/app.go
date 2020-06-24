@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"net/http"
+	"time"
 
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/mux"
@@ -12,15 +13,17 @@ import (
 	"github.com/rs/zerolog/log"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
+	"github.com/Bnei-Baruch/gxydb-api/domain"
 	"github.com/Bnei-Baruch/gxydb-api/middleware"
 )
 
 type App struct {
-	Router         *mux.Router
-	Handler        http.Handler
-	DB             common.DBInterface
-	cache          *AppCache
-	sessionManager SessionManager
+	Router               *mux.Router
+	Handler              http.Handler
+	DB                   common.DBInterface
+	cache                *AppCache
+	sessionManager       SessionManager
+	gatewayTokensManager *domain.GatewayTokensManager
 }
 
 func (a *App) initOidc(issuer string) middleware.OIDCTokenVerifier {
@@ -72,6 +75,12 @@ func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware
 
 	a.sessionManager = NewV1SessionManager(a.DB, a.cache)
 
+	if common.Config.MonitorGatewayTokens {
+		a.gatewayTokensManager = domain.NewGatewayTokensManager(a.DB, 3*24*time.Hour)
+		a.gatewayTokensManager.AddObserver(a)
+		a.gatewayTokensManager.Monitor()
+	}
+
 	corsMiddleware := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
 		AllowedMethods: []string{
@@ -106,10 +115,26 @@ func (a *App) Run() {
 }
 
 func (a *App) Shutdown() {
+	if a.gatewayTokensManager != nil {
+		a.gatewayTokensManager.Close()
+	}
+	a.cache.Close()
 	if err := a.DB.Close(); err != nil {
 		log.Error().Err(err).Msg("DB.close")
 	}
-	a.cache.Close()
+}
+
+func (a *App) Notify(event interface{}) {
+	switch event.(type) {
+	case string:
+		log.Info().Msgf("processing %s", event)
+		switch event.(string) {
+		case common.EventGatewayTokensChanged:
+			if err := a.cache.gatewayTokens.Reload(a.DB); err != nil {
+				log.Error().Err(err).Msg("cache.gatewayTokens.Reload")
+			}
+		}
+	}
 }
 
 func (a *App) initializeRoutes() {

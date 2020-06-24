@@ -14,7 +14,8 @@ ENV GOOS=linux \
 	DB_URL=${db_url} \
 	TEST_GATEWAY_URL=${test_gateway_url} \
 	TEST_GATEWAY_ADMIN_URL=${test_gateway_admin_url} \
-	SECRET=12345678901234567890123456789012
+	SECRET=12345678901234567890123456789012 \
+	MONITOR_GATEWAY_TOKENS=false
 
 RUN apk update && \
     apk add --no-cache \

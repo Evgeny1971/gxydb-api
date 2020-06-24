@@ -6,27 +6,29 @@ import (
 )
 
 type config struct {
-	ListenAddress    string
-	DBUrl            string
-	AccountsUrl      string
-	SkipAuth         bool
-	SkipEventsAuth   bool
-	SkipPermissions  bool
-	IceServers       map[string][]string
-	ServicePasswords []string
-	Secret           string
+	ListenAddress        string
+	DBUrl                string
+	AccountsUrl          string
+	SkipAuth             bool
+	SkipEventsAuth       bool
+	SkipPermissions      bool
+	IceServers           map[string][]string
+	ServicePasswords     []string
+	Secret               string
+	MonitorGatewayTokens bool
 }
 
 func newConfig() *config {
 	return &config{
-		ListenAddress:    ":8081",
-		DBUrl:            "postgres://user:password@localhost/galaxy?sslmode=disable",
-		AccountsUrl:      "https://accounts.kbb1.com/auth/realms/main",
-		SkipAuth:         false,
-		SkipEventsAuth:   false,
-		SkipPermissions:  false,
-		IceServers:       make(map[string][]string),
-		ServicePasswords: make([]string, 0),
+		ListenAddress:        ":8081",
+		DBUrl:                "postgres://user:password@localhost/galaxy?sslmode=disable",
+		AccountsUrl:          "https://accounts.kbb1.com/auth/realms/main",
+		SkipAuth:             false,
+		SkipEventsAuth:       false,
+		SkipPermissions:      false,
+		IceServers:           make(map[string][]string),
+		ServicePasswords:     make([]string, 0),
+		MonitorGatewayTokens: true,
 	}
 }
 
@@ -64,5 +66,8 @@ func Init() {
 	}
 	if val := os.Getenv("SECRET"); val != "" {
 		Config.Secret = val
+	}
+	if val := os.Getenv("MONITOR_GATEWAY_TOKENS"); val != "" {
+		Config.MonitorGatewayTokens = val == "true"
 	}
 }

@@ -16,6 +16,6 @@ if [ "${HAS_ERRORS}" = "0" ]; then
   echo "Sanity OK."
   exit 0
 else
-  echo "gxydb rotate_tokens error" | mail -s "ERROR: gxydb rotate_tokens." -r "gxydb@galaxy.kli.one" -a ${LOG_FILE} edoshor@gmail.com
+  echo "gxydb rotate_tokens error" | mail -s "ERROR: gxydb rotate_tokens." -r "gxydb@galaxy.kli.one" -a ${LOG_FILE} edoshor@gmail.com amnonbb@gmail.com
   exit 1
 fi
