@@ -15,7 +15,8 @@ ENV GOOS=linux \
 	TEST_GATEWAY_URL=${test_gateway_url} \
 	TEST_GATEWAY_ADMIN_URL=${test_gateway_admin_url} \
 	SECRET=12345678901234567890123456789012 \
-	MONITOR_GATEWAY_TOKENS=false
+	MONITOR_GATEWAY_TOKENS=false \
+	GATEWAY_ROOMS_SECRET=adminpwd
 
 RUN apk update && \
     apk add --no-cache \
@@ -24,7 +25,7 @@ RUN apk update && \
 WORKDIR ${work_dir}
 COPY . .
 
-RUN go test $(go list ./... | grep -v /models) \
+RUN go test -v $(go list ./... | grep -v /models) \
     && go build
 
 

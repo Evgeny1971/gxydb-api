@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/edoshor/janus-go"
+	janus_admin "github.com/edoshor/janus-go/admin"
 )
 
 type GatewayConfig struct {
@@ -15,7 +16,7 @@ type GatewayConfig struct {
 type GatewayManager struct {
 	Config   *GatewayConfig
 	client   *janus.Gateway
-	adminAPI janus.AdminAPI
+	adminAPI janus_admin.AdminAPI
 }
 
 func (m *GatewayManager) Init() {
@@ -61,13 +62,13 @@ func (m *GatewayManager) Gateway() (*janus.Gateway, error) {
 	return m.client, nil
 }
 
-func (m *GatewayManager) GatewayAdminAPI() (janus.AdminAPI, error) {
+func (m *GatewayManager) GatewayAdminAPI() (janus_admin.AdminAPI, error) {
 	if m.adminAPI != nil {
 		return m.adminAPI, nil
 	}
 
 	var err error
-	m.adminAPI, err = janus.NewAdminAPI(m.Config.AdminURL, m.Config.AdminSecret)
+	m.adminAPI, err = janus_admin.NewAdminAPI(m.Config.AdminURL, m.Config.AdminSecret)
 	return m.adminAPI, err
 }
 

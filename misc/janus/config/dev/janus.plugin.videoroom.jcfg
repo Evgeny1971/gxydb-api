@@ -1,5 +1,5 @@
 #
-# File automatically generated on Fri Apr 10 22:54:24 2020
+# File automatically generated on Tue Jun 30 00:29:16 2020
 #
 
 general : 
@@ -6790,4 +6790,99 @@ room-2393 :
   videoorient_ext = "yes";
   playoutdelay_ext = "yes";
   transport_wide_cc_ext = "yes";
+};
+room-1804561538 : 
+{
+  description = "room_uNymncqmiI";
+  bitrate = "64000";
+  publishers = "100";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  pin = "";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+  rec_dir = "";
+};
+room-1945286643 : 
+{
+  description = "room_w2N7NczTPl";
+  bitrate = "64000";
+  publishers = "100";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  pin = "";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+  rec_dir = "";
+};
+room-446254945 : 
+{
+  description = "room_bGi1bClx57";
+  bitrate = "64000";
+  publishers = "100";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  pin = "";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+  rec_dir = "";
+};
+room-1561628660 : 
+{
+  description = "room_QlwYCg5Lq3";
+  bitrate = "64000";
+  publishers = "100";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "adminpwd";
+  pin = "";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+  rec_dir = "";
+};
+room-1090262408 : 
+{
+  description = "room_N2Ofncg6qD";
+  bitrate = "64000";
+  publishers = "100";
+  pli_freq = "10";
+  audiocodec = "opus";
+  videocodec = "h264";
+  secret = "";
+  pin = "";
+  audiolevel_ext = "yes";
+  audiolevel_event = "yes";
+  audio_active_packets = "25";
+  audio_level_average = "100";
+  videoorient_ext = "yes";
+  playoutdelay_ext = "yes";
+  transport_wide_cc_ext = "yes";
+  rec_dir = "";
 };

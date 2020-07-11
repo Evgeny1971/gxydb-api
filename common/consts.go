@@ -14,3 +14,6 @@ const RoleRoot = "gxy_root"
 var AllRoles = []string{RoleGuest, RoleUser, RoleShidur, RoleSoundMan, RoleViewer, RoleAdmin, RoleRoot}
 
 const EventGatewayTokensChanged = "GATEWAY_TOKENS_CHANGED"
+
+const APIDefaultPageSize = 50
+const APIMaxPageSize = 1000

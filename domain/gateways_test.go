@@ -50,25 +50,17 @@ func (s *GatewaysTestSuite) TestActiveToken() {
 	s.Empty(token, "token")
 }
 
-func (s *GatewaysTestSuite) TestRotateTokens() {
+func (s *GatewaysTestSuite) TestSyncAll() {
 	gateway := s.createGateway()
 	tm := NewGatewayTokensManager(s.DB, 1)
-	err := tm.RotateAll()
-	s.Require().NoError(err, "tm.RotateAll")
+	tm.SyncAll()
 
 	s.Require().NoError(gateway.Reload(s.DB), "gateway.Reload")
 	token, err := tm.ActiveToken(gateway)
 	s.Require().NoError(err, "tm.ActiveToken")
 	s.NotEmpty(token, "token")
 
-	err = tm.RotateAll()
-	s.Require().NoError(err, "tm.RotateAll")
-
 	s.Require().NoError(gateway.Reload(s.DB), "gateway.Reload")
-	token2, err := tm.ActiveToken(gateway)
-	s.Require().NoError(err, "tm.ActiveToken")
-	s.NotEqual(token, token2, "token2")
-
 	var props map[string]interface{}
 	_ = json.Unmarshal(gateway.Properties.JSON, &props)
 	tokensProp, _ := props["tokens"]
@@ -78,11 +70,9 @@ func (s *GatewaysTestSuite) TestRotateTokens() {
 func (s *GatewaysTestSuite) TestRotateTokensWrongAdminPwd() {
 	gateway := s.createGatewayP(common.GatewayTypeStreaming, "wrong_password")
 	tm := NewGatewayTokensManager(s.DB, 1)
-	err := tm.RotateAll()
-	s.NoError(err, "tm.RotateAll")
-
-	err = tm.rotateGatewayTokens(gateway)
-	s.Error(err, "tm.rotateGatewayTokens")
+	changed, err := tm.syncGatewayTokens(gateway)
+	s.False(changed, "changed")
+	s.Error(err, "err")
 }
 
 func (s *GatewaysTestSuite) createGateway() *models.Gateway {

@@ -27,7 +27,6 @@ type Room struct {
 	Name             string    `boil:"name" json:"name" toml:"name" yaml:"name"`
 	DefaultGatewayID int64     `boil:"default_gateway_id" json:"default_gateway_id" toml:"default_gateway_id" yaml:"default_gateway_id"`
 	GatewayUID       int       `boil:"gateway_uid" json:"gateway_uid" toml:"gateway_uid" yaml:"gateway_uid"`
-	Secret           string    `boil:"secret" json:"secret" toml:"secret" yaml:"secret"`
 	Disabled         bool      `boil:"disabled" json:"disabled" toml:"disabled" yaml:"disabled"`
 	Properties       null.JSON `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
 	CreatedAt        time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
@@ -43,7 +42,6 @@ var RoomColumns = struct {
 	Name             string
 	DefaultGatewayID string
 	GatewayUID       string
-	Secret           string
 	Disabled         string
 	Properties       string
 	CreatedAt        string
@@ -54,7 +52,6 @@ var RoomColumns = struct {
 	Name:             "name",
 	DefaultGatewayID: "default_gateway_id",
 	GatewayUID:       "gateway_uid",
-	Secret:           "secret",
 	Disabled:         "disabled",
 	Properties:       "properties",
 	CreatedAt:        "created_at",
@@ -69,7 +66,6 @@ var RoomWhere = struct {
 	Name             whereHelperstring
 	DefaultGatewayID whereHelperint64
 	GatewayUID       whereHelperint
-	Secret           whereHelperstring
 	Disabled         whereHelperbool
 	Properties       whereHelpernull_JSON
 	CreatedAt        whereHelpertime_Time
@@ -80,7 +76,6 @@ var RoomWhere = struct {
 	Name:             whereHelperstring{field: "\"rooms\".\"name\""},
 	DefaultGatewayID: whereHelperint64{field: "\"rooms\".\"default_gateway_id\""},
 	GatewayUID:       whereHelperint{field: "\"rooms\".\"gateway_uid\""},
-	Secret:           whereHelperstring{field: "\"rooms\".\"secret\""},
 	Disabled:         whereHelperbool{field: "\"rooms\".\"disabled\""},
 	Properties:       whereHelpernull_JSON{field: "\"rooms\".\"properties\""},
 	CreatedAt:        whereHelpertime_Time{field: "\"rooms\".\"created_at\""},
@@ -115,8 +110,8 @@ func (*roomR) NewStruct() *roomR {
 type roomL struct{}
 
 var (
-	roomAllColumns            = []string{"id", "name", "default_gateway_id", "gateway_uid", "secret", "disabled", "properties", "created_at", "updated_at", "removed_at"}
-	roomColumnsWithoutDefault = []string{"name", "default_gateway_id", "gateway_uid", "secret", "properties", "updated_at", "removed_at"}
+	roomAllColumns            = []string{"id", "name", "default_gateway_id", "gateway_uid", "disabled", "properties", "created_at", "updated_at", "removed_at"}
+	roomColumnsWithoutDefault = []string{"name", "default_gateway_id", "gateway_uid", "properties", "updated_at", "removed_at"}
 	roomColumnsWithDefault    = []string{"id", "disabled", "created_at"}
 	roomPrimaryKeyColumns     = []string{"id"}
 )

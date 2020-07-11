@@ -22,6 +22,10 @@ func (a *App) V2GetConfig(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, gateway := range gateways {
+		if gateway.Disabled || gateway.RemovedAt.Valid {
+			continue
+		}
+
 		token, _ := a.cache.gatewayTokens.ByID(gateway.ID)
 		respGateway := &V2Gateway{
 			Name:  gateway.Name,

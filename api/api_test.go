@@ -16,6 +16,7 @@ import (
 
 	"github.com/coreos/go-oidc"
 	"github.com/edoshor/janus-go"
+	janus_admin "github.com/edoshor/janus-go/admin"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/suite"
 	"github.com/volatiletech/null"
@@ -1477,9 +1478,12 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		domain.GatewayAdminAPIRegistry.Set(gateway, janusAdminAPI)
 	}
 
+	listTokensResponse := &janus_admin.ListTokensResponse{
+		Data: map[string][]*janus_admin.StoredToken{"tokens": {}},
+	}
+	janusAdminAPI.On("ListTokens", mock.Anything, mock.Anything).Return(listTokensResponse, nil)
 	janusAdminAPI.On("AddToken", mock.Anything, mock.Anything).Return(nil, nil)
-	err := domain.NewGatewayTokensManager(s.DB, 1).RotateAll()
-	s.Require().NoError(err, "tm.RotateAll")
+	domain.NewGatewayTokensManager(s.DB, 1).SyncAll()
 
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
@@ -1522,8 +1526,16 @@ func (s *ApiTestSuite) request(req *http.Request) *httptest.ResponseRecorder {
 }
 
 func (s *ApiTestSuite) request200json(req *http.Request) map[string]interface{} {
+	return s.requestJson(req, http.StatusOK)
+}
+
+func (s *ApiTestSuite) request201json(req *http.Request) map[string]interface{} {
+	return s.requestJson(req, http.StatusCreated)
+}
+
+func (s *ApiTestSuite) requestJson(req *http.Request, statusCode int) map[string]interface{} {
 	resp := s.request(req)
-	s.Require().Equal(http.StatusOK, resp.Code)
+	s.Require().Equal(statusCode, resp.Code)
 	var body map[string]interface{}
 	s.Require().NoError(json.Unmarshal(resp.Body.Bytes(), &body))
 	return body
@@ -1628,6 +1640,7 @@ func (s *ApiTestSuite) createGatewayP(gType string, adminUrl, adminPwd string) *
 
 	gateway := &models.Gateway{
 		Name:           name,
+		Description:    null.StringFrom("description"),
 		URL:            "url",
 		AdminURL:       adminUrl,
 		AdminPassword:  base64.StdEncoding.EncodeToString(encAdminPwd),

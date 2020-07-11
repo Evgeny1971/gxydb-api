@@ -40,6 +40,9 @@ func Decrypt(text []byte, secret string) (string, error) {
 	}
 
 	t, err := gcm.Open(nil, text[:gcm.NonceSize()], text[gcm.NonceSize():], nil)
+	if err != nil {
+		return "", err
+	}
 
 	return string(t), nil
 }

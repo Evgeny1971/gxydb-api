@@ -207,8 +207,8 @@ type gatewayL struct{}
 
 var (
 	gatewayAllColumns            = []string{"id", "name", "description", "url", "admin_url", "admin_password", "disabled", "properties", "created_at", "updated_at", "removed_at", "events_password", "type"}
-	gatewayColumnsWithoutDefault = []string{"name", "description", "url", "admin_url", "admin_password", "properties", "updated_at", "removed_at"}
-	gatewayColumnsWithDefault    = []string{"id", "disabled", "created_at", "events_password", "type"}
+	gatewayColumnsWithoutDefault = []string{"name", "description", "url", "admin_url", "admin_password", "properties", "updated_at", "removed_at", "type"}
+	gatewayColumnsWithDefault    = []string{"id", "disabled", "created_at", "events_password"}
 	gatewayPrimaryKeyColumns     = []string{"id"}
 )
 

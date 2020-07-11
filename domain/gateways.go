@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/edoshor/janus-go"
+	janus_admin "github.com/edoshor/janus-go/admin"
 	pkgerr "github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/volatiletech/null"
@@ -98,7 +98,7 @@ func (tm *GatewayTokensManager) Monitor() {
 	tm.ticker = time.NewTicker(10 * time.Second)
 	go func() {
 		for range tm.ticker.C {
-			tm.syncAll()
+			tm.SyncAll()
 		}
 		tm.wg.Done()
 	}()
@@ -112,7 +112,7 @@ func (tm *GatewayTokensManager) Close() {
 	tm.wg.Wait()
 }
 
-func (tm *GatewayTokensManager) syncAll() {
+func (tm *GatewayTokensManager) SyncAll() {
 	gateways, err := models.Gateways(
 		models.GatewayWhere.Disabled.EQ(false),
 		models.GatewayWhere.RemovedAt.IsNull()).
@@ -164,7 +164,7 @@ func (tm *GatewayTokensManager) syncGatewayTokens(gateway *models.Gateway) (bool
 	support := true
 	tokensResp, err := tm.listTokens(gateway)
 	if err != nil {
-		var e *janus.ErrorAMResponse
+		var e *janus_admin.ErrorAMResponse
 		if pkgerr.As(err, &e) && e.Err.Code == 490 { // Stored-Token based authentication disabled
 			support = false
 		} else {
@@ -198,8 +198,8 @@ func (tm *GatewayTokensManager) syncGatewayTokens(gateway *models.Gateway) (bool
 	// ensure all non expired tokens exist on gateway
 	// generate new token if no next token in DB or previous one was created more than a day ago
 
-	gatewayTokens := tokensResp.(*janus.ListTokensResponse)
-	gatewayTokensMap := make(map[string]*janus.StoredToken)
+	gatewayTokens := tokensResp.(*janus_admin.ListTokensResponse)
+	gatewayTokensMap := make(map[string]*janus_admin.StoredToken)
 	for _, token := range gatewayTokens.Data["tokens"] {
 		gatewayTokensMap[token.Token] = token
 	}
@@ -278,91 +278,6 @@ func (tm *GatewayTokensManager) syncGatewayTokens(gateway *models.Gateway) (bool
 	return changed, nil
 }
 
-func (tm *GatewayTokensManager) RotateAll() error {
-	gateways, err := models.Gateways(
-		models.GatewayWhere.Disabled.EQ(false),
-		models.GatewayWhere.RemovedAt.IsNull()).
-		All(tm.db)
-	if err != nil {
-		return pkgerr.WithStack(err)
-	}
-	log.Info().Msgf("got %d gateways from DB", len(gateways))
-
-	for _, gateway := range gateways {
-		if err := tm.rotateGatewayTokens(gateway); err != nil {
-			log.Error().Err(err).Msgf("error rotating gateway tokens %s", gateway.Name)
-		}
-	}
-
-	tm.NotifyAll("GatewayTokensManager.RotateAll")
-	return nil
-}
-
-func (tm *GatewayTokensManager) rotateGatewayTokens(gateway *models.Gateway) error {
-	log.Info().Msgf("Rotating tokens of gateway %s", gateway.Name)
-
-	var props map[string]interface{}
-	if gateway.Properties.Valid {
-		if err := json.Unmarshal(gateway.Properties.JSON, &props); err != nil {
-			return pkgerr.Wrap(err, "json.Unmarshal gateway.Properties")
-		}
-	} else {
-		props = make(map[string]interface{})
-	}
-
-	var tokens []*GatewayToken
-	tokensProp, ok := props["tokens"]
-	if ok {
-		b, err := json.Marshal(tokensProp)
-		if err != nil {
-			return pkgerr.Wrap(err, "json.Marshal tokens property")
-		}
-		if err := json.Unmarshal(b, &tokens); err != nil {
-			return pkgerr.Wrap(err, "json.Unmarshal tokens")
-		}
-
-		log.Info().Msgf("gateway %s has %d tokens", gateway.Name, len(tokens))
-	} else {
-		tokens = make([]*GatewayToken, 0)
-	}
-
-	// remove expired tokens
-	maxAgeTS := time.Now().UTC().Add(-tm.maxAge)
-	tokensToSave := make([]*GatewayToken, 0)
-	for _, token := range tokens {
-		if token.CreatedAt.Before(maxAgeTS) {
-			decToken, err := token.Decrypt()
-			if err != nil {
-				log.Error().Err(err).Msg("decrypt token")
-			} else if err := tm.removeToken(gateway, decToken); err != nil {
-				log.Error().Err(err).Msg("error removing token")
-			}
-		} else {
-			tokensToSave = append(tokensToSave, token)
-		}
-	}
-
-	// create new token
-	token, err := tm.createToken(gateway, stringutil.GenerateUID(16))
-	if err != nil {
-		return pkgerr.WithMessage(err, "create token")
-	}
-	tokensToSave = append(tokensToSave, token)
-
-	// update props in DB
-	props["tokens"] = tokensToSave
-	b, err := json.Marshal(props)
-	if err != nil {
-		return pkgerr.Wrap(err, "json.Marshal props")
-	}
-	gateway.Properties = null.JSONFrom(b)
-	if _, err := gateway.Update(tm.db, boil.Whitelist(models.GatewayColumns.Properties)); err != nil {
-		return pkgerr.WithMessage(err, "gateway.Update")
-	}
-
-	return nil
-}
-
 func (tm *GatewayTokensManager) createToken(gateway *models.Gateway, tokenStr string) (*GatewayToken, error) {
 	log.Info().Msgf("creating new token on gateway %s", gateway.Name)
 
@@ -427,16 +342,16 @@ func (tm *GatewayTokensManager) listTokens(gateway *models.Gateway) (interface{}
 
 type gatewayAdminAPIRegistry struct {
 	lock     sync.RWMutex
-	registry map[int64]janus.AdminAPI
+	registry map[int64]janus_admin.AdminAPI
 }
 
 func NewGatewayAdminAPIRegistry() *gatewayAdminAPIRegistry {
 	return &gatewayAdminAPIRegistry{
-		registry: make(map[int64]janus.AdminAPI),
+		registry: make(map[int64]janus_admin.AdminAPI),
 	}
 }
 
-func (r *gatewayAdminAPIRegistry) For(gateway *models.Gateway) (janus.AdminAPI, error) {
+func (r *gatewayAdminAPIRegistry) For(gateway *models.Gateway) (janus_admin.AdminAPI, error) {
 	if api, ok := r.Get(gateway); ok {
 		return api, nil
 	}
@@ -450,7 +365,7 @@ func (r *gatewayAdminAPIRegistry) For(gateway *models.Gateway) (janus.AdminAPI, 
 		return nil, pkgerr.Wrap(err, "decrypt admin password")
 	}
 
-	api, err := janus.NewAdminAPI(gateway.AdminURL, adminPwd)
+	api, err := janus_admin.NewAdminAPI(gateway.AdminURL, adminPwd)
 	if err != nil {
 		return nil, pkgerr.Wrap(err, "janus.NewAdminAPI")
 	}
@@ -459,14 +374,14 @@ func (r *gatewayAdminAPIRegistry) For(gateway *models.Gateway) (janus.AdminAPI, 
 	return api, nil
 }
 
-func (r *gatewayAdminAPIRegistry) Get(gateway *models.Gateway) (janus.AdminAPI, bool) {
+func (r *gatewayAdminAPIRegistry) Get(gateway *models.Gateway) (janus_admin.AdminAPI, bool) {
 	r.lock.RLock()
 	defer r.lock.RUnlock()
 	api, ok := r.registry[gateway.ID]
 	return api, ok
 }
 
-func (r *gatewayAdminAPIRegistry) Set(gateway *models.Gateway, api janus.AdminAPI) {
+func (r *gatewayAdminAPIRegistry) Set(gateway *models.Gateway, api janus_admin.AdminAPI) {
 	r.lock.Lock()
 	r.registry[gateway.ID] = api
 	r.lock.Unlock()
