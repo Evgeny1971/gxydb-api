@@ -6,33 +6,33 @@ import (
 )
 
 type config struct {
-	ListenAddress            string
-	DBUrl                    string
-	AccountsUrl              string
-	SkipAuth                 bool
-	SkipEventsAuth           bool
-	SkipPermissions          bool
-	IceServers               map[string][]string
-	ServicePasswords         []string
-	Secret                   string
-	MonitorGatewayTokens     bool
-	GatewayRoomsSecret       string
-	GatewayVideoroomAdminKey string
+	ListenAddress         string
+	DBUrl                 string
+	AccountsUrl           string
+	SkipAuth              bool
+	SkipEventsAuth        bool
+	SkipPermissions       bool
+	IceServers            map[string][]string
+	ServicePasswords      []string
+	Secret                string
+	MonitorGatewayTokens  bool
+	GatewayRoomsSecret    string
+	GatewayPluginAdminKey string
 }
 
 func newConfig() *config {
 	return &config{
-		ListenAddress:            ":8081",
-		DBUrl:                    "postgres://user:password@localhost/galaxy?sslmode=disable",
-		AccountsUrl:              "https://accounts.kbb1.com/auth/realms/main",
-		SkipAuth:                 false,
-		SkipEventsAuth:           false,
-		SkipPermissions:          false,
-		IceServers:               make(map[string][]string),
-		ServicePasswords:         make([]string, 0),
-		MonitorGatewayTokens:     true,
-		GatewayRoomsSecret:       "",
-		GatewayVideoroomAdminKey: "",
+		ListenAddress:         ":8081",
+		DBUrl:                 "postgres://user:password@localhost/galaxy?sslmode=disable",
+		AccountsUrl:           "https://accounts.kbb1.com/auth/realms/main",
+		SkipAuth:              false,
+		SkipEventsAuth:        false,
+		SkipPermissions:       false,
+		IceServers:            make(map[string][]string),
+		ServicePasswords:      make([]string, 0),
+		MonitorGatewayTokens:  true,
+		GatewayRoomsSecret:    "",
+		GatewayPluginAdminKey: "",
 	}
 }
 
@@ -77,7 +77,7 @@ func Init() {
 	if val := os.Getenv("GATEWAY_ROOMS_SECRET"); val != "" {
 		Config.GatewayRoomsSecret = val
 	}
-	if val := os.Getenv("GATEWAY_VIDEOROOM_ADMIN_KEY"); val != "" {
-		Config.GatewayVideoroomAdminKey = val
+	if val := os.Getenv("GATEWAY_PLUGIN_ADMIN_KEY"); val != "" {
+		Config.GatewayPluginAdminKey = val
 	}
 }

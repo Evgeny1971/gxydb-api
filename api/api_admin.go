@@ -287,8 +287,16 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 			PlayoutDelayExt:    true,
 			TransportWideCCExt: true,
 		}
-		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayVideoroomAdminKey).
+		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayPluginAdminKey).
 			CreateRequest(room, true, []string{})
+
+		chatroom := &janus_plugins.TextroomRoom{
+			Room:        room.Room,
+			Description: room.Description,
+			Secret:      room.Secret,
+		}
+		textroomRequest := janus_plugins.MakeTextroomRequestFactory(common.Config.GatewayPluginAdminKey).
+			CreateRequest(chatroom, true, []string{})
 
 		for _, gateway := range a.cache.gateways.Values() {
 			if gateway.Disabled || gateway.RemovedAt.Valid || gateway.Type != common.GatewayTypeRooms {
@@ -301,7 +309,10 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if _, err = api.MessagePlugin(request); err != nil {
-				return pkgerr.Wrap(err, "api.MessagePlugin")
+				return pkgerr.Wrap(err, "api.MessagePlugin [videoroom]")
+			}
+			if _, err = api.MessagePlugin(textroomRequest); err != nil {
+				return pkgerr.Wrap(err, "api.MessagePlugin [textroom]")
 			}
 		}
 
@@ -428,8 +439,15 @@ func (a *App) AdminUpdateRoom(w http.ResponseWriter, r *http.Request) {
 			Room:        data.GatewayUID,
 			Description: data.Name,
 		}
-		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayVideoroomAdminKey).
+		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayPluginAdminKey).
 			EditRequest(room, true, common.Config.GatewayRoomsSecret)
+
+		chatroom := &janus_plugins.TextroomRoomForEdit{
+			Room:        room.Room,
+			Description: room.Description,
+		}
+		textroomRequest := janus_plugins.MakeTextroomRequestFactory(common.Config.GatewayPluginAdminKey).
+			EditRequest(chatroom, true, common.Config.GatewayRoomsSecret)
 
 		for _, gateway := range a.cache.gateways.Values() {
 			if gateway.Disabled || gateway.RemovedAt.Valid || gateway.Type != common.GatewayTypeRooms {
@@ -442,7 +460,10 @@ func (a *App) AdminUpdateRoom(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if _, err = api.MessagePlugin(request); err != nil {
-				return pkgerr.Wrap(err, "api.MessagePlugin")
+				return pkgerr.Wrap(err, "api.MessagePlugin [videoroom]")
+			}
+			if _, err = api.MessagePlugin(textroomRequest); err != nil {
+				return pkgerr.Wrap(err, "api.MessagePlugin [textroom]")
 			}
 		}
 
@@ -495,7 +516,10 @@ func (a *App) AdminDeleteRoom(w http.ResponseWriter, r *http.Request) {
 			return httputil.NewInternalError(pkgerr.WithStack(err))
 		}
 
-		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayVideoroomAdminKey).
+		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayPluginAdminKey).
+			DestroyRequest(room.GatewayUID, true, common.Config.GatewayRoomsSecret)
+
+		textroomRequest := janus_plugins.MakeTextroomRequestFactory(common.Config.GatewayPluginAdminKey).
 			DestroyRequest(room.GatewayUID, true, common.Config.GatewayRoomsSecret)
 
 		for _, gateway := range a.cache.gateways.Values() {
@@ -509,7 +533,10 @@ func (a *App) AdminDeleteRoom(w http.ResponseWriter, r *http.Request) {
 			}
 
 			if _, err = api.MessagePlugin(request); err != nil {
-				return pkgerr.Wrap(err, "api.MessagePlugin")
+				return pkgerr.Wrap(err, "api.MessagePlugin [videoroom]")
+			}
+			if _, err = api.MessagePlugin(textroomRequest); err != nil {
+				return pkgerr.Wrap(err, "api.MessagePlugin [textroom]")
 			}
 		}
 

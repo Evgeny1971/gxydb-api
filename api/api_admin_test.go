@@ -108,7 +108,7 @@ func (s *ApiTestSuite) TestAdmin_GatewaysHandleInfoNotFound() {
 	s.Require().NoError(err, "NewGatewaySession")
 	defer session.Destroy()
 
-	req, _ = http.NewRequest("GET", fmt.Sprintf("/admin/gateways/%s/sessions/%d/handles/1/info", gateway.Name, session.Id), nil)
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/admin/gateways/%s/sessions/%d/handles/1/info", gateway.Name, session.ID), nil)
 	s.apiAuthP(req, []string{common.RoleAdmin})
 	resp = s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
@@ -126,11 +126,11 @@ func (s *ApiTestSuite) TestAdmin_GatewaysHandleInfo() {
 	s.Require().NoError(err, "session.Attach")
 	defer handle.Detach()
 
-	req, _ := http.NewRequest("GET", fmt.Sprintf("/admin/gateways/%s/sessions/%d/handles/%d/info", gateway.Name, session.Id, handle.Id), nil)
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/admin/gateways/%s/sessions/%d/handles/%d/info", gateway.Name, session.ID, handle.ID), nil)
 	s.apiAuthP(req, []string{common.RoleAdmin})
 	body := s.request200json(req)
-	s.EqualValues(session.Id, body["session_id"], "session_id")
-	s.EqualValues(handle.Id, body["handle_id"], "handle_id")
+	s.EqualValues(session.ID, body["session_id"], "session_id")
+	s.EqualValues(handle.ID, body["handle_id"], "handle_id")
 	s.NotNil(body["info"], "info")
 }
 
@@ -392,6 +392,10 @@ func (s *ApiTestSuite) TestAdmin_CreateRoom() {
 	gRoom := s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64)))
 	s.Require().NotNil(gRoom, "gateway room")
 	s.Equal(gRoom.Description, payload.Name, "gateway room description")
+
+	gChatroom := s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64)))
+	s.Require().NotNil(gRoom, "gateway room")
+	s.Equal(gChatroom.Description, payload.Name, "gateway chatroom description")
 }
 
 func (s *ApiTestSuite) TestAdmin_UpdateRoomForbidden() {
@@ -510,6 +514,10 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 	gRoom := s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64)))
 	s.Require().NotNil(gRoom, "gateway room")
 	s.Equal(gRoom.Description, payload.Name, "gateway room description")
+
+	gChatroom := s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64)))
+	s.Require().NotNil(gRoom, "gateway room")
+	s.Equal(gChatroom.Description, payload.Name, "gateway chatroom description")
 }
 
 func (s *ApiTestSuite) TestAdmin_DeleteRoomForbidden() {
@@ -561,17 +569,36 @@ func (s *ApiTestSuite) TestAdmin_DeleteRoom() {
 
 	// verify room does not exists on gateway
 	s.Nil(s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64))))
+	s.Nil(s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64))))
 }
 
 func (s *ApiTestSuite) findRoomInGateway(gateway *models.Gateway, id int) *janus_plugins.VideoroomRoomFromListResponse {
 	api, err := domain.GatewayAdminAPIRegistry.For(gateway)
 	s.Require().NoError(err, "Admin API for gateway")
 
-	request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayVideoroomAdminKey).ListRequest()
+	request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayPluginAdminKey).ListRequest()
 	resp, err := api.MessagePlugin(request)
 	s.Require().NoError(err, "api.MessagePlugin")
 
 	tResp, _ := resp.(*janus_plugins.VideoroomListResponse)
+	for _, x := range tResp.Rooms {
+		if x.Room == id {
+			return x
+		}
+	}
+
+	return nil
+}
+
+func (s *ApiTestSuite) findChatroomInGateway(gateway *models.Gateway, id int) *janus_plugins.TextroomRoomFromListResponse {
+	api, err := domain.GatewayAdminAPIRegistry.For(gateway)
+	s.Require().NoError(err, "Admin API for gateway")
+
+	request := janus_plugins.MakeTextroomRequestFactory(common.Config.GatewayPluginAdminKey).ListRequest()
+	resp, err := api.MessagePlugin(request)
+	s.Require().NoError(err, "api.MessagePlugin")
+
+	tResp, _ := resp.(*janus_plugins.TextroomListResponse)
 	for _, x := range tResp.Rooms {
 		if x.Room == id {
 			return x
