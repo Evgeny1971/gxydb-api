@@ -50,6 +50,8 @@ github.com/edoshor/janus-go v0.0.0-20200620083907-0e2506322a84 h1:hVoaRl+8aGj4D1
 github.com/edoshor/janus-go v0.0.0-20200620083907-0e2506322a84/go.mod h1:MtMSWgICYueR+PDTGMxVj3NdyMaI0NdMKT5x7GrSgpo=
 github.com/edoshor/janus-go v0.0.0-20200712013710-c2c1dedd2dfb h1:w98NjCn+2+qJEkr7CDJcIHaXbYC4b/V6teA62PdN++w=
 github.com/edoshor/janus-go v0.0.0-20200712013710-c2c1dedd2dfb/go.mod h1:MtMSWgICYueR+PDTGMxVj3NdyMaI0NdMKT5x7GrSgpo=
+github.com/edoshor/janus-go v0.0.0-20200713004900-fe44c8dc56e7 h1:ooDwQdCiaV84VHzuOVbk4w6O1i+zAI5YH//xzRG/mjI=
+github.com/edoshor/janus-go v0.0.0-20200713004900-fe44c8dc56e7/go.mod h1:MtMSWgICYueR+PDTGMxVj3NdyMaI0NdMKT5x7GrSgpo=
 github.com/friendsofgo/errors v0.9.2 h1:X6NYxef4efCBdwI7BgS820zFaN7Cphrmb+Pljdzjtgk=
 github.com/friendsofgo/errors v0.9.2/go.mod h1:yCvFW5AkDIL9qn7suHVLiI/gH228n7PC4Pn44IGoTOI=
 github.com/fsnotify/fsnotify v1.4.7 h1:IXs+QLmnXW2CcXuY+8Mzv/fWEsPGWxqefPtCP5CnV9I=
