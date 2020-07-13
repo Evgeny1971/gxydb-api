@@ -288,7 +288,7 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 			TransportWideCCExt: true,
 		}
 		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayPluginAdminKey).
-			CreateRequest(room, true, []string{})
+			CreateRequest(room, true, nil)
 
 		chatroom := &janus_plugins.TextroomRoom{
 			Room:        room.Room,
@@ -296,7 +296,7 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 			Secret:      room.Secret,
 		}
 		textroomRequest := janus_plugins.MakeTextroomRequestFactory(common.Config.GatewayPluginAdminKey).
-			CreateRequest(chatroom, true, []string{})
+			CreateRequest(chatroom, true, nil)
 
 		for _, gateway := range a.cache.gateways.Values() {
 			if gateway.Disabled || gateway.RemovedAt.Valid || gateway.Type != common.GatewayTypeRooms {
