@@ -80,7 +80,7 @@ func AuthenticationMiddleware(tokenVerifier OIDCTokenVerifier, gwPwd func(string
 			}
 
 			// gateways are using basic auth
-			if r.URL.Path == "/event" || r.URL.Path == "/protocol" {
+			if r.URL.Path == "/event" || strings.HasPrefix(r.URL.Path, "/protocol") {
 				if common.Config.SkipEventsAuth {
 					next.ServeHTTP(w, r)
 					return

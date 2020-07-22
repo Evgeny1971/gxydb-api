@@ -484,6 +484,27 @@ func (a *App) V1HandleProtocol(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondSuccess(w)
 }
 
+func (a *App) V1HandleServiceProtocol(w http.ResponseWriter, r *http.Request) {
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		httputil.NewBadRequestError(err, "read request body failed").Abort(w, r)
+		return
+	}
+	r.Body.Close()
+	rCtx := a.requestContext(r)
+	rCtx.Params = body
+
+	msg, err := janus.ParseTextroomMessage(body)
+	if err != nil {
+		httputil.NewBadRequestError(err, "error parsing request body").Abort(w, r)
+		return
+	}
+
+	log.Ctx(r.Context()).Info().Interface("payload", msg).Msg("service protocol message")
+
+	httputil.RespondSuccess(w)
+}
+
 func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 	user := &V1User{
 		ID:        session.R.User.AccountsID,

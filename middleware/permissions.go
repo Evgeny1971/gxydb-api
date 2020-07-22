@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"strings"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/httputil"
@@ -15,7 +16,7 @@ func MinimalPermissionMiddleware(next http.Handler) http.Handler {
 		}
 
 		// skip permissions check on health_check and gateway event handlers
-		if r.URL.Path == "/health_check" || r.URL.Path == "/event" || r.URL.Path == "/protocol" {
+		if r.URL.Path == "/health_check" || r.URL.Path == "/event" || strings.HasPrefix(r.URL.Path, "/protocol") {
 			next.ServeHTTP(w, r)
 			return
 		}
