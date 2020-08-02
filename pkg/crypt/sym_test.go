@@ -30,6 +30,7 @@ func TestEncrypt(t *testing.T) {
 	str := base64.StdEncoding.EncodeToString(encText)
 	fmt.Println(str)
 
+	//dStr := []byte("$2a$10$XCSPObl1.cTTn0/CZqzdE.ou2tOUp0hXwMZ\neXyLU3rq/5BaPA4irO")
 	dStr, err := base64.StdEncoding.DecodeString(str)
 	assert.NoError(t, err, "DecodeString error")
 	decText, err := Decrypt(dStr, common.Config.Secret)
