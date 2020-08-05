@@ -438,6 +438,9 @@ func (a *App) AdminUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		room := &janus_plugins.VideoroomRoomForEdit{
 			Room:        data.GatewayUID,
 			Description: data.Name,
+			Publishers:  100,   // same as create
+			Bitrate:     64000, // same as create
+			FirFreq:     10,    // same as create
 		}
 		request := janus_plugins.MakeVideoroomRequestFactory(common.Config.GatewayPluginAdminKey).
 			EditRequest(room, true, common.Config.GatewayRoomsSecret)
