@@ -1,5 +1,8 @@
 ARG work_dir=/go/src/github.com/Bnei-Baruch/gxydb-api
 ARG build_number=dev
+ARG db_url="postgres://user:password@host.docker.internal/galaxy?sslmode=disable"
+ARG test_gateway_url="ws://host.docker.internal:8188/"
+ARG test_gateway_admin_url="http://host.docker.internal:7088/admin"
 
 FROM golang:1.14-alpine3.11 as build
 
@@ -7,9 +10,9 @@ LABEL maintainer="edoshor@gmail.com"
 
 ARG work_dir
 ARG build_number
-ARG db_url="postgres://user:password@host.docker.internal/galaxy?sslmode=disable"
-ARG test_gateway_url="ws://host.docker.internal:8188/"
-ARG test_gateway_admin_url="http://host.docker.internal:7088/admin"
+ARG db_url
+ARG test_gateway_url
+ARG test_gateway_admin_url
 
 ENV GOOS=linux \
 	CGO_ENABLED=0 \
