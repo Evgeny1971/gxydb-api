@@ -11,7 +11,7 @@ services:
     ports:
       - 5432:5432
   janus1:
-    image: bb-janus:latest
+    image: bneibaruch/janus:latest
     restart: always
     volumes:
       - ./misc/janus/config/dev:/usr/janusgxy/etc/janus
