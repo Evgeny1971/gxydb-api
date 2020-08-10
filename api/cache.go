@@ -21,6 +21,7 @@ type AppCache struct {
 	gatewayTokens *GatewayTokenCache
 	rooms         *RoomCache
 	users         *UserCache
+	dynamicConfig *DynamicConfigCache
 	ticker        *time.Ticker
 	ticks         int64
 }
@@ -31,6 +32,7 @@ func (c *AppCache) Init(db common.DBInterface) error {
 	c.gatewayTokens = new(GatewayTokenCache)
 	c.rooms = new(RoomCache)
 	c.users = new(UserCache)
+	c.dynamicConfig = new(DynamicConfigCache)
 
 	c.ticker = time.NewTicker(time.Second)
 	go func() {
@@ -39,6 +41,11 @@ func (c *AppCache) Init(db common.DBInterface) error {
 			if c.ticks%3600 == 0 {
 				if err := c.gatewayTokens.Reload(c.db); err != nil {
 					log.Error().Err(err).Msg("gatewayTokens.Reload")
+				}
+			}
+			if c.ticks%60 == 0 {
+				if err := c.dynamicConfig.Reload(c.db); err != nil {
+					log.Error().Err(err).Msg("dynamicConfig.Reload")
 				}
 			}
 		}
@@ -66,6 +73,10 @@ func (c *AppCache) ReloadAll(db common.DBInterface) error {
 
 	if err := c.users.Reload(db); err != nil {
 		return pkgerr.Wrap(err, "reload users")
+	}
+
+	if err := c.dynamicConfig.Reload(db); err != nil {
+		return pkgerr.Wrap(err, "reload dynamicConfig")
 	}
 
 	return nil
@@ -254,4 +265,66 @@ func (c *UserCache) ByAccountsID(id string) (*models.User, bool) {
 
 func (c *UserCache) Set(user *models.User) {
 	c.cache.Add(user.AccountsID, user)
+}
+
+type DynamicConfigCache struct {
+	m            map[string]*models.DynamicConfig
+	lock         sync.RWMutex
+	lastModified time.Time
+}
+
+func (c *DynamicConfigCache) Reload(db common.DBInterface) error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	kvs, err := models.DynamicConfigs().All(db)
+	if err != nil {
+		return pkgerr.WithStack(err)
+	}
+
+	c.m = make(map[string]*models.DynamicConfig, len(kvs))
+	for _, kv := range kvs {
+		c.m[kv.Key] = kv
+		if c.lastModified.Before(kv.UpdatedAt) {
+			c.lastModified = kv.UpdatedAt
+		}
+	}
+
+	return nil
+}
+
+func (c *DynamicConfigCache) ByKey(key string) (*models.DynamicConfig, bool) {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	r, ok := c.m[key]
+	return r, ok
+}
+
+func (c *DynamicConfigCache) Set(kv *models.DynamicConfig) {
+	c.lock.Lock()
+	c.m[kv.Key] = kv
+	if c.lastModified.Before(kv.UpdatedAt) {
+		c.lastModified = kv.UpdatedAt
+	}
+	c.lock.Unlock()
+}
+
+func (c *DynamicConfigCache) Values() []*models.DynamicConfig {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+
+	values := make([]*models.DynamicConfig, len(c.m))
+	i := 0
+	for _, v := range c.m {
+		values[i] = v
+		i++
+	}
+
+	return values
+}
+
+func (c *DynamicConfigCache) LastModified() time.Time {
+	c.lock.RLock()
+	defer c.lock.RUnlock()
+	return c.lastModified
 }

@@ -599,16 +599,22 @@ func (s *ApiTestSuite) TestUpdateSession() {
 	gateway := s.createGateway()
 	room := s.createRoom(gateway)
 	user := s.createUser()
+	kv := s.createDynamicConfig()
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
 	payloadJson, _ := json.Marshal(v1User)
 	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.AccountsID), bytes.NewBuffer(payloadJson))
 	s.apiAuth(req)
-	s.request200json(req)
+	body := s.request200json(req)
+
+	ts, err := time.Parse(time.RFC3339Nano, body["config_last_modified"].(string))
+	s.NoError(err, "parse config_last_modified")
+	s.InEpsilon(ts.UnixNano(), kv.UpdatedAt.UnixNano(), 100, "config_last_modified")
+
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/users/%s", user.AccountsID), nil)
 	s.apiAuth(req)
-	body := s.request200json(req)
+	body = s.request200json(req)
 	s.assertV1User(v1User, body)
 
 	v1User.Question = true
@@ -1485,6 +1491,11 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 	janusAdminAPI.On("AddToken", mock.Anything, mock.Anything).Return(nil, nil)
 	domain.NewGatewayTokensManager(s.DB, 1).SyncAll()
 
+	kvs := make([]*models.DynamicConfig, 3)
+	for i := range kvs {
+		kvs[i] = s.createDynamicConfig()
+	}
+
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("GET", "/v2/config", nil)
@@ -1515,6 +1526,12 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 
 	s.ElementsMatch(common.Config.IceServers[common.GatewayTypeRooms], iceServers[common.GatewayTypeRooms], "rooms ice servers")
 	s.ElementsMatch(common.Config.IceServers[common.GatewayTypeStreaming], iceServers[common.GatewayTypeStreaming], "streaming ice servers")
+
+	dynamicConfig := body["dynamic_config"].(map[string]interface{})
+	s.Equal(len(kvs), len(dynamicConfig), "len(dynamicConfig)")
+	for _, kv := range kvs {
+		s.Equalf(kv.Value, dynamicConfig[kv.Key], "dynamic_config[%s]", kv.Key)
+	}
 
 	janusAdminAPI.AssertNumberOfCalls(s.T(), "AddToken", 2*len(roomsGateways))
 }

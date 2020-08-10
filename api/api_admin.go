@@ -563,6 +563,258 @@ func (a *App) AdminDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondSuccess(w)
 }
 
+func (a *App) AdminListDynamicConfigs(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	query := r.URL.Query()
+	listParams, err := ParseListParams(query)
+	if err != nil {
+		httputil.NewBadRequestError(err, "malformed list parameters").Abort(w, r)
+		return
+	}
+
+	mods := make([]qm.QueryMod, 0)
+
+	// count query
+	var total int64
+	countMods := append([]qm.QueryMod{qm.Select("count(DISTINCT id)")}, mods...)
+	err = models.DynamicConfigs(countMods...).QueryRow(a.DB).Scan(&total)
+	if err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	} else if total == 0 {
+		httputil.RespondWithJSON(w, http.StatusOK, DynamicConfigsResponse{Items: make([]*models.DynamicConfig, 0)})
+		return
+	}
+
+	// order, limit, offset
+	if listParams.OrderBy == "" {
+		listParams.OrderBy = "key asc"
+	}
+	_, offset := listParams.appendListMods(&mods)
+	if int64(offset) >= total {
+		httputil.RespondWithJSON(w, http.StatusOK, DynamicConfigsResponse{Items: make([]*models.DynamicConfig, 0)})
+		return
+	}
+
+	// data query
+	kvs, err := models.DynamicConfigs(mods...).All(a.DB)
+	if err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, DynamicConfigsResponse{
+		ListResponse: ListResponse{
+			Total: total,
+		},
+		Items: kvs,
+	})
+}
+
+func (a *App) AdminCreateDynamicConfig(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	var data models.DynamicConfig
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w, r)
+		return
+	}
+	a.requestContext(r).Params = data
+
+	if len(data.Key) == 0 || len(data.Key) > 255 {
+		httputil.NewBadRequestError(nil, "key is missing or longer than 255 characters").Abort(w, r)
+		return
+	}
+
+	if len(data.Value) == 0 {
+		httputil.NewBadRequestError(nil, "value is missing").Abort(w, r)
+		return
+	}
+
+	if exists, _ := models.DynamicConfigs(models.DynamicConfigWhere.Key.EQ(data.Key)).Exists(a.DB); exists {
+		httputil.NewBadRequestError(nil, "key already exists").Abort(w, r)
+		return
+	}
+
+	err := sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
+		data.UpdatedAt = time.Now().UTC()
+		if err := data.Insert(tx, boil.Whitelist("key", "value", "updated_at")); err != nil {
+			return pkgerr.WithStack(err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		var hErr *httputil.HttpError
+		if errors.As(err, &hErr) {
+			hErr.Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
+
+	if err := a.cache.dynamicConfig.Reload(a.DB); err != nil {
+		log.Error().Err(err).Msg("Reload cache")
+	}
+
+	httputil.RespondWithJSON(w, http.StatusCreated, data)
+}
+
+func (a *App) AdminGetDynamicConfig(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		httputil.NewNotFoundError().Abort(w, r)
+		return
+	}
+
+	kv, err := models.FindDynamicConfig(a.DB, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w, r)
+		} else {
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
+		}
+		return
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, kv)
+}
+
+func (a *App) AdminUpdateDynamicConfig(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		httputil.NewNotFoundError().Abort(w, r)
+		return
+	}
+
+	kv, err := models.FindDynamicConfig(a.DB, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w, r)
+		} else {
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
+		}
+		return
+	}
+
+	var data models.DynamicConfig
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w, r)
+		return
+	}
+	a.requestContext(r).Params = data
+
+	if len(data.Key) == 0 || len(data.Key) > 255 {
+		httputil.NewBadRequestError(nil, "key is missing or longer than 255 characters").Abort(w, r)
+		return
+	}
+
+	if len(data.Value) == 0 {
+		httputil.NewBadRequestError(nil, "value is missing").Abort(w, r)
+		return
+	}
+
+	if exists, _ := models.DynamicConfigs(models.DynamicConfigWhere.Key.EQ(data.Key)).Exists(a.DB); exists {
+		httputil.NewBadRequestError(nil, "key already exists").Abort(w, r)
+		return
+	}
+
+	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
+		kv.Key = data.Key
+		kv.Value = data.Value
+		kv.UpdatedAt = time.Now().UTC()
+		if _, err := kv.Update(tx, boil.Whitelist("key", "value", "updated_at")); err != nil {
+			return pkgerr.WithStack(err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		var hErr *httputil.HttpError
+		if errors.As(err, &hErr) {
+			hErr.Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
+
+	if err := a.cache.dynamicConfig.Reload(a.DB); err != nil {
+		log.Error().Err(err).Msg("Reload cache")
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, kv)
+}
+
+func (a *App) AdminDeleteDynamicConfig(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.ParseInt(vars["id"], 10, 64)
+	if err != nil {
+		httputil.NewNotFoundError().Abort(w, r)
+		return
+	}
+
+	kv, err := models.FindDynamicConfig(a.DB, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			httputil.NewNotFoundError().Abort(w, r)
+		} else {
+			httputil.NewInternalError(pkgerr.WithStack(err)).Abort(w, r)
+		}
+		return
+	}
+
+	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
+		if _, err := kv.Delete(tx); err != nil {
+			return httputil.NewInternalError(pkgerr.WithStack(err))
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		var hErr *httputil.HttpError
+		if errors.As(err, &hErr) {
+			hErr.Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
+
+	if err := a.cache.dynamicConfig.Reload(a.DB); err != nil {
+		log.Error().Err(err).Msg("Reload cache")
+	}
+
+	httputil.RespondSuccess(w)
+}
+
 type ListParams struct {
 	PageNumber int    `json:"page_no"`
 	PageSize   int    `json:"page_size"`
@@ -652,6 +904,11 @@ type RoomsRequest struct {
 type RoomsResponse struct {
 	ListResponse
 	Rooms []*models.Room `json:"data"`
+}
+
+type DynamicConfigsResponse struct {
+	ListResponse
+	Items []*models.DynamicConfig `json:"data"`
 }
 
 func ParseRoomsRequest(query url.Values) (*RoomsRequest, error) {

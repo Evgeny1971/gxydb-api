@@ -6,6 +6,7 @@ package models
 var TableNames = struct {
 	Composites       string
 	CompositesRooms  string
+	DynamicConfig    string
 	Gateways         string
 	Rooms            string
 	SchemaMigrations string
@@ -14,6 +15,7 @@ var TableNames = struct {
 }{
 	Composites:       "composites",
 	CompositesRooms:  "composites_rooms",
+	DynamicConfig:    "dynamic_config",
 	Gateways:         "gateways",
 	Rooms:            "rooms",
 	SchemaMigrations: "schema_migrations",

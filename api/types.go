@@ -10,8 +10,9 @@ type V2Gateway struct {
 }
 
 type V2Config struct {
-	Gateways   map[string]map[string]*V2Gateway `json:"gateways"`
-	IceServers map[string][]string              `json:"ice_servers"`
+	Gateways      map[string]map[string]*V2Gateway `json:"gateways"`
+	IceServers    map[string][]string              `json:"ice_servers"`
+	DynamicConfig map[string]string                `json:"dynamic_config"`
 }
 
 type V1User struct {

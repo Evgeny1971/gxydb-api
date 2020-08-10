@@ -15,12 +15,13 @@ import (
 )
 
 func (a *App) V2GetConfig(w http.ResponseWriter, r *http.Request) {
-	gateways := a.cache.gateways.Values()
 	cfg := V2Config{
-		Gateways:   make(map[string]map[string]*V2Gateway, len(gateways)),
-		IceServers: common.Config.IceServers,
+		Gateways:      make(map[string]map[string]*V2Gateway),
+		IceServers:    common.Config.IceServers,
+		DynamicConfig: make(map[string]string),
 	}
 
+	gateways := a.cache.gateways.Values()
 	for _, gateway := range gateways {
 		if gateway.Disabled || gateway.RemovedAt.Valid {
 			continue
@@ -38,6 +39,11 @@ func (a *App) V2GetConfig(w http.ResponseWriter, r *http.Request) {
 			cfg.Gateways[gateway.Type] = make(map[string]*V2Gateway)
 		}
 		cfg.Gateways[gateway.Type][gateway.Name] = respGateway
+	}
+
+	kvs := a.cache.dynamicConfig.Values()
+	for _, kv := range kvs {
+		cfg.DynamicConfig[kv.Key] = kv.Value
 	}
 
 	httputil.RespondWithJSON(w, http.StatusOK, cfg)

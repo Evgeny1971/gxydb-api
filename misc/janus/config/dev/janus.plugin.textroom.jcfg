@@ -1,5 +1,5 @@
 #
-# File automatically generated on Sun Jul 12 02:10:32 2020
+# File automatically generated on Mon Aug 10 00:15:20 2020
 #
 
 general : 
@@ -2519,4 +2519,79 @@ room-31436 :
   secret = "adminpwd";
   pin = "";
   post = "";
+};
+room-1979793524 : 
+{
+  description = "room_bKCVnGrzA5";
+  secret = "adminpwd";
+};
+room-25612 : 
+{
+  description = "room_eFIcnkBLoZ_edit";
+  secret = "adminpwd";
+};
+room-20124 : 
+{
+  description = "room_txAsgDkM5T_edit";
+  secret = "adminpwd";
+};
+room-1929597183 : 
+{
+  description = "room_r0BDF8dMWZ";
+  secret = "adminpwd";
+};
+room-24357 : 
+{
+  description = "room_iuQhdAQq0d_edit";
+  secret = "adminpwd";
+};
+room-20794 : 
+{
+  description = "room_mFDK98gpxx_edit";
+  secret = "adminpwd";
+};
+room-80176798 : 
+{
+  description = "room_uVG5ppjkP2";
+  secret = "adminpwd";
+};
+room-4008 : 
+{
+  description = "room_qJYJ1yl3XO_edit";
+  secret = "adminpwd";
+};
+room-25267 : 
+{
+  description = "room_VaS9V8DyzX_edit";
+  secret = "adminpwd";
+};
+room-1294929040 : 
+{
+  description = "room_eayZRT9ElX";
+  secret = "adminpwd";
+};
+room-21638 : 
+{
+  description = "room_rUGovdzd3m_edit";
+  secret = "adminpwd";
+};
+room-31231 : 
+{
+  description = "room_Vu27VoQc7G_edit";
+  secret = "adminpwd";
+};
+room-1314748290 : 
+{
+  description = "room_sVwQuSa7ui";
+  secret = "adminpwd";
+};
+room-5952 : 
+{
+  description = "room_ta69Xc7EIM_edit";
+  secret = "adminpwd";
+};
+room-6701 : 
+{
+  description = "room_NatEBcAw56_edit";
+  secret = "adminpwd";
 };
