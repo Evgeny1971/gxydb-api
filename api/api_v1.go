@@ -293,7 +293,10 @@ func (a *App) V1UpdateSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httputil.RespondWithJSON(w, http.StatusOK, map[string]interface{}{"config_last_modified": a.cache.dynamicConfig.LastModified()})
+	httputil.RespondWithJSON(w, http.StatusOK, map[string]interface{}{
+		"result":               "success",
+		"config_last_modified": a.cache.dynamicConfig.LastModified(),
+	})
 }
 
 func (a *App) V1ListComposites(w http.ResponseWriter, r *http.Request) {
