@@ -1533,6 +1533,10 @@ func (s *ApiTestSuite) TestV2GetConfig() {
 		s.Equalf(kv.Value, dynamicConfig[kv.Key], "dynamic_config[%s]", kv.Key)
 	}
 
+	ts, err := time.Parse(time.RFC3339Nano, body["last_modified"].(string))
+	s.NoError(err, "parse last_modified")
+	s.InEpsilon(ts.UnixNano(), kvs[len(kvs)-1].UpdatedAt.UnixNano(), 100, "last_modified")
+
 	janusAdminAPI.AssertNumberOfCalls(s.T(), "AddToken", 2*len(roomsGateways))
 }
 

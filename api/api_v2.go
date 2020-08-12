@@ -45,6 +45,7 @@ func (a *App) V2GetConfig(w http.ResponseWriter, r *http.Request) {
 	for _, kv := range kvs {
 		cfg.DynamicConfig[kv.Key] = kv.Value
 	}
+	cfg.LastModified = a.cache.dynamicConfig.LastModified()
 
 	httputil.RespondWithJSON(w, http.StatusOK, cfg)
 }

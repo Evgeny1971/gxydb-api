@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
 	_ "github.com/Bnei-Baruch/gxydb-api/pkg/testutil"
@@ -28,12 +30,16 @@ func TestEncrypt(t *testing.T) {
 	encText, err := Encrypt([]byte("janusoverlord"), common.Config.Secret)
 	assert.NoError(t, err, "Encrypt error")
 	str := base64.StdEncoding.EncodeToString(encText)
-	fmt.Println(str)
 
-	//dStr := []byte("$2a$10$XCSPObl1.cTTn0/CZqzdE.ou2tOUp0hXwMZ\neXyLU3rq/5BaPA4irO")
 	dStr, err := base64.StdEncoding.DecodeString(str)
 	assert.NoError(t, err, "DecodeString error")
 	decText, err := Decrypt(dStr, common.Config.Secret)
 	assert.NoError(t, err, "Decrypt error")
 	assert.Equal(t, "janusoverlord", decText)
+}
+
+func TestGenPass(t *testing.T) {
+	b, err := bcrypt.GenerateFromPassword([]byte("put_your_password_here"), bcrypt.MinCost)
+	require.NoError(t, err)
+	fmt.Println(string(b))
 }

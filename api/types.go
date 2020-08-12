@@ -13,6 +13,7 @@ type V2Config struct {
 	Gateways      map[string]map[string]*V2Gateway `json:"gateways"`
 	IceServers    map[string][]string              `json:"ice_servers"`
 	DynamicConfig map[string]string                `json:"dynamic_config"`
+	LastModified  time.Time                        `json:"last_modified"`
 }
 
 type V1User struct {
