@@ -802,42 +802,74 @@ func (s *ApiTestSuite) TestAdmin_UpdateDynamicConfigBadRequest() {
 }
 
 func (s *ApiTestSuite) TestAdmin_UpdateDynamicConfig() {
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
-	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+	kv := s.createDynamicConfig()
 
-	payload := models.Room{
-		Name:             fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
-		GatewayUID:       rand.Intn(math.MaxInt16),
-		DefaultGatewayID: gateway.ID,
+	payload := models.DynamicConfig{
+		Key:   fmt.Sprintf("key_%s", stringutil.GenerateName(10)),
+		Value: fmt.Sprintf("value_%s", stringutil.GenerateName(10)),
 	}
 	b, _ := json.Marshal(payload)
-	req, _ := http.NewRequest("POST", "/admin/rooms", bytes.NewBuffer(b))
+	req, _ := http.NewRequest("PUT", fmt.Sprintf("/admin/dynamic_config/%d", kv.ID), bytes.NewBuffer(b))
 	s.apiAuthP(req, []string{common.RoleRoot})
-	body := s.request201json(req)
+	body := s.request200json(req)
+	s.Equal(payload.Key, body["key"], "key")
+	s.Equal(payload.Value, body["value"], "value")
+	ts, err := time.Parse(time.RFC3339Nano, body["updated_at"].(string))
+	s.NoError(err, "parse updated_at")
+	s.True(time.Now().After(ts), "now is after updated_at")
+}
 
-	gateway2 := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+func (s *ApiTestSuite) TestAdmin_SetDynamicConfigNotFound() {
+	req, _ := http.NewRequest("POST", "/admin/dynamic_config/abc", nil)
+	s.apiAuthP(req, []string{common.RoleRoot})
+	resp := s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	req, _ = http.NewRequest("POST", "/admin/dynamic_config/1", nil)
+	s.apiAuthP(req, []string{common.RoleRoot})
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+}
+
+func (s *ApiTestSuite) TestAdmin_SetDynamicConfigBadRequest() {
+	kv := s.createDynamicConfig()
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
-	payload.Name = fmt.Sprintf("%s_edit", payload.Name)
-	payload.DefaultGatewayID = gateway2.ID
-	payload.Disabled = true
-	b, _ = json.Marshal(payload)
-	req, _ = http.NewRequest("PUT", fmt.Sprintf("/admin/rooms/%d", int64(body["id"].(float64))), bytes.NewBuffer(b))
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/admin/dynamic_config/%s", kv.Key), bytes.NewBuffer([]byte("{\"bad\":\"json")))
 	s.apiAuthP(req, []string{common.RoleRoot})
-	body = s.request200json(req)
-	s.Equal(payload.Name, body["name"], "name")
-	s.EqualValues(payload.DefaultGatewayID, body["default_gateway_id"], "default_gateway_id")
-	s.True(body["disabled"].(bool), "disabled")
-	s.Greater(body["updated_at"], body["created_at"], "updated_at > created_at")
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
 
-	// verify room is updated on gateway
-	gRoom := s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64)))
-	s.Require().NotNil(gRoom, "gateway room")
-	s.Equal(gRoom.Description, payload.Name, "gateway room description")
+	// no value
+	body := models.DynamicConfig{}
+	b, _ := json.Marshal(body)
+	req, _ = http.NewRequest("POST", fmt.Sprintf("/admin/dynamic_config/%s", kv.Key), bytes.NewBuffer(b))
+	s.apiAuthP(req, []string{common.RoleRoot})
+	resp = s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
 
-	gChatroom := s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64)))
-	s.Require().NotNil(gRoom, "gateway room")
-	s.Equal(gChatroom.Description, payload.Name, "gateway chatroom description")
+func (s *ApiTestSuite) TestAdmin_SetDynamicConfig() {
+	kv := s.createDynamicConfig()
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	payload := models.DynamicConfig{
+		Value: fmt.Sprintf("value_%s", stringutil.GenerateName(10)),
+	}
+	b, _ := json.Marshal(payload)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("/admin/dynamic_config/%s", kv.Key), bytes.NewBuffer(b))
+	s.apiAuthP(req, []string{common.RoleRoot})
+	resp := s.request(req)
+	s.Require().Equal(http.StatusOK, resp.Code)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/admin/dynamic_config/%d", kv.ID), nil)
+	s.apiAuthP(req, []string{common.RoleRoot})
+	body := s.request200json(req)
+	s.Equal(body["key"], kv.Key, "key")
+	s.Equal(body["value"], payload.Value, "value")
+	updatedAt, err := time.Parse(time.RFC3339Nano, body["updated_at"].(string))
+	s.NoError(err, "time.Parse error")
+	s.True(updatedAt.After(kv.UpdatedAt), "updated_at is after")
 }
 
 func (s *ApiTestSuite) TestAdmin_DeleteDynamicConfigForbidden() {

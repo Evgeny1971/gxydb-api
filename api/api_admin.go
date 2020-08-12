@@ -767,6 +767,59 @@ func (a *App) AdminUpdateDynamicConfig(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondWithJSON(w, http.StatusOK, kv)
 }
 
+func (a *App) AdminSetDynamicConfig(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	vars := mux.Vars(r)
+	key := vars["key"]
+	kv, ok := a.cache.dynamicConfig.ByKey(key)
+	if !ok {
+		httputil.NewNotFoundError().Abort(w, r)
+		return
+	}
+
+	var data models.DynamicConfig
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w, r)
+		return
+	}
+	a.requestContext(r).Params = data
+
+	if len(data.Value) == 0 {
+		httputil.NewBadRequestError(nil, "value is missing").Abort(w, r)
+		return
+	}
+
+	err := sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
+		kv.Value = data.Value
+		kv.UpdatedAt = time.Now().UTC()
+		if _, err := kv.Update(tx, boil.Whitelist("value", "updated_at")); err != nil {
+			return pkgerr.WithStack(err)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		var hErr *httputil.HttpError
+		if errors.As(err, &hErr) {
+			hErr.Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
+
+	if err := a.cache.dynamicConfig.Reload(a.DB); err != nil {
+		log.Error().Err(err).Msg("Reload cache")
+	}
+
+	httputil.RespondSuccess(w)
+}
+
 func (a *App) AdminDeleteDynamicConfig(w http.ResponseWriter, r *http.Request) {
 	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
 		httputil.NewForbiddenError().Abort(w, r)

@@ -173,5 +173,6 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/admin/dynamic_config", a.AdminCreateDynamicConfig).Methods("POST")
 	a.Router.HandleFunc("/admin/dynamic_config/{id}", a.AdminGetDynamicConfig).Methods("GET")
 	a.Router.HandleFunc("/admin/dynamic_config/{id}", a.AdminUpdateDynamicConfig).Methods("PUT")
+	a.Router.HandleFunc("/admin/dynamic_config/{key}", a.AdminSetDynamicConfig).Methods("POST")
 	a.Router.HandleFunc("/admin/dynamic_config/{id}", a.AdminDeleteDynamicConfig).Methods("DELETE")
 }
