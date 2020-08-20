@@ -18,6 +18,7 @@ type config struct {
 	MonitorGatewayTokens  bool
 	GatewayRoomsSecret    string
 	GatewayPluginAdminKey string
+	CollectPeriodicStats  bool
 }
 
 func newConfig() *config {
@@ -33,6 +34,7 @@ func newConfig() *config {
 		MonitorGatewayTokens:  true,
 		GatewayRoomsSecret:    "",
 		GatewayPluginAdminKey: "",
+		CollectPeriodicStats:  true,
 	}
 }
 
@@ -79,5 +81,8 @@ func Init() {
 	}
 	if val := os.Getenv("GATEWAY_PLUGIN_ADMIN_KEY"); val != "" {
 		Config.GatewayPluginAdminKey = val
+	}
+	if val := os.Getenv("COLLECT_PERIODIC_STATS"); val != "" {
+		Config.CollectPeriodicStats = val == "true"
 	}
 }

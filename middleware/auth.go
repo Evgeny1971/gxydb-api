@@ -74,7 +74,7 @@ func AuthenticationMiddleware(tokenVerifier OIDCTokenVerifier, gwPwd func(string
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			// health_check needs no auth
-			if r.URL.Path == "/health_check" {
+			if r.URL.Path == "/health_check" || r.URL.Path == "/metrics" {
 				next.ServeHTTP(w, r)
 				return
 			}

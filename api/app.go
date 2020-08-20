@@ -3,27 +3,32 @@ package api
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/coreos/go-oidc"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/cors"
 	"github.com/rs/zerolog/log"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/domain"
+	"github.com/Bnei-Baruch/gxydb-api/instrumentation"
 	"github.com/Bnei-Baruch/gxydb-api/middleware"
 )
 
 type App struct {
-	Router               *mux.Router
-	Handler              http.Handler
-	DB                   common.DBInterface
-	cache                *AppCache
-	sessionManager       SessionManager
-	gatewayTokensManager *domain.GatewayTokensManager
+	Router                 *mux.Router
+	Handler                http.Handler
+	DB                     common.DBInterface
+	cache                  *AppCache
+	sessionManager         SessionManager
+	gatewayTokensManager   *domain.GatewayTokensManager
+	periodicStatsCollector *instrumentation.PeriodicCollector
 }
 
 func (a *App) initOidc(issuer string) middleware.OIDCTokenVerifier {
@@ -56,13 +61,11 @@ func (a *App) Initialize() {
 func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware.OIDCTokenVerifier) {
 	a.DB = db
 
-	a.Router = mux.NewRouter()
-	a.initializeRoutes()
-
-	a.cache = new(AppCache)
-	if err := a.cache.Init(db); err != nil {
-		log.Fatal().Err(err).Msg("initialize app cache")
-	}
+	a.initRoutes()
+	a.initCache()
+	a.initSessionManagement()
+	a.initGatewayTokensMonitoring()
+	a.initInstrumentation()
 
 	// this is declared here to abstract away the cache from auth middleware
 	gatewayPwd := func(name string) (string, bool) {
@@ -71,14 +74,6 @@ func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware
 			return g.EventsPassword, true
 		}
 		return "", false
-	}
-
-	a.sessionManager = NewV1SessionManager(a.DB, a.cache)
-
-	if common.Config.MonitorGatewayTokens {
-		a.gatewayTokensManager = domain.NewGatewayTokensManager(a.DB, 3*24*time.Hour)
-		a.gatewayTokensManager.AddObserver(a)
-		a.gatewayTokensManager.Monitor()
 	}
 
 	corsMiddleware := cors.New(cors.Options{
@@ -118,6 +113,9 @@ func (a *App) Shutdown() {
 	if a.gatewayTokensManager != nil {
 		a.gatewayTokensManager.Close()
 	}
+	if a.periodicStatsCollector != nil {
+		a.periodicStatsCollector.Close()
+	}
 	a.cache.Close()
 	if err := a.DB.Close(); err != nil {
 		log.Error().Err(err).Msg("DB.close")
@@ -137,8 +135,16 @@ func (a *App) Notify(event interface{}) {
 	}
 }
 
-func (a *App) initializeRoutes() {
-	a.Router.HandleFunc("/health_check", a.HealthCheck).Methods("GET")
+type promErrorLog struct {
+	promhttp.Logger
+}
+
+func (l promErrorLog) Println(v ...interface{}) {
+	log.Error().Msgf("prometheus metrics error: %s", fmt.Sprint(v))
+}
+
+func (a *App) initRoutes() {
+	a.Router = mux.NewRouter()
 
 	// api v1 (current)
 	a.Router.HandleFunc("/groups", a.V1ListGroups).Methods("GET")
@@ -175,4 +181,41 @@ func (a *App) initializeRoutes() {
 	a.Router.HandleFunc("/admin/dynamic_config/{id}", a.AdminUpdateDynamicConfig).Methods("PUT")
 	a.Router.HandleFunc("/admin/dynamic_config/{key}", a.AdminSetDynamicConfig).Methods("POST")
 	a.Router.HandleFunc("/admin/dynamic_config/{id}", a.AdminDeleteDynamicConfig).Methods("DELETE")
+
+	// misc
+	a.Router.HandleFunc("/health_check", a.HealthCheck).Methods("GET")
+	a.Router.Handle("/metrics", promhttp.HandlerFor(
+		prometheus.DefaultGatherer,
+		promhttp.HandlerOpts{
+			ErrorLog:          promErrorLog{},
+			EnableOpenMetrics: true,
+		},
+	))
+}
+
+func (a *App) initCache() {
+	a.cache = new(AppCache)
+	if err := a.cache.Init(a.DB); err != nil {
+		log.Fatal().Err(err).Msg("initialize app cache")
+	}
+}
+
+func (a *App) initSessionManagement() {
+	a.sessionManager = NewV1SessionManager(a.DB, a.cache)
+}
+
+func (a *App) initGatewayTokensMonitoring() {
+	if common.Config.MonitorGatewayTokens {
+		a.gatewayTokensManager = domain.NewGatewayTokensManager(a.DB, 3*24*time.Hour)
+		a.gatewayTokensManager.AddObserver(a)
+		a.gatewayTokensManager.Monitor()
+	}
+}
+
+func (a *App) initInstrumentation() {
+	instrumentation.Stats.Init()
+	if common.Config.CollectPeriodicStats {
+		a.periodicStatsCollector = instrumentation.NewPeriodicCollector(a.DB)
+		a.periodicStatsCollector.Start()
+	}
 }
