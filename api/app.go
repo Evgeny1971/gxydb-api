@@ -140,7 +140,7 @@ type promErrorLog struct {
 }
 
 func (l promErrorLog) Println(v ...interface{}) {
-	log.Error().Msgf("prometheus metrics error: %s", fmt.Sprint(v))
+	log.Error().Msgf("prometheus metrics error: %s", fmt.Sprint(v...))
 }
 
 func (a *App) initRoutes() {
