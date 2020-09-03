@@ -46,7 +46,16 @@ func (sm *V1SessionManager) HandleEvent(ctx context.Context, event interface{}) 
 		case *janus.PluginEvent:
 			e := event.(*janus.PluginEvent)
 			if e.Event.Plugin == "janus.plugin.videoroom" {
-				switch e.Event.Data["event"].(string) {
+				eventType, ok := e.Event.Data["event"]
+				if !ok {
+					eventType, ok = e.Event.Data["videoroom"] // audio level change events have a little different structure.
+				}
+				if eventType == nil {
+					log.Ctx(ctx).Warn().Interface("event", event).Msg("type less gateway event")
+					return nil
+				}
+
+				switch eventType.(string) {
 				case "leaving":
 					if err := sm.onVideoroomLeaving(ctx, tx, e); err != nil {
 						return pkgerr.Wrap(err, "V1SessionManager.onVideoroomLeaving")
@@ -209,10 +218,20 @@ func (sm *V1SessionManager) getInternalUserID(ctx context.Context, tx *sql.Tx, u
 }
 
 func (sm *V1SessionManager) closeSession(ctx context.Context, tx *sql.Tx, userID int64) error {
+	b, err := json.Marshal(map[string]interface{}{
+		"close_session": time.Now().UTC(),
+	})
+	if err != nil {
+		log.Ctx(ctx).Error().Err(err).Msg("SessionManager.closeSession json.Marshal")
+	}
+
 	rowsAffected, err := models.Sessions(
 		models.SessionWhere.UserID.EQ(userID),
 		models.SessionWhere.RemovedAt.IsNull()).
-		UpdateAll(tx, models.M{models.SessionColumns.RemovedAt: time.Now().UTC()})
+		UpdateAll(tx, models.M{
+			models.SessionColumns.Properties: null.JSONFrom(b),
+			models.SessionColumns.RemovedAt:  time.Now().UTC(),
+		})
 	if err != nil {
 		return pkgerr.Wrap(err, "db update session")
 	}
