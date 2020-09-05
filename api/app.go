@@ -116,6 +116,7 @@ func (a *App) Shutdown() {
 	if a.periodicStatsCollector != nil {
 		a.periodicStatsCollector.Close()
 	}
+	a.sessionManager.Close()
 	a.cache.Close()
 	if err := a.DB.Close(); err != nil {
 		log.Error().Err(err).Msg("DB.close")
@@ -202,6 +203,7 @@ func (a *App) initCache() {
 
 func (a *App) initSessionManagement() {
 	a.sessionManager = NewV1SessionManager(a.DB, a.cache)
+	a.sessionManager.Start()
 }
 
 func (a *App) initGatewayTokensMonitoring() {

@@ -1,8 +1,10 @@
 package common
 
 import (
+	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 type config struct {
@@ -19,6 +21,8 @@ type config struct {
 	GatewayRoomsSecret    string
 	GatewayPluginAdminKey string
 	CollectPeriodicStats  bool
+	CleanSessionsInterval time.Duration
+	DeadSessionPeriod     time.Duration
 }
 
 func newConfig() *config {
@@ -35,6 +39,8 @@ func newConfig() *config {
 		GatewayRoomsSecret:    "",
 		GatewayPluginAdminKey: "",
 		CollectPeriodicStats:  true,
+		CleanSessionsInterval: time.Minute,
+		DeadSessionPeriod:     90 * time.Second,
 	}
 }
 
@@ -84,5 +90,22 @@ func Init() {
 	}
 	if val := os.Getenv("COLLECT_PERIODIC_STATS"); val != "" {
 		Config.CollectPeriodicStats = val == "true"
+	}
+	if val := os.Getenv("CLEAN_SESSIONS_INTERVAL"); val != "" {
+		pVal, err := time.ParseDuration(val)
+		if err != nil {
+			panic(err)
+		}
+		Config.CleanSessionsInterval = pVal
+	}
+	if val := os.Getenv("DEAD_SESSION_PERIOD"); val != "" {
+		pVal, err := time.ParseDuration(val)
+		if err != nil {
+			panic(err)
+		}
+		if pVal <= 0 {
+			panic(fmt.Errorf("DEAD_SESSION_PERIOD must be positive, got %d", pVal))
+		}
+		Config.DeadSessionPeriod = pVal
 	}
 }

@@ -9,10 +9,13 @@ import (
 	"time"
 
 	"github.com/edoshor/janus-go"
+	"github.com/lib/pq"
 	pkgerr "github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
+	"github.com/volatiletech/sqlboiler/queries"
+	"github.com/volatiletech/sqlboiler/queries/qm"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/models"
@@ -24,17 +27,21 @@ type SessionManager interface {
 	HandleEvent(context.Context, interface{}) error
 	HandleProtocol(context.Context, *janus.TextroomPostMsg) error
 	UpsertSession(context.Context, *V1User) error
+	Start()
+	Close()
 }
 
 type V1SessionManager struct {
-	db    common.DBInterface
-	cache *AppCache
+	db      common.DBInterface
+	cache   *AppCache
+	cleaner *PeriodicSessionCleaner
 }
 
 func NewV1SessionManager(db common.DBInterface, cache *AppCache) SessionManager {
 	return &V1SessionManager{
-		db:    db,
-		cache: cache,
+		db:      db,
+		cache:   cache,
+		cleaner: NewPeriodicSessionCleaner(db),
 	}
 }
 
@@ -109,6 +116,14 @@ func (sm *V1SessionManager) UpsertSession(ctx context.Context, user *V1User) err
 	return sqlutil.InTx(ctx, sm.db, func(tx *sql.Tx) error {
 		return sm.upsertSession(ctx, tx, user)
 	})
+}
+
+func (sm *V1SessionManager) Start() {
+	sm.cleaner.Start()
+}
+
+func (sm *V1SessionManager) Close() {
+	sm.cleaner.Close()
 }
 
 func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, event *janus.PluginEvent) error {
@@ -225,17 +240,17 @@ func (sm *V1SessionManager) closeSession(ctx context.Context, tx *sql.Tx, userID
 		log.Ctx(ctx).Error().Err(err).Msg("SessionManager.closeSession json.Marshal")
 	}
 
-	rowsAffected, err := models.Sessions(
-		models.SessionWhere.UserID.EQ(userID),
-		models.SessionWhere.RemovedAt.IsNull()).
-		UpdateAll(tx, models.M{
-			models.SessionColumns.Properties: null.JSONFrom(b),
-			models.SessionColumns.RemovedAt:  time.Now().UTC(),
-		})
+	res, err := queries.Raw("update sessions set properties = coalesce(properties, '{}'::jsonb) || $1, removed_at = $2 where user_id = $3 and removed_at is null",
+		string(b), time.Now().UTC(), userID,
+	).Exec(tx)
 	if err != nil {
 		return pkgerr.Wrap(err, "db update session")
 	}
 
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		return pkgerr.Wrap(err, "db update session")
+	}
 	log.Ctx(ctx).Info().Msgf("%d sessions were closed", rowsAffected)
 
 	return nil
@@ -306,4 +321,118 @@ func (sm *V1SessionManager) makeSession(userID int64, user *V1User) (*models.Ses
 		IPAddress:      null.StringFrom(user.IP),
 		UpdatedAt:      null.TimeFrom(time.Now().UTC()),
 	}, nil
+}
+
+type PeriodicSessionCleaner struct {
+	ticker *time.Ticker
+	db     common.DBInterface
+}
+
+func NewPeriodicSessionCleaner(db common.DBInterface) *PeriodicSessionCleaner {
+	return &PeriodicSessionCleaner{db: db}
+}
+
+func (psc *PeriodicSessionCleaner) Start() {
+	if common.Config.CleanSessionsInterval <= 0 {
+		return
+	}
+
+	log.Info().Msg("periodically cleaning sessions")
+	psc.ticker = time.NewTicker(common.Config.CleanSessionsInterval)
+	go psc.run()
+}
+
+func (psc *PeriodicSessionCleaner) Close() {
+	if psc.ticker != nil {
+		psc.ticker.Stop()
+	}
+}
+
+func (psc *PeriodicSessionCleaner) run() {
+	for range psc.ticker.C {
+		psc.clean()
+	}
+}
+
+func (psc *PeriodicSessionCleaner) clean() {
+	// Note that we might be missing a DB index here.
+	// However, at a < 10k rows table my tests showed it was irrelevant. So maybe add it in the future.
+	mods := []qm.QueryMod{
+		models.SessionWhere.RemovedAt.IsNull(),
+		models.SessionWhere.UpdatedAt.LT(null.TimeFrom(time.Now().Add(-common.Config.DeadSessionPeriod))),
+	}
+
+	// fetch for visibility
+	sessions, err := models.Sessions(mods...).All(psc.db)
+	if err != nil {
+		log.Error().Err(err).Msg("PeriodicSessionCleaner fetch sessions")
+		return
+	}
+	log.Info().Msgf("PeriodicSessionCleaner found %d sessions to be cleaned", len(sessions))
+
+	if len(sessions) == 0 {
+		return
+	}
+
+	// clean
+	b, err := json.Marshal(map[string]interface{}{
+		"clean_session": time.Now().UTC(),
+	})
+	if err != nil {
+		log.Error().Err(err).Msg("PeriodicSessionCleaner json.Marshal")
+	}
+	err = sqlutil.InTx(context.TODO(), psc.db, func(tx *sql.Tx) error {
+		ids := make([]int64, len(sessions))
+		for i := range sessions {
+			ids[i] = sessions[i].ID
+		}
+		res, err := queries.Raw("update sessions set properties = coalesce(properties, '{}'::jsonb) || $1, removed_at = $2 where id = ANY($3)",
+			string(b), time.Now().UTC(), pq.Array(ids),
+		).Exec(tx)
+		if err != nil {
+			return pkgerr.WithStack(err)
+		}
+		affected, err := res.RowsAffected()
+		if err != nil {
+			return pkgerr.WithStack(err)
+		}
+
+		if int(affected) != len(sessions) {
+			log.Warn().
+				Int("sessions", len(sessions)).
+				Int64("affected", affected).
+				Msg("PeriodicSessionCleaner clean sessions rows affected mismatch")
+			return nil
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Error().Err(err).Msg("PeriodicSessionCleaner clean sessions")
+		return
+	}
+
+	// report
+	dead := make([]*models.Session, 0)
+	revived := make([]*models.Session, 0)
+	for _, session := range sessions {
+		var props map[string]interface{}
+		if session.Properties.Valid {
+			if err := json.Unmarshal(session.Properties.JSON, &props); err != nil {
+				log.Warn().Err(err).Bytes("json", session.Properties.JSON).Msg("json.Unmarshal session.Properties")
+				continue
+			}
+			if _, ok := props["close_session"]; ok {
+				revived = append(revived, session)
+				continue
+			}
+		}
+		dead = append(dead, session)
+	}
+	log.Info().
+		Int("total", len(sessions)).
+		Int("dead", len(dead)).
+		Int("revived", len(revived)).
+		Msg("PeriodicSessionCleaner summary")
 }
