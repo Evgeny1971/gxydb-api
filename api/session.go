@@ -269,7 +269,7 @@ func (sm *V1SessionManager) upsertSession(ctx context.Context, tx *sql.Tx, user 
 
 	err = session.Upsert(tx, true,
 		[]string{models.SessionColumns.UserID, models.SessionColumns.GatewayID, models.SessionColumns.GatewaySession},
-		boil.Blacklist(models.SessionColumns.CreatedAt), boil.Infer())
+		boil.Blacklist(models.SessionColumns.CreatedAt, models.SessionColumns.Properties), boil.Infer())
 	if err != nil {
 		return pkgerr.Wrap(err, "db upsert")
 	}
@@ -435,4 +435,19 @@ func (psc *PeriodicSessionCleaner) clean() {
 		Int("dead", len(dead)).
 		Int("revived", len(revived)).
 		Msg("PeriodicSessionCleaner summary")
+	for _, s := range dead {
+		log.Info().
+			Int64("session", s.ID).
+			Int64("user", s.UserID).
+			Int64("user", s.GatewayID.Int64).
+			Msg("PeriodicSessionCleaner dead")
+	}
+	for _, s := range revived {
+		log.Info().
+			Int64("session", s.ID).
+			Int64("user", s.UserID).
+			Int64("user", s.GatewayID.Int64).
+			Str("properties", string(s.Properties.JSON)).
+			Msg("PeriodicSessionCleaner revived")
+	}
 }
