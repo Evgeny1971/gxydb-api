@@ -439,14 +439,14 @@ func (psc *PeriodicSessionCleaner) clean() {
 		log.Info().
 			Int64("session", s.ID).
 			Int64("user", s.UserID).
-			Int64("user", s.GatewayID.Int64).
+			Int64("gateway", s.GatewayID.Int64).
 			Msg("PeriodicSessionCleaner dead")
 	}
 	for _, s := range revived {
 		log.Info().
 			Int64("session", s.ID).
 			Int64("user", s.UserID).
-			Int64("user", s.GatewayID.Int64).
+			Int64("gateway", s.GatewayID.Int64).
 			Str("properties", string(s.Properties.JSON)).
 			Msg("PeriodicSessionCleaner revived")
 	}

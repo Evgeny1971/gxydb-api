@@ -279,6 +279,7 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 			FirFreq:            10,
 			AudioCodec:         "opus",
 			VideoCodec:         "h264",
+			H264Profile:        "42e01f",
 			AudioLevelExt:      true,
 			AudioLevelEvent:    true,
 			AudioActivePackets: 25,
