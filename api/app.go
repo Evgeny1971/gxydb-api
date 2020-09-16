@@ -49,6 +49,9 @@ func (a *App) Initialize() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("sql.Open")
 	}
+	db.SetMaxIdleConns(common.Config.DBMaxIdleConns)
+	db.SetMaxOpenConns(common.Config.DBMaxOpenConns)
+	db.SetConnMaxLifetime(common.Config.DBConnMaxLifetime)
 
 	var tokenVerifier middleware.OIDCTokenVerifier
 	if !common.Config.SkipAuth {

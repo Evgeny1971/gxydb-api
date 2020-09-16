@@ -3,6 +3,7 @@ package common
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -23,6 +24,9 @@ type config struct {
 	CollectPeriodicStats  bool
 	CleanSessionsInterval time.Duration
 	DeadSessionPeriod     time.Duration
+	DBMaxIdleConns        int
+	DBMaxOpenConns        int
+	DBConnMaxLifetime     time.Duration
 }
 
 func newConfig() *config {
@@ -41,6 +45,9 @@ func newConfig() *config {
 		CollectPeriodicStats:  true,
 		CleanSessionsInterval: time.Minute,
 		DeadSessionPeriod:     90 * time.Second,
+		DBMaxIdleConns:        2,
+		DBMaxOpenConns:        0,
+		DBConnMaxLifetime:     0,
 	}
 }
 
@@ -107,5 +114,26 @@ func Init() {
 			panic(fmt.Errorf("DEAD_SESSION_PERIOD must be positive, got %d", pVal))
 		}
 		Config.DeadSessionPeriod = pVal
+	}
+	if val := os.Getenv("DB_MAX_IDLE_CONNS"); val != "" {
+		pVal, err := strconv.Atoi(val)
+		if err != nil {
+			panic(err)
+		}
+		Config.DBMaxIdleConns = pVal
+	}
+	if val := os.Getenv("DB_MAX_OPEN_CONNS"); val != "" {
+		pVal, err := strconv.Atoi(val)
+		if err != nil {
+			panic(err)
+		}
+		Config.DBMaxOpenConns = pVal
+	}
+	if val := os.Getenv("DB_CONN_MAX_LIFETIME"); val != "" {
+		pVal, err := time.ParseDuration(val)
+		if err != nil {
+			panic(err)
+		}
+		Config.DBConnMaxLifetime = pVal
 	}
 }
