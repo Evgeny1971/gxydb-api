@@ -92,6 +92,21 @@ func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware
 		AllowedHeaders: []string{"Origin", "Accept", "Content-Type", "X-Requested-With", "Authorization"},
 	})
 
+	// middleware post route match
+	a.Router.Use(func(h http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if route := mux.CurrentRoute(r); route != nil {
+				rCtx, _ := middleware.ContextFromRequest(r)
+				if tpl, err := route.GetPathTemplate(); err == nil {
+					rCtx.RouteName = tpl
+				} else {
+					rCtx.RouteName = r.URL.Path
+				}
+			}
+			h.ServeHTTP(w, r)
+		})
+	})
+
 	a.Handler = middleware.ContextMiddleware(
 		middleware.LoggingMiddleware(
 			middleware.RecoveryMiddleware(

@@ -7,8 +7,9 @@ import (
 var Stats = new(Collectors)
 
 type Collectors struct {
-	GatewaySessionsGauge  *prometheus.GaugeVec
-	RoomParticipantsGauge *prometheus.GaugeVec
+	GatewaySessionsGauge     *prometheus.GaugeVec
+	RoomParticipantsGauge    *prometheus.GaugeVec
+	RequestDurationHistogram *prometheus.HistogramVec
 }
 
 func (c *Collectors) Init() {
@@ -33,8 +34,16 @@ func (c *Collectors) Init() {
 		"name",
 	})
 
+	c.RequestDurationHistogram = prometheus.NewHistogramVec(prometheus.HistogramOpts{
+		Namespace: "galaxy",
+		Subsystem: "api",
+		Name:      "request_duration",
+		Help:      "Time (in milliseconds) spent serving HTTP requests.",
+	}, []string{"method", "route", "status_code"})
+
 	prometheus.MustRegister(c.GatewaySessionsGauge)
 	prometheus.MustRegister(c.RoomParticipantsGauge)
+	prometheus.MustRegister(c.RequestDurationHistogram)
 	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
 }
 

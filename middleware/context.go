@@ -10,6 +10,7 @@ type RequestContext struct {
 	IDClaims    *IDTokenClaims
 	ServiceUser bool
 	Params      interface{}
+	RouteName   string
 }
 
 type requestCtx struct{}
