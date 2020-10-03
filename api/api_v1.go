@@ -508,7 +508,15 @@ func (a *App) V1HandleServiceProtocol(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Ctx(r.Context()).Info().Interface("payload", msg).Msg("service protocol message")
+	if err := a.serviceProtocolHandler.HandleMessage(r.Context(), msg); err != nil {
+		var pErr *ProtocolError
+		if errors.As(err, &pErr) {
+			httputil.NewBadRequestError(err, "service protocol error").Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
 
 	httputil.RespondSuccess(w)
 }

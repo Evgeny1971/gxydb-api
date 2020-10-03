@@ -27,7 +27,9 @@ type App struct {
 	DB                     common.DBInterface
 	cache                  *AppCache
 	sessionManager         SessionManager
+	serviceProtocolHandler ServiceProtocolHandler
 	gatewayTokensManager   *domain.GatewayTokensManager
+	roomsStatisticsManager *domain.RoomStatisticsManager
 	periodicStatsCollector *instrumentation.PeriodicCollector
 }
 
@@ -68,6 +70,8 @@ func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware
 	a.initCache()
 	a.initSessionManagement()
 	a.initGatewayTokensMonitoring()
+	a.initRoomsStatistics()
+	a.initServiceProtocolHandler()
 	a.initInstrumentation()
 
 	// this is declared here to abstract away the cache from auth middleware
@@ -184,16 +188,17 @@ func (a *App) initRoutes() {
 
 	// api v2 (next)
 	a.Router.HandleFunc("/v2/config", a.V2GetConfig).Methods("GET")
+	a.Router.HandleFunc("/v2/rooms_statistics", a.V2GetRoomsStatistics).Methods("GET") // Here due to more open permissions. otherwise might be under /admin/
 
 	// admin
 	a.Router.HandleFunc("/admin/gateways", a.AdminListGateways).Methods("GET")
 	a.Router.HandleFunc("/admin/gateways/{gateway_id}/sessions/{session_id}/handles/{handle_id}/info", a.AdminGatewaysHandleInfo).Methods("GET")
-
 	a.Router.HandleFunc("/admin/rooms", a.AdminListRooms).Methods("GET")
 	a.Router.HandleFunc("/admin/rooms", a.AdminCreateRoom).Methods("POST")
 	a.Router.HandleFunc("/admin/rooms/{id}", a.AdminGetRoom).Methods("GET")
 	a.Router.HandleFunc("/admin/rooms/{id}", a.AdminUpdateRoom).Methods("PUT")
 	a.Router.HandleFunc("/admin/rooms/{id}", a.AdminDeleteRoom).Methods("DELETE")
+	a.Router.HandleFunc("/admin/rooms_statistics", a.AdminDeleteRoomsStatistics).Methods("DELETE")
 	a.Router.HandleFunc("/admin/dynamic_config", a.AdminListDynamicConfigs).Methods("GET")
 	a.Router.HandleFunc("/admin/dynamic_config", a.AdminCreateDynamicConfig).Methods("POST")
 	a.Router.HandleFunc("/admin/dynamic_config/{id}", a.AdminGetDynamicConfig).Methods("GET")
@@ -224,12 +229,20 @@ func (a *App) initSessionManagement() {
 	a.sessionManager.Start()
 }
 
+func (a *App) initServiceProtocolHandler() {
+	a.serviceProtocolHandler = NewV1ServiceProtocolHandler(a.DB, a.cache, a.roomsStatisticsManager)
+}
+
 func (a *App) initGatewayTokensMonitoring() {
 	if common.Config.MonitorGatewayTokens {
 		a.gatewayTokensManager = domain.NewGatewayTokensManager(a.DB, 3*24*time.Hour)
 		a.gatewayTokensManager.AddObserver(a)
 		a.gatewayTokensManager.Monitor()
 	}
+}
+
+func (a *App) initRoomsStatistics() {
+	a.roomsStatisticsManager = domain.NewRoomStatisticsManager(a.DB)
 }
 
 func (a *App) initInstrumentation() {

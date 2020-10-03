@@ -50,6 +50,21 @@ func (a *App) V2GetConfig(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondWithJSON(w, http.StatusOK, cfg)
 }
 
+func (a *App) V2GetRoomsStatistics(w http.ResponseWriter, r *http.Request) {
+	stats, err := a.roomsStatisticsManager.GetAll()
+	if err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	}
+
+	data := make(map[int]*V2RoomStatistics, len(stats))
+	for _, roomStats := range stats {
+		data[roomStats.R.Room.GatewayUID] = &V2RoomStatistics{OnAir: roomStats.OnAir}
+	}
+
+	httputil.RespondWithJSON(w, http.StatusOK, data)
+}
+
 func (a *App) ListRooms(w http.ResponseWriter, r *http.Request) {
 	rooms, err := models.Rooms(
 		models.RoomWhere.Disabled.EQ(false),

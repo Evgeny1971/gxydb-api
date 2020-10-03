@@ -1,25 +1,18 @@
 package domain
 
 import (
-	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/suite"
-	"github.com/volatiletech/sqlboiler/boil"
-	"golang.org/x/crypto/bcrypt"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/models"
-	"github.com/Bnei-Baruch/gxydb-api/pkg/crypt"
-	"github.com/Bnei-Baruch/gxydb-api/pkg/stringutil"
 	"github.com/Bnei-Baruch/gxydb-api/pkg/testutil"
 )
 
 type GatewaysTestSuite struct {
-	suite.Suite
-	testutil.TestDBManager
+	ModelsSuite
 	testutil.GatewayManager
 }
 
@@ -68,7 +61,7 @@ func (s *GatewaysTestSuite) TestSyncAll() {
 }
 
 func (s *GatewaysTestSuite) TestRotateTokensWrongAdminPwd() {
-	gateway := s.createGatewayP(common.GatewayTypeStreaming, "wrong_password")
+	gateway := s.CreateGatewayP(common.GatewayTypeStreaming, s.GatewayManager.Config.AdminURL, "wrong_password")
 	tm := NewGatewayTokensManager(s.DB, 1)
 	changed, err := tm.syncGatewayTokens(gateway)
 	s.False(changed, "changed")
@@ -76,28 +69,7 @@ func (s *GatewaysTestSuite) TestRotateTokensWrongAdminPwd() {
 }
 
 func (s *GatewaysTestSuite) createGateway() *models.Gateway {
-	return s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminSecret)
-}
-
-func (s *GatewaysTestSuite) createGatewayP(gType string, adminPwd string) *models.Gateway {
-	name := fmt.Sprintf("gateway_%s", stringutil.GenerateName(4))
-	pwdHash, err := bcrypt.GenerateFromPassword([]byte(name), bcrypt.MinCost)
-	s.Require().NoError(err)
-	encAdminPwd, err := crypt.Encrypt([]byte(adminPwd), common.Config.Secret)
-	s.Require().NoError(err)
-
-	gateway := &models.Gateway{
-		Name:           name,
-		URL:            "url",
-		AdminURL:       s.GatewayManager.Config.AdminURL,
-		AdminPassword:  base64.StdEncoding.EncodeToString(encAdminPwd),
-		EventsPassword: string(pwdHash),
-		Type:           gType,
-	}
-
-	s.Require().NoError(gateway.Insert(s.DB, boil.Infer()))
-
-	return gateway
+	return s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 }
 
 func TestGatewaysTestSuite(t *testing.T) {

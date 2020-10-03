@@ -12,13 +12,13 @@ import (
 )
 
 func (s *ApiTestSuite) TestSessions_Clean() {
-	gateway := s.createGateway()
-	room := s.createRoom(gateway)
+	gateway := s.CreateGateway()
+	room := s.CreateRoom(gateway)
 	users := make([]*models.User, 5)
 	sessions := make([]*models.Session, len(users))
 	for i := range users {
-		users[i] = s.createUser()
-		sessions[i] = s.createSession(users[i], gateway, room)
+		users[i] = s.CreateUser()
+		sessions[i] = s.CreateSession(users[i], gateway, room)
 	}
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 

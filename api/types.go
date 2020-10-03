@@ -16,6 +16,10 @@ type V2Config struct {
 	LastModified  time.Time                        `json:"last_modified"`
 }
 
+type V2RoomStatistics struct {
+	OnAir int `json:"on_air"`
+}
+
 type V1User struct {
 	ID        string `json:"id"`
 	Display   string `json:"display"`
@@ -66,4 +70,13 @@ type V1ProtocolMessageText struct {
 	Status bool
 	Room   int
 	User   V1User
+}
+
+type V1ServiceProtocolMessageText struct {
+	Type        string
+	Status      bool
+	Room        *int
+	Column      *int `json:"col"`
+	Index       *int `json:"i"`
+	Transaction *string
 }

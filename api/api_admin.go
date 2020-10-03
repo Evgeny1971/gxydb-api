@@ -564,6 +564,20 @@ func (a *App) AdminDeleteRoom(w http.ResponseWriter, r *http.Request) {
 	httputil.RespondSuccess(w)
 }
 
+func (a *App) AdminDeleteRoomsStatistics(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleShidur, common.RoleRoot) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	if err := a.roomsStatisticsManager.Reset(r.Context()); err != nil {
+		httputil.NewInternalError(err).Abort(w, r)
+		return
+	}
+
+	httputil.RespondSuccess(w)
+}
+
 func (a *App) AdminListDynamicConfigs(w http.ResponseWriter, r *http.Request) {
 	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleRoot) {
 		httputil.NewForbiddenError().Abort(w, r)

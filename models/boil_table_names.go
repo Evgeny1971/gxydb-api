@@ -8,6 +8,7 @@ var TableNames = struct {
 	CompositesRooms  string
 	DynamicConfig    string
 	Gateways         string
+	RoomStatistics   string
 	Rooms            string
 	SchemaMigrations string
 	Sessions         string
@@ -17,6 +18,7 @@ var TableNames = struct {
 	CompositesRooms:  "composites_rooms",
 	DynamicConfig:    "dynamic_config",
 	Gateways:         "gateways",
+	RoomStatistics:   "room_statistics",
 	Rooms:            "rooms",
 	SchemaMigrations: "schema_migrations",
 	Sessions:         "sessions",

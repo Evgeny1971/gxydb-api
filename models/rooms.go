@@ -86,10 +86,12 @@ var RoomWhere = struct {
 // RoomRels is where relationship names are stored.
 var RoomRels = struct {
 	DefaultGateway  string
+	RoomStatistic   string
 	CompositesRooms string
 	Sessions        string
 }{
 	DefaultGateway:  "DefaultGateway",
+	RoomStatistic:   "RoomStatistic",
 	CompositesRooms: "CompositesRooms",
 	Sessions:        "Sessions",
 }
@@ -97,6 +99,7 @@ var RoomRels = struct {
 // roomR is where relationships are stored.
 type roomR struct {
 	DefaultGateway  *Gateway
+	RoomStatistic   *RoomStatistic
 	CompositesRooms CompositesRoomSlice
 	Sessions        SessionSlice
 }
@@ -217,6 +220,20 @@ func (o *Room) DefaultGateway(mods ...qm.QueryMod) gatewayQuery {
 
 	query := Gateways(queryMods...)
 	queries.SetFrom(query.Query, "\"gateways\"")
+
+	return query
+}
+
+// RoomStatistic pointed to by the foreign key.
+func (o *Room) RoomStatistic(mods ...qm.QueryMod) roomStatisticQuery {
+	queryMods := []qm.QueryMod{
+		qm.Where("\"room_id\" = ?", o.ID),
+	}
+
+	queryMods = append(queryMods, mods...)
+
+	query := RoomStatistics(queryMods...)
+	queries.SetFrom(query.Query, "\"room_statistics\"")
 
 	return query
 }
@@ -348,6 +365,96 @@ func (roomL) LoadDefaultGateway(e boil.Executor, singular bool, maybeRoom interf
 					foreign.R = &gatewayR{}
 				}
 				foreign.R.DefaultGatewayRooms = append(foreign.R.DefaultGatewayRooms, local)
+				break
+			}
+		}
+	}
+
+	return nil
+}
+
+// LoadRoomStatistic allows an eager lookup of values, cached into the
+// loaded structs of the objects. This is for a 1-1 relationship.
+func (roomL) LoadRoomStatistic(e boil.Executor, singular bool, maybeRoom interface{}, mods queries.Applicator) error {
+	var slice []*Room
+	var object *Room
+
+	if singular {
+		object = maybeRoom.(*Room)
+	} else {
+		slice = *maybeRoom.(*[]*Room)
+	}
+
+	args := make([]interface{}, 0, 1)
+	if singular {
+		if object.R == nil {
+			object.R = &roomR{}
+		}
+		args = append(args, object.ID)
+	} else {
+	Outer:
+		for _, obj := range slice {
+			if obj.R == nil {
+				obj.R = &roomR{}
+			}
+
+			for _, a := range args {
+				if a == obj.ID {
+					continue Outer
+				}
+			}
+
+			args = append(args, obj.ID)
+		}
+	}
+
+	if len(args) == 0 {
+		return nil
+	}
+
+	query := NewQuery(qm.From(`room_statistics`), qm.WhereIn(`room_statistics.room_id in ?`, args...))
+	if mods != nil {
+		mods.Apply(query)
+	}
+
+	results, err := query.Query(e)
+	if err != nil {
+		return errors.Wrap(err, "failed to eager load RoomStatistic")
+	}
+
+	var resultSlice []*RoomStatistic
+	if err = queries.Bind(results, &resultSlice); err != nil {
+		return errors.Wrap(err, "failed to bind eager loaded slice RoomStatistic")
+	}
+
+	if err = results.Close(); err != nil {
+		return errors.Wrap(err, "failed to close results of eager load for room_statistics")
+	}
+	if err = results.Err(); err != nil {
+		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for room_statistics")
+	}
+
+	if len(resultSlice) == 0 {
+		return nil
+	}
+
+	if singular {
+		foreign := resultSlice[0]
+		object.R.RoomStatistic = foreign
+		if foreign.R == nil {
+			foreign.R = &roomStatisticR{}
+		}
+		foreign.R.Room = object
+	}
+
+	for _, local := range slice {
+		for _, foreign := range resultSlice {
+			if local.ID == foreign.RoomID {
+				local.R.RoomStatistic = foreign
+				if foreign.R == nil {
+					foreign.R = &roomStatisticR{}
+				}
+				foreign.R.Room = local
 				break
 			}
 		}
@@ -575,6 +682,56 @@ func (o *Room) SetDefaultGateway(exec boil.Executor, insert bool, related *Gatew
 		related.R.DefaultGatewayRooms = append(related.R.DefaultGatewayRooms, o)
 	}
 
+	return nil
+}
+
+// SetRoomStatistic of the room to the related item.
+// Sets o.R.RoomStatistic to related.
+// Adds o to related.R.Room.
+func (o *Room) SetRoomStatistic(exec boil.Executor, insert bool, related *RoomStatistic) error {
+	var err error
+
+	if insert {
+		related.RoomID = o.ID
+
+		if err = related.Insert(exec, boil.Infer()); err != nil {
+			return errors.Wrap(err, "failed to insert into foreign table")
+		}
+	} else {
+		updateQuery := fmt.Sprintf(
+			"UPDATE \"room_statistics\" SET %s WHERE %s",
+			strmangle.SetParamNames("\"", "\"", 1, []string{"room_id"}),
+			strmangle.WhereClause("\"", "\"", 2, roomStatisticPrimaryKeyColumns),
+		)
+		values := []interface{}{o.ID, related.RoomID}
+
+		if boil.DebugMode {
+			fmt.Fprintln(boil.DebugWriter, updateQuery)
+			fmt.Fprintln(boil.DebugWriter, values)
+		}
+		if _, err = exec.Exec(updateQuery, values...); err != nil {
+			return errors.Wrap(err, "failed to update foreign table")
+		}
+
+		related.RoomID = o.ID
+
+	}
+
+	if o.R == nil {
+		o.R = &roomR{
+			RoomStatistic: related,
+		}
+	} else {
+		o.R.RoomStatistic = related
+	}
+
+	if related.R == nil {
+		related.R = &roomStatisticR{
+			Room: o,
+		}
+	} else {
+		related.R.Room = o
+	}
 	return nil
 }
 

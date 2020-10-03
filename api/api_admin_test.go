@@ -57,7 +57,7 @@ func (s *ApiTestSuite) TestAdmin_ListGateways() {
 
 	gateways := make([]*models.Gateway, 10)
 	for i := range gateways {
-		gateways[i] = s.createGateway()
+		gateways[i] = s.CreateGateway()
 	}
 
 	body = s.request200json(req)
@@ -97,7 +97,7 @@ func (s *ApiTestSuite) TestAdmin_GatewaysHandleInfoNotFound() {
 	resp := s.request(req)
 	s.Require().Equal(http.StatusNotFound, resp.Code)
 
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ = http.NewRequest("GET", fmt.Sprintf("/admin/gateways/%s/sessions/1/handles/1/info", gateway.Name), nil)
@@ -116,7 +116,7 @@ func (s *ApiTestSuite) TestAdmin_GatewaysHandleInfoNotFound() {
 }
 
 func (s *ApiTestSuite) TestAdmin_GatewaysHandleInfo() {
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	session, err := s.NewGatewaySession()
@@ -170,10 +170,10 @@ func (s *ApiTestSuite) TestAdmin_ListRooms() {
 	s.Equal(0, int(body["total"].(float64)), "total")
 	s.Equal(0, len(body["data"].([]interface{})), "len(data)")
 
-	gateway := s.createGateway()
+	gateway := s.CreateGateway()
 	rooms := make([]*models.Room, 10)
 	for i := range rooms {
-		rooms[i] = s.createRoom(gateway)
+		rooms[i] = s.CreateRoom(gateway)
 	}
 
 	body = s.request200json(req)
@@ -235,7 +235,7 @@ func (s *ApiTestSuite) TestAdmin_ListRooms() {
 	}
 
 	// gateways filter
-	gateway2 := s.createGateway()
+	gateway2 := s.CreateGateway()
 	rooms[0].DefaultGatewayID = gateway2.ID
 	_, err = rooms[0].Update(s.DB, boil.Whitelist(models.RoomColumns.DefaultGatewayID))
 	s.Require().NoError(err)
@@ -289,8 +289,8 @@ func (s *ApiTestSuite) TestAdmin_GetRoomNotFound() {
 }
 
 func (s *ApiTestSuite) TestAdmin_GetRoom() {
-	gateway := s.createGateway()
-	room := s.createRoom(gateway)
+	gateway := s.CreateGateway()
+	room := s.CreateRoom(gateway)
 	req, _ := http.NewRequest("GET", fmt.Sprintf("/admin/rooms/%d", room.ID), nil)
 	s.apiAuthP(req, []string{common.RoleRoot})
 	body := s.request200json(req)
@@ -328,7 +328,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoomBadRequest() {
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 
 	// invalid gateway uid
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	body.DefaultGatewayID = gateway.ID
@@ -340,7 +340,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoomBadRequest() {
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 
 	// existing gateway_uid
-	room := s.createRoom(gateway)
+	room := s.CreateRoom(gateway)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 	body.GatewayUID = room.GatewayUID
 	b, _ = json.Marshal(body)
@@ -371,7 +371,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoomBadRequest() {
 }
 
 func (s *ApiTestSuite) TestAdmin_CreateRoom() {
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	payload := models.Room{
@@ -423,8 +423,8 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoomNotFound() {
 }
 
 func (s *ApiTestSuite) TestAdmin_UpdateRoomBadRequest() {
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
-	room := s.createRoom(gateway)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	room := s.CreateRoom(gateway)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	req, _ := http.NewRequest("PUT", fmt.Sprintf("/admin/rooms/%d", room.ID), bytes.NewBuffer([]byte("{\"bad\":\"json")))
@@ -453,7 +453,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoomBadRequest() {
 	s.Require().Equal(http.StatusBadRequest, resp.Code)
 
 	// existing gateway_uid
-	room2 := s.createRoom(gateway)
+	room2 := s.CreateRoom(gateway)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 	body.GatewayUID = room2.GatewayUID
 	b, _ = json.Marshal(body)
@@ -483,7 +483,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoomBadRequest() {
 }
 
 func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	payload := models.Room{
@@ -496,7 +496,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 	s.apiAuthP(req, []string{common.RoleRoot})
 	body := s.request201json(req)
 
-	gateway2 := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway2 := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	payload.Name = fmt.Sprintf("%s_edit", payload.Name)
@@ -545,7 +545,7 @@ func (s *ApiTestSuite) TestAdmin_DeleteRoomNotFound() {
 }
 
 func (s *ApiTestSuite) TestAdmin_DeleteRoom() {
-	gateway := s.createGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
+	gateway := s.CreateGatewayP(common.GatewayTypeRooms, s.GatewayManager.Config.AdminURL, s.GatewayManager.Config.AdminSecret)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	payload := models.Room{
@@ -571,6 +571,29 @@ func (s *ApiTestSuite) TestAdmin_DeleteRoom() {
 	// verify room does not exists on gateway
 	s.Nil(s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64))))
 	s.Nil(s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64))))
+}
+
+func (s *ApiTestSuite) TestAdmin_DeleteRoomsStatistics() {
+	gateway := s.CreateGateway()
+	rooms := make([]*models.Room, 5)
+	for i := range rooms {
+		rooms[i] = s.CreateRoom(gateway)
+		roomStatistic := models.RoomStatistic{
+			RoomID: rooms[i].ID,
+			OnAir:  i + 1,
+		}
+		err := roomStatistic.Insert(s.DB, boil.Infer())
+		s.Require().NoError(err, "create RoomStatistic")
+	}
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	req, _ := http.NewRequest("DELETE", "/admin/rooms_statistics", nil)
+	s.apiAuthP(req, []string{common.RoleRoot})
+	s.request200json(req)
+
+	count, err := models.RoomStatistics().Count(s.DB)
+	s.Require().NoError(err)
+	s.EqualValues(0, count)
 }
 
 func (s *ApiTestSuite) TestAdmin_ListDynamicConfigsForbidden() {
