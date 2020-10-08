@@ -50,4 +50,5 @@ func (c *Collectors) Init() {
 func (c *Collectors) Reset() {
 	c.GatewaySessionsGauge.Reset()
 	c.RoomParticipantsGauge.Reset()
+	c.RequestDurationHistogram.Reset()
 }

@@ -52,8 +52,12 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			if status >= http.StatusBadRequest {
 				event.Interface("params", rCtx.Params)
 			}
-			if rCtx.RouteName != "" { // some middleware respond without ever reaching the router (401,403, etc...)
+
+			// some middleware respond without ever reaching the router (OPTIONS, 401,403, etc...)
+			if rCtx.RouteName != "" {
 				path = rCtx.RouteName
+			} else {
+				path = "any"
 			}
 		}
 
