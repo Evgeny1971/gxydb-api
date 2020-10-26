@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -523,29 +524,34 @@ func (a *App) V1HandleServiceProtocol(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 	user := &V1User{
-		ID:        session.R.User.AccountsID,
-		Display:   session.Display.String,
-		Email:     session.R.User.Email.String,
-		Group:     room.Name,
-		IP:        session.IPAddress.String,
-		Name:      "",     // Useless. Shouldn't be used on the client side.
-		Role:      "user", // fixed. No more "groups" only "users"
-		System:    session.UserAgent.String,
-		Username:  session.R.User.Username.String, // Useless. Never seen a value here
-		Room:      room.GatewayUID,
-		Timestamp: session.CreatedAt.Unix(), // Not sure we really need this
-		Session:   session.GatewaySession.Int64,
-		Handle:    session.GatewayHandle.Int64,
-		RFID:      session.GatewayFeed.Int64,
-		Camera:    session.Camera,
-		Question:  session.Question,
-		SelfTest:  session.SelfTest,  // Not sure we really need this
-		SoundTest: session.SoundTest, // Not sure we really need this
+		ID:             session.R.User.AccountsID,
+		Display:        session.Display.String,
+		Email:          session.R.User.Email.String,
+		Group:          room.Name,
+		IP:             session.IPAddress.String,
+		Name:           "",     // Useless. Shouldn't be used on the client side.
+		Role:           "user", // fixed. No more "groups" only "users"
+		System:         session.UserAgent.String,
+		Username:       session.R.User.Username.String, // Useless. Never seen a value here
+		Room:           room.GatewayUID,
+		Timestamp:      session.CreatedAt.Unix(), // Not sure we really need this
+		Session:        session.GatewaySession.Int64,
+		Handle:         session.GatewayHandle.Int64,
+		RFID:           session.GatewayFeed.Int64,
+		TextroomHandle: session.GatewayHandleTextroom.Int64,
+		Camera:         session.Camera,
+		Question:       session.Question,
+		SelfTest:       session.SelfTest,  // Not sure we really need this
+		SoundTest:      session.SoundTest, // Not sure we really need this
 	}
 
 	if session.GatewayID.Valid {
 		gateway, _ := a.cache.gateways.ByID(session.GatewayID.Int64)
 		user.Janus = gateway.Name
+	}
+
+	if session.Extra.Valid {
+		_ = json.Unmarshal(session.Extra.JSON, &user.Extra)
 	}
 
 	return user

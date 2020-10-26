@@ -21,25 +21,27 @@ type V2RoomStatistics struct {
 }
 
 type V1User struct {
-	ID        string `json:"id"`
-	Display   string `json:"display"`
-	Email     string `json:"email"`
-	Group     string `json:"group"`
-	IP        string `json:"ip"`
-	Janus     string `json:"janus"`
-	Name      string `json:"name"`
-	Role      string `json:"role"`
-	System    string `json:"system"`
-	Username  string `json:"username"`
-	Room      int    `json:"room"`
-	Timestamp int64  `json:"timestamp"`
-	Session   int64  `json:"session"`
-	Handle    int64  `json:"handle"`
-	RFID      int64  `json:"rfid"`
-	Camera    bool   `json:"camera"`
-	Question  bool   `json:"question"`
-	SelfTest  bool   `json:"self_test"`
-	SoundTest bool   `json:"sound_test"`
+	ID             string                 `json:"id"`
+	Display        string                 `json:"display"`
+	Email          string                 `json:"email"`
+	Group          string                 `json:"group"`
+	IP             string                 `json:"ip"`
+	Janus          string                 `json:"janus"`
+	Name           string                 `json:"name"`
+	Role           string                 `json:"role"`
+	System         string                 `json:"system"`
+	Username       string                 `json:"username"`
+	Room           int                    `json:"room"`
+	Timestamp      int64                  `json:"timestamp"`
+	Session        int64                  `json:"session"`
+	Handle         int64                  `json:"handle"`
+	RFID           int64                  `json:"rfid"`
+	TextroomHandle int64                  `json:"textroom_handle"`
+	Camera         bool                   `json:"camera"`
+	Question       bool                   `json:"question"`
+	SelfTest       bool                   `json:"self_test"`
+	SoundTest      bool                   `json:"sound_test"`
+	Extra          map[string]interface{} `json:"extra"`
 }
 
 type V1RoomInfo struct {

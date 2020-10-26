@@ -61,10 +61,15 @@ func (sm *V1SessionManager) HandleEvent(ctx context.Context, event interface{}) 
 					log.Ctx(ctx).Warn().Interface("event", event).Msg("type less gateway event")
 					return nil
 				}
+				eventTypeStr, ok := eventType.(string)
+				if !ok {
+					log.Ctx(ctx).Warn().Interface("event", event).Msg("event type is expected to be a string")
+					return nil
+				}
 
-				switch eventType.(string) {
-				case "leaving":
-					if err := sm.onVideoroomLeaving(ctx, tx, e); err != nil {
+				switch eventTypeStr {
+				case "leaving", "kicked", "unpublished":
+					if err := sm.onVideoroomLeaving(ctx, tx, e, eventTypeStr); err != nil {
 						return pkgerr.Wrap(err, "V1SessionManager.onVideoroomLeaving")
 					}
 				}
@@ -126,7 +131,7 @@ func (sm *V1SessionManager) Close() {
 	sm.cleaner.Close()
 }
 
-func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, event *janus.PluginEvent) error {
+func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, event *janus.PluginEvent, eventType string) error {
 	display, ok := event.Event.Data["display"].(string)
 	if !ok {
 		return nil // some service users don't set their display. ignore this event.
@@ -138,7 +143,7 @@ func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, 
 	}
 
 	logger := log.Ctx(ctx)
-	logger.Info().Msgf("%s has left room %v", v1User.ID, event.Event.Data["room"])
+	logger.Info().Msgf("%s has left room %v [%s]", v1User.ID, event.Event.Data["room"], eventType)
 
 	userID, err := sm.getInternalUserID(ctx, tx, &v1User)
 	if err != nil {
@@ -305,22 +310,29 @@ func (sm *V1SessionManager) makeSession(userID int64, user *V1User) (*models.Ses
 		return nil, NewProtocolError(fmt.Sprintf("Unknown gateway: %s", user.Janus))
 	}
 
-	return &models.Session{
-		UserID:         userID,
-		RoomID:         null.Int64From(room.ID),
-		GatewayID:      null.Int64From(gateway.ID),
-		GatewaySession: null.Int64From(user.Session),
-		GatewayHandle:  null.Int64From(user.Handle),
-		GatewayFeed:    null.Int64From(user.RFID),
-		Display:        null.StringFrom(user.Display),
-		Camera:         user.Camera,
-		Question:       user.Question,
-		SelfTest:       user.SelfTest,
-		SoundTest:      user.SoundTest,
-		UserAgent:      null.StringFrom(user.System),
-		IPAddress:      null.StringFrom(user.IP),
-		UpdatedAt:      null.TimeFrom(time.Now().UTC()),
-	}, nil
+	s := models.Session{
+		UserID:                userID,
+		RoomID:                null.Int64From(room.ID),
+		GatewayID:             null.Int64From(gateway.ID),
+		GatewaySession:        null.Int64From(user.Session),
+		GatewayHandle:         null.Int64From(user.Handle),
+		GatewayFeed:           null.Int64From(user.RFID),
+		GatewayHandleTextroom: null.Int64From(user.TextroomHandle),
+		Display:               null.StringFrom(user.Display),
+		Camera:                user.Camera,
+		Question:              user.Question,
+		SelfTest:              user.SelfTest,
+		SoundTest:             user.SoundTest,
+		UserAgent:             null.StringFrom(user.System),
+		IPAddress:             null.StringFrom(user.IP),
+		UpdatedAt:             null.TimeFrom(time.Now().UTC()),
+	}
+
+	if extraB, err := json.Marshal(user.Extra); err == nil {
+		s.Extra = null.JSONFrom(extraB)
+	}
+
+	return &s, nil
 }
 
 type PeriodicSessionCleaner struct {

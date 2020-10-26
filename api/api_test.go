@@ -600,6 +600,12 @@ func (s *ApiTestSuite) TestUpdateSession() {
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	v1User := s.makeV1user(gateway, room, user)
+	v1User.Extra = map[string]interface{}{
+		"key": "value",
+		"key2": map[string]interface{}{
+			"nested_key": "value",
+		},
+	}
 	payloadJson, _ := json.Marshal(v1User)
 	req, _ := http.NewRequest("PUT", fmt.Sprintf("/users/%s", user.AccountsID), bytes.NewBuffer(payloadJson))
 	s.apiAuth(req)
@@ -1799,27 +1805,34 @@ func (s *ApiTestSuite) assertV1User(v1User *V1User, body map[string]interface{})
 	s.Equal(v1User.Session, int64(body["session"].(float64)), "session")
 	s.Equal(v1User.Handle, int64(body["handle"].(float64)), "handle")
 	s.Equal(v1User.RFID, int64(body["rfid"].(float64)), "rfid")
+	s.Equal(v1User.TextroomHandle, int64(body["textroom_handle"].(float64)), "textroom_handle")
 	s.Equal(v1User.Camera, body["camera"], "camera")
 	s.Equal(v1User.Question, body["question"], "question")
 	s.Equal(v1User.SelfTest, body["self_test"], "self_test")
 	s.Equal(v1User.SoundTest, body["sound_test"], "sound_test")
+	if len(v1User.Extra) == 0 {
+		s.Nil(body["extra"], "extra")
+	} else {
+		s.Equal(v1User.Extra, body["extra"], "extra")
+	}
 }
 
 func (s *ApiTestSuite) makeV1user(gateway *models.Gateway, room *models.Room, user *models.User) *V1User {
 	v1User := &V1User{
-		Group:     "Test Room",
-		IP:        "127.0.0.1",
-		Name:      fmt.Sprintf("user-%s", stringutil.GenerateName(4)),
-		Role:      "user",
-		System:    "user_agent",
-		Timestamp: time.Now().Unix(),
-		Session:   rand.Int63n(math.MaxInt32),
-		Handle:    rand.Int63n(math.MaxInt32),
-		RFID:      rand.Int63n(math.MaxInt32),
-		Camera:    false,
-		Question:  false,
-		SelfTest:  false,
-		SoundTest: false,
+		Group:          "Test Room",
+		IP:             "127.0.0.1",
+		Name:           fmt.Sprintf("user-%s", stringutil.GenerateName(4)),
+		Role:           "user",
+		System:         "user_agent",
+		Timestamp:      time.Now().Unix(),
+		Session:        rand.Int63n(math.MaxInt32),
+		Handle:         rand.Int63n(math.MaxInt32),
+		RFID:           rand.Int63n(math.MaxInt32),
+		TextroomHandle: rand.Int63n(math.MaxInt32),
+		Camera:         false,
+		Question:       false,
+		SelfTest:       false,
+		SoundTest:      false,
 	}
 	if user != nil {
 		v1User.ID = user.AccountsID

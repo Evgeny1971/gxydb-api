@@ -23,67 +23,73 @@ import (
 
 // Session is an object representing the database table.
 type Session struct {
-	ID             int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID         int64       `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	RoomID         null.Int64  `boil:"room_id" json:"room_id,omitempty" toml:"room_id" yaml:"room_id,omitempty"`
-	GatewayID      null.Int64  `boil:"gateway_id" json:"gateway_id,omitempty" toml:"gateway_id" yaml:"gateway_id,omitempty"`
-	GatewaySession null.Int64  `boil:"gateway_session" json:"gateway_session,omitempty" toml:"gateway_session" yaml:"gateway_session,omitempty"`
-	GatewayHandle  null.Int64  `boil:"gateway_handle" json:"gateway_handle,omitempty" toml:"gateway_handle" yaml:"gateway_handle,omitempty"`
-	GatewayFeed    null.Int64  `boil:"gateway_feed" json:"gateway_feed,omitempty" toml:"gateway_feed" yaml:"gateway_feed,omitempty"`
-	Display        null.String `boil:"display" json:"display,omitempty" toml:"display" yaml:"display,omitempty"`
-	Camera         bool        `boil:"camera" json:"camera" toml:"camera" yaml:"camera"`
-	Question       bool        `boil:"question" json:"question" toml:"question" yaml:"question"`
-	SelfTest       bool        `boil:"self_test" json:"self_test" toml:"self_test" yaml:"self_test"`
-	SoundTest      bool        `boil:"sound_test" json:"sound_test" toml:"sound_test" yaml:"sound_test"`
-	UserAgent      null.String `boil:"user_agent" json:"user_agent,omitempty" toml:"user_agent" yaml:"user_agent,omitempty"`
-	IPAddress      null.String `boil:"ip_address" json:"ip_address,omitempty" toml:"ip_address" yaml:"ip_address,omitempty"`
-	Properties     null.JSON   `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
-	CreatedAt      time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt      null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	RemovedAt      null.Time   `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
+	ID                    int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID                int64       `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	RoomID                null.Int64  `boil:"room_id" json:"room_id,omitempty" toml:"room_id" yaml:"room_id,omitempty"`
+	GatewayID             null.Int64  `boil:"gateway_id" json:"gateway_id,omitempty" toml:"gateway_id" yaml:"gateway_id,omitempty"`
+	GatewaySession        null.Int64  `boil:"gateway_session" json:"gateway_session,omitempty" toml:"gateway_session" yaml:"gateway_session,omitempty"`
+	GatewayHandle         null.Int64  `boil:"gateway_handle" json:"gateway_handle,omitempty" toml:"gateway_handle" yaml:"gateway_handle,omitempty"`
+	GatewayFeed           null.Int64  `boil:"gateway_feed" json:"gateway_feed,omitempty" toml:"gateway_feed" yaml:"gateway_feed,omitempty"`
+	Display               null.String `boil:"display" json:"display,omitempty" toml:"display" yaml:"display,omitempty"`
+	Camera                bool        `boil:"camera" json:"camera" toml:"camera" yaml:"camera"`
+	Question              bool        `boil:"question" json:"question" toml:"question" yaml:"question"`
+	SelfTest              bool        `boil:"self_test" json:"self_test" toml:"self_test" yaml:"self_test"`
+	SoundTest             bool        `boil:"sound_test" json:"sound_test" toml:"sound_test" yaml:"sound_test"`
+	UserAgent             null.String `boil:"user_agent" json:"user_agent,omitempty" toml:"user_agent" yaml:"user_agent,omitempty"`
+	IPAddress             null.String `boil:"ip_address" json:"ip_address,omitempty" toml:"ip_address" yaml:"ip_address,omitempty"`
+	Properties            null.JSON   `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
+	CreatedAt             time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt             null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	RemovedAt             null.Time   `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
+	Extra                 null.JSON   `boil:"extra" json:"extra,omitempty" toml:"extra" yaml:"extra,omitempty"`
+	GatewayHandleTextroom null.Int64  `boil:"gateway_handle_textroom" json:"gateway_handle_textroom,omitempty" toml:"gateway_handle_textroom" yaml:"gateway_handle_textroom,omitempty"`
 
 	R *sessionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L sessionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 var SessionColumns = struct {
-	ID             string
-	UserID         string
-	RoomID         string
-	GatewayID      string
-	GatewaySession string
-	GatewayHandle  string
-	GatewayFeed    string
-	Display        string
-	Camera         string
-	Question       string
-	SelfTest       string
-	SoundTest      string
-	UserAgent      string
-	IPAddress      string
-	Properties     string
-	CreatedAt      string
-	UpdatedAt      string
-	RemovedAt      string
+	ID                    string
+	UserID                string
+	RoomID                string
+	GatewayID             string
+	GatewaySession        string
+	GatewayHandle         string
+	GatewayFeed           string
+	Display               string
+	Camera                string
+	Question              string
+	SelfTest              string
+	SoundTest             string
+	UserAgent             string
+	IPAddress             string
+	Properties            string
+	CreatedAt             string
+	UpdatedAt             string
+	RemovedAt             string
+	Extra                 string
+	GatewayHandleTextroom string
 }{
-	ID:             "id",
-	UserID:         "user_id",
-	RoomID:         "room_id",
-	GatewayID:      "gateway_id",
-	GatewaySession: "gateway_session",
-	GatewayHandle:  "gateway_handle",
-	GatewayFeed:    "gateway_feed",
-	Display:        "display",
-	Camera:         "camera",
-	Question:       "question",
-	SelfTest:       "self_test",
-	SoundTest:      "sound_test",
-	UserAgent:      "user_agent",
-	IPAddress:      "ip_address",
-	Properties:     "properties",
-	CreatedAt:      "created_at",
-	UpdatedAt:      "updated_at",
-	RemovedAt:      "removed_at",
+	ID:                    "id",
+	UserID:                "user_id",
+	RoomID:                "room_id",
+	GatewayID:             "gateway_id",
+	GatewaySession:        "gateway_session",
+	GatewayHandle:         "gateway_handle",
+	GatewayFeed:           "gateway_feed",
+	Display:               "display",
+	Camera:                "camera",
+	Question:              "question",
+	SelfTest:              "self_test",
+	SoundTest:             "sound_test",
+	UserAgent:             "user_agent",
+	IPAddress:             "ip_address",
+	Properties:            "properties",
+	CreatedAt:             "created_at",
+	UpdatedAt:             "updated_at",
+	RemovedAt:             "removed_at",
+	Extra:                 "extra",
+	GatewayHandleTextroom: "gateway_handle_textroom",
 }
 
 // Generated where
@@ -112,43 +118,47 @@ func (w whereHelpernull_Int64) GTE(x null.Int64) qm.QueryMod {
 }
 
 var SessionWhere = struct {
-	ID             whereHelperint64
-	UserID         whereHelperint64
-	RoomID         whereHelpernull_Int64
-	GatewayID      whereHelpernull_Int64
-	GatewaySession whereHelpernull_Int64
-	GatewayHandle  whereHelpernull_Int64
-	GatewayFeed    whereHelpernull_Int64
-	Display        whereHelpernull_String
-	Camera         whereHelperbool
-	Question       whereHelperbool
-	SelfTest       whereHelperbool
-	SoundTest      whereHelperbool
-	UserAgent      whereHelpernull_String
-	IPAddress      whereHelpernull_String
-	Properties     whereHelpernull_JSON
-	CreatedAt      whereHelpertime_Time
-	UpdatedAt      whereHelpernull_Time
-	RemovedAt      whereHelpernull_Time
+	ID                    whereHelperint64
+	UserID                whereHelperint64
+	RoomID                whereHelpernull_Int64
+	GatewayID             whereHelpernull_Int64
+	GatewaySession        whereHelpernull_Int64
+	GatewayHandle         whereHelpernull_Int64
+	GatewayFeed           whereHelpernull_Int64
+	Display               whereHelpernull_String
+	Camera                whereHelperbool
+	Question              whereHelperbool
+	SelfTest              whereHelperbool
+	SoundTest             whereHelperbool
+	UserAgent             whereHelpernull_String
+	IPAddress             whereHelpernull_String
+	Properties            whereHelpernull_JSON
+	CreatedAt             whereHelpertime_Time
+	UpdatedAt             whereHelpernull_Time
+	RemovedAt             whereHelpernull_Time
+	Extra                 whereHelpernull_JSON
+	GatewayHandleTextroom whereHelpernull_Int64
 }{
-	ID:             whereHelperint64{field: "\"sessions\".\"id\""},
-	UserID:         whereHelperint64{field: "\"sessions\".\"user_id\""},
-	RoomID:         whereHelpernull_Int64{field: "\"sessions\".\"room_id\""},
-	GatewayID:      whereHelpernull_Int64{field: "\"sessions\".\"gateway_id\""},
-	GatewaySession: whereHelpernull_Int64{field: "\"sessions\".\"gateway_session\""},
-	GatewayHandle:  whereHelpernull_Int64{field: "\"sessions\".\"gateway_handle\""},
-	GatewayFeed:    whereHelpernull_Int64{field: "\"sessions\".\"gateway_feed\""},
-	Display:        whereHelpernull_String{field: "\"sessions\".\"display\""},
-	Camera:         whereHelperbool{field: "\"sessions\".\"camera\""},
-	Question:       whereHelperbool{field: "\"sessions\".\"question\""},
-	SelfTest:       whereHelperbool{field: "\"sessions\".\"self_test\""},
-	SoundTest:      whereHelperbool{field: "\"sessions\".\"sound_test\""},
-	UserAgent:      whereHelpernull_String{field: "\"sessions\".\"user_agent\""},
-	IPAddress:      whereHelpernull_String{field: "\"sessions\".\"ip_address\""},
-	Properties:     whereHelpernull_JSON{field: "\"sessions\".\"properties\""},
-	CreatedAt:      whereHelpertime_Time{field: "\"sessions\".\"created_at\""},
-	UpdatedAt:      whereHelpernull_Time{field: "\"sessions\".\"updated_at\""},
-	RemovedAt:      whereHelpernull_Time{field: "\"sessions\".\"removed_at\""},
+	ID:                    whereHelperint64{field: "\"sessions\".\"id\""},
+	UserID:                whereHelperint64{field: "\"sessions\".\"user_id\""},
+	RoomID:                whereHelpernull_Int64{field: "\"sessions\".\"room_id\""},
+	GatewayID:             whereHelpernull_Int64{field: "\"sessions\".\"gateway_id\""},
+	GatewaySession:        whereHelpernull_Int64{field: "\"sessions\".\"gateway_session\""},
+	GatewayHandle:         whereHelpernull_Int64{field: "\"sessions\".\"gateway_handle\""},
+	GatewayFeed:           whereHelpernull_Int64{field: "\"sessions\".\"gateway_feed\""},
+	Display:               whereHelpernull_String{field: "\"sessions\".\"display\""},
+	Camera:                whereHelperbool{field: "\"sessions\".\"camera\""},
+	Question:              whereHelperbool{field: "\"sessions\".\"question\""},
+	SelfTest:              whereHelperbool{field: "\"sessions\".\"self_test\""},
+	SoundTest:             whereHelperbool{field: "\"sessions\".\"sound_test\""},
+	UserAgent:             whereHelpernull_String{field: "\"sessions\".\"user_agent\""},
+	IPAddress:             whereHelpernull_String{field: "\"sessions\".\"ip_address\""},
+	Properties:            whereHelpernull_JSON{field: "\"sessions\".\"properties\""},
+	CreatedAt:             whereHelpertime_Time{field: "\"sessions\".\"created_at\""},
+	UpdatedAt:             whereHelpernull_Time{field: "\"sessions\".\"updated_at\""},
+	RemovedAt:             whereHelpernull_Time{field: "\"sessions\".\"removed_at\""},
+	Extra:                 whereHelpernull_JSON{field: "\"sessions\".\"extra\""},
+	GatewayHandleTextroom: whereHelpernull_Int64{field: "\"sessions\".\"gateway_handle_textroom\""},
 }
 
 // SessionRels is where relationship names are stored.
@@ -178,8 +188,8 @@ func (*sessionR) NewStruct() *sessionR {
 type sessionL struct{}
 
 var (
-	sessionAllColumns            = []string{"id", "user_id", "room_id", "gateway_id", "gateway_session", "gateway_handle", "gateway_feed", "display", "camera", "question", "self_test", "sound_test", "user_agent", "ip_address", "properties", "created_at", "updated_at", "removed_at"}
-	sessionColumnsWithoutDefault = []string{"user_id", "room_id", "gateway_id", "gateway_session", "gateway_handle", "gateway_feed", "display", "user_agent", "ip_address", "properties", "updated_at", "removed_at"}
+	sessionAllColumns            = []string{"id", "user_id", "room_id", "gateway_id", "gateway_session", "gateway_handle", "gateway_feed", "display", "camera", "question", "self_test", "sound_test", "user_agent", "ip_address", "properties", "created_at", "updated_at", "removed_at", "extra", "gateway_handle_textroom"}
+	sessionColumnsWithoutDefault = []string{"user_id", "room_id", "gateway_id", "gateway_session", "gateway_handle", "gateway_feed", "display", "user_agent", "ip_address", "properties", "updated_at", "removed_at", "extra", "gateway_handle_textroom"}
 	sessionColumnsWithDefault    = []string{"id", "camera", "question", "self_test", "sound_test", "created_at"}
 	sessionPrimaryKeyColumns     = []string{"id"}
 )
