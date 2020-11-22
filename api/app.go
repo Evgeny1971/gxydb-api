@@ -171,11 +171,12 @@ func (a *App) initRoutes() {
 
 	// api v1 (current)
 	a.Router.HandleFunc("/groups", a.V1ListGroups).Methods("GET")
-	a.Router.HandleFunc("/group/{id}", a.V1CreateGroup).Methods("PUT")
+	a.Router.HandleFunc("/group/{id}", a.V1CreateGroup).Methods("PUT") // unused
 	a.Router.HandleFunc("/rooms", a.V1ListRooms).Methods("GET")
-	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET")
-	a.Router.HandleFunc("/users", a.V1ListUsers).Methods("GET")
-	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET")
+	a.Router.HandleFunc("/room/{id}", a.V1GetRoom).Methods("GET") // unused
+	a.Router.HandleFunc("/rooms/{id}", a.V1UpdateRoom).Methods("PUT")
+	a.Router.HandleFunc("/users", a.V1ListUsers).Methods("GET")    // unused
+	a.Router.HandleFunc("/users/{id}", a.V1GetUser).Methods("GET") // unused
 	a.Router.HandleFunc("/users/{id}", a.V1UpdateSession).Methods("PUT")
 	a.Router.HandleFunc("/qids", a.V1ListComposites).Methods("GET")
 	a.Router.HandleFunc("/qids/{id}", a.V1GetComposite).Methods("GET")

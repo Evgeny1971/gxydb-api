@@ -442,6 +442,88 @@ func (s *ApiTestSuite) TestListRoomsIsSorted() {
 	}
 }
 
+func (s *ApiTestSuite) TestUpdateRoomForbidden() {
+	req, _ := http.NewRequest("PUT", "/rooms/id", nil)
+	resp := s.request(req)
+	s.Require().Equal(http.StatusUnauthorized, resp.Code)
+
+	req, _ = http.NewRequest("PUT", "/rooms/id", nil)
+	s.apiAuth(req)
+	resp = s.request(req)
+	s.Require().Equal(http.StatusForbidden, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateRoomMalformedID() {
+	req, _ := http.NewRequest("PUT", "/rooms/id", nil)
+	s.apiAuthP(req, []string{common.RoleShidur})
+	resp := s.request(req)
+	s.Require().Equal(http.StatusBadRequest, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateRoomNotFound() {
+	req, _ := http.NewRequest("PUT", "/rooms/1", nil)
+	s.apiAuthP(req, []string{common.RoleShidur})
+	resp := s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// disabled room
+	gateway := s.CreateGateway()
+	room := s.CreateRoom(gateway)
+	room.Disabled = true
+	_, err := room.Update(s.DB, boil.Whitelist(models.RoomColumns.Disabled))
+	s.Require().NoError(err)
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/rooms/%d", room.GatewayUID), nil)
+	s.apiAuthP(req, []string{common.RoleShidur})
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+
+	// removed room
+	room.Disabled = false
+	room.RemovedAt = null.TimeFrom(time.Now().UTC())
+	_, err = room.Update(s.DB, boil.Whitelist(models.RoomColumns.Disabled, models.RoomColumns.RemovedAt))
+	s.Require().NoError(err)
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/rooms/%d", room.GatewayUID), nil)
+	s.apiAuthP(req, []string{common.RoleShidur})
+	resp = s.request(req)
+	s.Require().Equal(http.StatusNotFound, resp.Code)
+}
+
+func (s *ApiTestSuite) TestUpdateRoom() {
+	gateway := s.CreateGateway()
+	room := s.CreateRoom(gateway)
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	req, _ := http.NewRequest("GET", fmt.Sprintf("/room/%d", room.GatewayUID), nil)
+	s.apiAuth(req)
+	body := s.request200json(req)
+	s.assertTokenVerifier()
+
+	// verify room's attributes
+	s.Equal(room.GatewayUID, int(body["room"].(float64)), "room")
+	s.Equal(gateway.Name, body["janus"], "Janus")
+	s.Equal(room.Name, body["description"], "description")
+	s.False(body["questions"].(bool), "questions")
+	s.Nil(body["extra"], "extra")
+
+	v1Room := V1Room{
+		Extra: map[string]interface{}{
+			"key": "value",
+			"key2": map[string]interface{}{
+				"nested_key": "value",
+			},
+		},
+	}
+	payloadJson, _ := json.Marshal(v1Room)
+	req, _ = http.NewRequest("PUT", fmt.Sprintf("/rooms/%d", room.GatewayUID), bytes.NewBuffer(payloadJson))
+	s.apiAuthP(req, []string{common.RoleShidur})
+	s.request200json(req)
+
+	req, _ = http.NewRequest("GET", fmt.Sprintf("/room/%d", room.GatewayUID), nil)
+	s.apiAuth(req)
+	body = s.request200json(req)
+	s.Equal(v1Room.Extra, body["extra"], "extra")
+}
+
 func (s *ApiTestSuite) TestGetUserMalformedID() {
 	req, _ := http.NewRequest("GET", "/users/1234567890123456789012345678901234567890", nil)
 	s.apiAuth(req)

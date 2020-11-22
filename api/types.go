@@ -52,9 +52,11 @@ type V1RoomInfo struct {
 
 type V1Room struct {
 	V1RoomInfo
-	Questions          bool      `json:"questions"`
-	NumUsers           int       `json:"num_users"`
-	Users              []*V1User `json:"users"`
+	Questions          bool                   `json:"questions"`
+	NumUsers           int                    `json:"num_users"`
+	Users              []*V1User              `json:"users"`
+	Region             string                 `json:"region"`
+	Extra              map[string]interface{} `json:"extra"`
 	firstSessionInRoom time.Time
 }
 

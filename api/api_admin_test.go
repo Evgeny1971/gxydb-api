@@ -378,6 +378,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoom() {
 		Name:             fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
 		GatewayUID:       rand.Intn(math.MaxInt32),
 		DefaultGatewayID: gateway.ID,
+		Region:           null.StringFrom("region"),
 	}
 	b, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/admin/rooms", bytes.NewBuffer(b))
@@ -388,6 +389,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoom() {
 	s.EqualValues(payload.GatewayUID, body["gateway_uid"], "gateway_uid")
 	s.EqualValues(payload.DefaultGatewayID, body["default_gateway_id"], "default_gateway_id")
 	s.False(body["disabled"].(bool), "disabled")
+	s.Equal(payload.Region.String, body["region"], "region")
 
 	// verify room is created on gateway
 	gRoom := s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64)))
@@ -490,6 +492,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 		Name:             fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
 		GatewayUID:       rand.Intn(math.MaxInt16),
 		DefaultGatewayID: gateway.ID,
+		Region:           null.StringFrom("region"),
 	}
 	b, _ := json.Marshal(payload)
 	req, _ := http.NewRequest("POST", "/admin/rooms", bytes.NewBuffer(b))
@@ -502,6 +505,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 	payload.Name = fmt.Sprintf("%s_edit", payload.Name)
 	payload.DefaultGatewayID = gateway2.ID
 	payload.Disabled = true
+	payload.Region = null.StringFrom("updated region")
 	b, _ = json.Marshal(payload)
 	req, _ = http.NewRequest("PUT", fmt.Sprintf("/admin/rooms/%d", int64(body["id"].(float64))), bytes.NewBuffer(b))
 	s.apiAuthP(req, []string{common.RoleRoot})
@@ -509,6 +513,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 	s.Equal(payload.Name, body["name"], "name")
 	s.EqualValues(payload.DefaultGatewayID, body["default_gateway_id"], "default_gateway_id")
 	s.True(body["disabled"].(bool), "disabled")
+	s.Equal(payload.Region.String, body["region"], "region")
 	s.Greater(body["updated_at"], body["created_at"], "updated_at > created_at")
 
 	// verify room is updated on gateway

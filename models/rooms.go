@@ -23,15 +23,17 @@ import (
 
 // Room is an object representing the database table.
 type Room struct {
-	ID               int64     `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Name             string    `boil:"name" json:"name" toml:"name" yaml:"name"`
-	DefaultGatewayID int64     `boil:"default_gateway_id" json:"default_gateway_id" toml:"default_gateway_id" yaml:"default_gateway_id"`
-	GatewayUID       int       `boil:"gateway_uid" json:"gateway_uid" toml:"gateway_uid" yaml:"gateway_uid"`
-	Disabled         bool      `boil:"disabled" json:"disabled" toml:"disabled" yaml:"disabled"`
-	Properties       null.JSON `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
-	CreatedAt        time.Time `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
-	UpdatedAt        null.Time `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
-	RemovedAt        null.Time `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
+	ID               int64       `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Name             string      `boil:"name" json:"name" toml:"name" yaml:"name"`
+	DefaultGatewayID int64       `boil:"default_gateway_id" json:"default_gateway_id" toml:"default_gateway_id" yaml:"default_gateway_id"`
+	GatewayUID       int         `boil:"gateway_uid" json:"gateway_uid" toml:"gateway_uid" yaml:"gateway_uid"`
+	Disabled         bool        `boil:"disabled" json:"disabled" toml:"disabled" yaml:"disabled"`
+	Properties       null.JSON   `boil:"properties" json:"properties,omitempty" toml:"properties" yaml:"properties,omitempty"`
+	CreatedAt        time.Time   `boil:"created_at" json:"created_at" toml:"created_at" yaml:"created_at"`
+	UpdatedAt        null.Time   `boil:"updated_at" json:"updated_at,omitempty" toml:"updated_at" yaml:"updated_at,omitempty"`
+	RemovedAt        null.Time   `boil:"removed_at" json:"removed_at,omitempty" toml:"removed_at" yaml:"removed_at,omitempty"`
+	Extra            null.JSON   `boil:"extra" json:"extra,omitempty" toml:"extra" yaml:"extra,omitempty"`
+	Region           null.String `boil:"region" json:"region,omitempty" toml:"region" yaml:"region,omitempty"`
 
 	R *roomR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L roomL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,6 +49,8 @@ var RoomColumns = struct {
 	CreatedAt        string
 	UpdatedAt        string
 	RemovedAt        string
+	Extra            string
+	Region           string
 }{
 	ID:               "id",
 	Name:             "name",
@@ -57,6 +61,8 @@ var RoomColumns = struct {
 	CreatedAt:        "created_at",
 	UpdatedAt:        "updated_at",
 	RemovedAt:        "removed_at",
+	Extra:            "extra",
+	Region:           "region",
 }
 
 // Generated where
@@ -71,6 +77,8 @@ var RoomWhere = struct {
 	CreatedAt        whereHelpertime_Time
 	UpdatedAt        whereHelpernull_Time
 	RemovedAt        whereHelpernull_Time
+	Extra            whereHelpernull_JSON
+	Region           whereHelpernull_String
 }{
 	ID:               whereHelperint64{field: "\"rooms\".\"id\""},
 	Name:             whereHelperstring{field: "\"rooms\".\"name\""},
@@ -81,6 +89,8 @@ var RoomWhere = struct {
 	CreatedAt:        whereHelpertime_Time{field: "\"rooms\".\"created_at\""},
 	UpdatedAt:        whereHelpernull_Time{field: "\"rooms\".\"updated_at\""},
 	RemovedAt:        whereHelpernull_Time{field: "\"rooms\".\"removed_at\""},
+	Extra:            whereHelpernull_JSON{field: "\"rooms\".\"extra\""},
+	Region:           whereHelpernull_String{field: "\"rooms\".\"region\""},
 }
 
 // RoomRels is where relationship names are stored.
@@ -113,8 +123,8 @@ func (*roomR) NewStruct() *roomR {
 type roomL struct{}
 
 var (
-	roomAllColumns            = []string{"id", "name", "default_gateway_id", "gateway_uid", "disabled", "properties", "created_at", "updated_at", "removed_at"}
-	roomColumnsWithoutDefault = []string{"name", "default_gateway_id", "gateway_uid", "properties", "updated_at", "removed_at"}
+	roomAllColumns            = []string{"id", "name", "default_gateway_id", "gateway_uid", "disabled", "properties", "created_at", "updated_at", "removed_at", "extra", "region"}
+	roomColumnsWithoutDefault = []string{"name", "default_gateway_id", "gateway_uid", "properties", "updated_at", "removed_at", "extra", "region"}
 	roomColumnsWithDefault    = []string{"id", "disabled", "created_at"}
 	roomPrimaryKeyColumns     = []string{"id"}
 )

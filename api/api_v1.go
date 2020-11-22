@@ -14,6 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	pkgerr "github.com/pkg/errors"
 	"github.com/rs/zerolog/log"
+	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries/qm"
 
@@ -202,6 +203,59 @@ func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 
 	respRoom := a.makeV1Room(room, nil)
 	httputil.RespondWithJSON(w, http.StatusOK, respRoom)
+}
+
+func (a *App) V1UpdateRoom(w http.ResponseWriter, r *http.Request) {
+	if !common.Config.SkipPermissions && !middleware.RequestHasRole(r, common.RoleShidur) {
+		httputil.NewForbiddenError().Abort(w, r)
+		return
+	}
+
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		httputil.NewBadRequestError(err, "malformed id").Abort(w, r)
+		return
+	}
+
+	room, ok := a.cache.rooms.ByGatewayUID(id)
+	if !ok {
+		httputil.NewNotFoundError().Abort(w, r)
+		return
+	}
+
+	var data *V1Room
+	if err := httputil.DecodeJSONBody(w, r, &data); err != nil {
+		err.Abort(w, r)
+		return
+	}
+	a.requestContext(r).Params = data
+
+	if extraB, err := json.Marshal(data.Extra); err == nil {
+		room.Extra = null.JSONFrom(extraB)
+	} else {
+		httputil.NewBadRequestError(err, "malformed extra data").Abort(w, r)
+		return
+	}
+
+	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
+		if _, err := room.Update(tx, boil.Whitelist(models.RoomColumns.Extra)); err != nil {
+			return pkgerr.WithStack(err)
+		}
+		return nil
+	})
+
+	if err != nil {
+		var hErr *httputil.HttpError
+		if errors.As(err, &hErr) {
+			hErr.Abort(w, r)
+		} else {
+			httputil.NewInternalError(err).Abort(w, r)
+		}
+		return
+	}
+
+	httputil.RespondSuccess(w)
 }
 
 func (a *App) V1ListUsers(w http.ResponseWriter, r *http.Request) {
@@ -567,6 +621,7 @@ func (a *App) makeV1Room(room *models.Room, gateway *models.Gateway) *V1Room {
 			Janus:       gateway.Name,
 			Description: room.Name,
 		},
+		Region: room.Region.String,
 	}
 
 	if room.R.Sessions != nil {
@@ -604,6 +659,10 @@ func (a *App) makeV1Room(room *models.Room, gateway *models.Gateway) *V1Room {
 			respRoom.Users[i] = a.makeV1User(room, session)
 			i++
 		}
+	}
+
+	if room.Extra.Valid {
+		_ = json.Unmarshal(room.Extra.JSON, &respRoom.Extra)
 	}
 
 	return respRoom

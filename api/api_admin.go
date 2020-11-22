@@ -426,8 +426,9 @@ func (a *App) AdminUpdateRoom(w http.ResponseWriter, r *http.Request) {
 		room.Name = data.Name
 		room.DefaultGatewayID = data.DefaultGatewayID
 		room.Disabled = data.Disabled
+		room.Region = data.Region
 		room.UpdatedAt = null.TimeFrom(time.Now().UTC())
-		if _, err := room.Update(tx, boil.Whitelist("name", "default_gateway_id", "disabled", "updated_at")); err != nil {
+		if _, err := room.Update(tx, boil.Whitelist("name", "default_gateway_id", "disabled", "region", "updated_at")); err != nil {
 			return pkgerr.WithStack(err)
 		}
 
