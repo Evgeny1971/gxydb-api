@@ -70,6 +70,41 @@ type OIDCTokenVerifier interface {
 	Verify(context.Context, string) (*oidc.IDToken, error)
 }
 
+type FailoverOIDCTokenVerifier struct {
+	verifiers []*oidc.IDTokenVerifier
+}
+
+func NewFailoverOIDCTokenVerifier(issuerUrls []string) (OIDCTokenVerifier, error) {
+	v := new(FailoverOIDCTokenVerifier)
+
+	for _, url := range issuerUrls {
+		provider, err := oidc.NewProvider(context.TODO(), url)
+		if err != nil {
+			return nil, pkgerr.Wrapf(err, "oidc.NewProvider %s", url)
+		}
+
+		v.verifiers = append(v.verifiers, provider.Verifier(&oidc.Config{
+			SkipClientIDCheck: true,
+		}))
+	}
+
+	return v, nil
+}
+
+func (v *FailoverOIDCTokenVerifier) Verify(ctx context.Context, tokenStr string) (*oidc.IDToken, error) {
+	var token *oidc.IDToken
+	var err error
+
+	for _, verifier := range v.verifiers {
+		token, err = verifier.Verify(ctx, tokenStr)
+		if err == nil {
+			return token, nil
+		}
+	}
+
+	return nil, err
+}
+
 func AuthenticationMiddleware(tokenVerifier OIDCTokenVerifier, gwPwd func(string) (string, bool)) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

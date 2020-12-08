@@ -1,13 +1,11 @@
 package api
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/coreos/go-oidc"
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq"
 	"github.com/prometheus/client_golang/prometheus"
@@ -33,15 +31,13 @@ type App struct {
 	periodicStatsCollector *instrumentation.PeriodicCollector
 }
 
-func (a *App) initOidc(issuer string) middleware.OIDCTokenVerifier {
-	provider, err := oidc.NewProvider(context.TODO(), issuer)
+func (a *App) initOidc(issuerUrls []string) middleware.OIDCTokenVerifier {
+	verifier, err := middleware.NewFailoverOIDCTokenVerifier(issuerUrls)
 	if err != nil {
-		log.Fatal().Err(err).Msg("oidc.NewProvider")
+		log.Fatal().Err(err).Msg("Error initializing OIDC token verifier")
 	}
 
-	return provider.Verifier(&oidc.Config{
-		SkipClientIDCheck: true,
-	})
+	return verifier
 }
 
 func (a *App) Initialize() {
@@ -57,7 +53,7 @@ func (a *App) Initialize() {
 
 	var tokenVerifier middleware.OIDCTokenVerifier
 	if !common.Config.SkipAuth {
-		tokenVerifier = a.initOidc(common.Config.AccountsUrl)
+		tokenVerifier = a.initOidc(common.Config.AccountsUrls)
 	}
 
 	a.InitializeWithDeps(db, tokenVerifier)

@@ -11,7 +11,7 @@ import (
 type config struct {
 	ListenAddress         string
 	DBUrl                 string
-	AccountsUrl           string
+	AccountsUrls          []string
 	SkipAuth              bool
 	SkipEventsAuth        bool
 	SkipPermissions       bool
@@ -33,7 +33,7 @@ func newConfig() *config {
 	return &config{
 		ListenAddress:         ":8081",
 		DBUrl:                 "postgres://user:password@localhost/galaxy?sslmode=disable",
-		AccountsUrl:           "https://accounts.kbb1.com/auth/realms/main",
+		AccountsUrls:          []string{"https://accounts.kbb1.com/auth/realms/main"},
 		SkipAuth:              false,
 		SkipEventsAuth:        false,
 		SkipPermissions:       false,
@@ -63,7 +63,7 @@ func Init() {
 		Config.DBUrl = val
 	}
 	if val := os.Getenv("ACCOUNTS_URL"); val != "" {
-		Config.AccountsUrl = val
+		Config.AccountsUrls = strings.Split(val, ",")
 	}
 	if val := os.Getenv("SKIP_AUTH"); val != "" {
 		Config.SkipAuth = val == "true"
