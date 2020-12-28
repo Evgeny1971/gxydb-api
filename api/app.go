@@ -29,6 +29,7 @@ type App struct {
 	gatewayTokensManager   *domain.GatewayTokensManager
 	roomsStatisticsManager *domain.RoomStatisticsManager
 	periodicStatsCollector *instrumentation.PeriodicCollector
+	mqttListener           *MQTTListener
 }
 
 func (a *App) initOidc(issuerUrls []string) middleware.OIDCTokenVerifier {
@@ -68,6 +69,7 @@ func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware
 	a.initGatewayTokensMonitoring()
 	a.initRoomsStatistics()
 	a.initServiceProtocolHandler()
+	a.initMQTT()
 	a.initInstrumentation()
 
 	// this is declared here to abstract away the cache from auth middleware
@@ -133,6 +135,11 @@ func (a *App) Shutdown() {
 	}
 	if a.periodicStatsCollector != nil {
 		a.periodicStatsCollector.Close()
+	}
+	if a.mqttListener != nil {
+		if err := a.mqttListener.Close(); err != nil {
+			log.Error().Err(err).Msg("mqttListener.Close")
+		}
 	}
 	a.sessionManager.Close()
 	a.cache.Close()
@@ -227,7 +234,7 @@ func (a *App) initSessionManagement() {
 }
 
 func (a *App) initServiceProtocolHandler() {
-	a.serviceProtocolHandler = NewV1ServiceProtocolHandler(a.DB, a.cache, a.roomsStatisticsManager)
+	a.serviceProtocolHandler = NewV1ServiceProtocolHandler(a.cache, a.roomsStatisticsManager)
 }
 
 func (a *App) initGatewayTokensMonitoring() {
@@ -247,5 +254,14 @@ func (a *App) initInstrumentation() {
 	if common.Config.CollectPeriodicStats {
 		a.periodicStatsCollector = instrumentation.NewPeriodicCollector(a.DB)
 		a.periodicStatsCollector.Start()
+	}
+}
+
+func (a *App) initMQTT() {
+	if common.Config.MQTTBrokerUrl != "" {
+		a.mqttListener = NewMQTTListener(a.serviceProtocolHandler)
+		if err := a.mqttListener.Init(); err != nil {
+			log.Fatal().Err(err).Msg("initialize mqtt listener")
+		}
 	}
 }

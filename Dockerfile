@@ -3,6 +3,7 @@ ARG build_number=dev
 ARG db_url="postgres://user:password@host.docker.internal/galaxy?sslmode=disable"
 ARG test_gateway_url="ws://host.docker.internal:8188/"
 ARG test_gateway_admin_url="http://host.docker.internal:7088/admin"
+ARG test_mqtt_broker="host.docker.internal:1883"
 
 FROM golang:1.14-alpine3.11 as build
 
@@ -13,6 +14,7 @@ ARG build_number
 ARG db_url
 ARG test_gateway_url
 ARG test_gateway_admin_url
+ARG test_mqtt_broker
 
 ENV GOOS=linux \
 	CGO_ENABLED=0 \
@@ -22,7 +24,8 @@ ENV GOOS=linux \
 	SECRET=12345678901234567890123456789012 \
 	MONITOR_GATEWAY_TOKENS=false \
 	COLLECT_PERIODIC_STATS=false \
-	GATEWAY_ROOMS_SECRET=adminpwd
+	GATEWAY_ROOMS_SECRET=adminpwd \
+	MQTT_BROKER_URL=${test_mqtt_broker}
 
 RUN apk update && \
     apk add --no-cache \

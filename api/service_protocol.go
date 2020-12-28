@@ -1,42 +1,33 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 
-	"github.com/edoshor/janus-go"
 	pkgerr "github.com/pkg/errors"
-	"github.com/rs/zerolog/log"
 
-	"github.com/Bnei-Baruch/gxydb-api/common"
 	"github.com/Bnei-Baruch/gxydb-api/domain"
 )
 
 type ServiceProtocolHandler interface {
-	HandleMessage(context.Context, *janus.TextroomPostMsg) error
+	HandleMessage(string) error
 }
 
 type V1ServiceProtocolHandler struct {
-	db                     common.DBInterface
 	cache                  *AppCache
 	roomsStatisticsManager *domain.RoomStatisticsManager
 }
 
-func NewV1ServiceProtocolHandler(db common.DBInterface, cache *AppCache, rsm *domain.RoomStatisticsManager) ServiceProtocolHandler {
+func NewV1ServiceProtocolHandler(cache *AppCache, rsm *domain.RoomStatisticsManager) ServiceProtocolHandler {
 	return &V1ServiceProtocolHandler{
-		db:                     db,
 		cache:                  cache,
 		roomsStatisticsManager: rsm,
 	}
 }
 
-func (h *V1ServiceProtocolHandler) HandleMessage(ctx context.Context, msg *janus.TextroomPostMsg) error {
-	logger := log.Ctx(ctx)
-	logger.Info().Interface("msg", msg).Msg("service protocol message")
-
+func (h *V1ServiceProtocolHandler) HandleMessage(payload string) error {
 	var pMsg V1ServiceProtocolMessageText
-	if err := json.Unmarshal([]byte(msg.Text), &pMsg); err != nil {
+	if err := json.Unmarshal([]byte(payload), &pMsg); err != nil {
 		return pkgerr.WithStack(WrappingProtocolError(err, fmt.Sprintf("json.Unmarshal: %s", err.Error())))
 	}
 

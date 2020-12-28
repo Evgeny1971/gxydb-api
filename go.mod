@@ -11,12 +11,12 @@ require (
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
+	github.com/eclipse/paho.golang v0.9.0
 	github.com/edoshor/janus-go v0.0.0-20200713013352-5e00c69690bc
-	github.com/friendsofgo/errors v0.9.2
+	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect
 	github.com/golang-migrate/migrate v3.5.4+incompatible
-	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.4
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/khaiql/dbcleaner v2.3.0+incompatible // indirect

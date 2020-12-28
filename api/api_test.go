@@ -2,12 +2,15 @@ package api
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"reflect"
 	"strconv"
 	"testing"
@@ -15,6 +18,7 @@ import (
 	"unsafe"
 
 	"github.com/coreos/go-oidc"
+	"github.com/eclipse/paho.golang/paho"
 	"github.com/edoshor/janus-go"
 	janus_admin "github.com/edoshor/janus-go/admin"
 	"github.com/stretchr/testify/mock"
@@ -41,6 +45,11 @@ type ApiTestSuite struct {
 func (s *ApiTestSuite) SetupSuite() {
 	s.Require().NoError(s.InitTestDB())
 	s.tokenVerifier = new(mocks.OIDCTokenVerifier)
+
+	if _, ok := os.LookupEnv("MQTT_BROKER_URL"); !ok {
+		common.Config.MQTTBrokerUrl = "localhost:1883"
+	}
+
 	s.app = new(App)
 	s.app.InitializeWithDeps(s.DB, s.tokenVerifier)
 	s.GatewayManager.Init()
@@ -1679,6 +1688,62 @@ func (s *ApiTestSuite) TestHandleServiceProtocolAudioOut() {
 	req, _ = http.NewRequest("GET", "/v2/rooms_statistics", nil)
 	s.apiAuth(req)
 	body := s.request200json(req)
+
+	// verify rooms statistics
+	stats, ok := body[strconv.Itoa(room.GatewayUID)]
+	s.Require().True(ok, "room stats ok")
+	statsObj, ok := stats.(map[string]interface{})
+	s.Require().True(ok, "room stats is not object")
+	s.Equal(1, int(statsObj["on_air"].(float64)), "on_air")
+}
+
+func (s *ApiTestSuite) TestMQTTHandleServiceProtocolAudioOut() {
+	gateway := s.CreateGateway()
+	room := s.CreateRoom(gateway)
+	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
+
+	client := paho.NewClient()
+	conn, err := net.Dial("tcp", common.Config.MQTTBrokerUrl)
+	s.Require().NoError(err)
+	client.Conn = conn
+
+	ca, err := client.Connect(context.Background(), &paho.Connect{
+		KeepAlive:  30,
+		ClientID:   fmt.Sprintf("gxydb-api_%d", rand.Intn(1024)),
+		CleanStart: true,
+	})
+	s.Require().NoError(err)
+	if ca.ReasonCode != 0 {
+		s.FailNowf("MQTT connect error", "%d - %s", ca.ReasonCode, ca.Properties.ReasonString)
+	}
+
+	payload := map[string]interface{}{
+		"type":   "audio-out",
+		"status": true,
+		"room":   room.GatewayUID,
+	}
+	payloadJson, _ := json.Marshal(payload)
+
+	pr, err := client.Publish(context.Background(), &paho.Publish{
+		Topic:   "galaxy/service/shidur",
+		Payload: payloadJson,
+	})
+	s.Require().NoError(err)
+	if pr != nil && pr.ReasonCode != 0 {
+		s.FailNowf("MQTT publish error", "%d - %s", pr.ReasonCode, pr.Properties.ReasonString)
+	}
+
+	var body map[string]interface{}
+	for i := 0; i < 5; i++ {
+		req, _ := http.NewRequest("GET", "/v2/rooms_statistics", nil)
+		s.apiAuth(req)
+		body = s.request200json(req)
+
+		if len(body) > 0 {
+			break
+		}
+		time.Sleep(time.Second)
+	}
 
 	// verify rooms statistics
 	stats, ok := body[strconv.Itoa(room.GatewayUID)]
