@@ -2,8 +2,7 @@ package api
 
 import (
 	"context"
-	"fmt"
-	"math/rand"
+	"crypto/tls"
 	"net"
 
 	"github.com/eclipse/paho.golang/paho"
@@ -15,28 +14,49 @@ import (
 
 type MQTTListener struct {
 	client                 *paho.Client
+	cache                  *AppCache
 	serviceProtocolHandler ServiceProtocolHandler
 }
 
-func NewMQTTListener(sph ServiceProtocolHandler) *MQTTListener {
+func NewMQTTListener(cache *AppCache, sph ServiceProtocolHandler) *MQTTListener {
 	return &MQTTListener{
 		client:                 paho.NewClient(),
+		cache:                  cache,
 		serviceProtocolHandler: sph,
 	}
 }
 
 func (l *MQTTListener) Init() error {
-	conn, err := net.Dial("tcp", common.Config.MQTTBrokerUrl)
+	var conn net.Conn
+	var err error
+	if common.Config.MQTTSecure {
+		conn, err = tls.Dial("tcp", common.Config.MQTTBrokerUrl, nil)
+	} else {
+		conn, err = net.Dial("tcp", common.Config.MQTTBrokerUrl)
+	}
 	if err != nil {
-		return pkgerr.Wrap(err, "net.Dial")
+		return pkgerr.Wrap(err, "conn.Dial")
 	}
 
 	l.client.Conn = conn
 
 	cp := &paho.Connect{
 		KeepAlive:  30,
-		ClientID:   fmt.Sprintf("gxydb-api_%d", rand.Intn(1024)),
+		ClientID:   "gxydb-api",
 		CleanStart: true,
+	}
+
+	var pwd string
+	if dc, ok := l.cache.dynamicConfig.ByKey(common.DynamicConfigMQTTAuth); ok {
+		pwd = dc.Value
+	} else {
+		pwd = common.Config.MQTTPassword
+	}
+	if pwd != "" {
+		cp.Username = "gxydb-api"
+		cp.Password = []byte(pwd)
+		cp.UsernameFlag = true
+		cp.PasswordFlag = true
 	}
 
 	ca, err := l.client.Connect(context.Background(), cp)

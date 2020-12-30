@@ -28,6 +28,8 @@ type config struct {
 	DBMaxOpenConns        int
 	DBConnMaxLifetime     time.Duration
 	MQTTBrokerUrl         string
+	MQTTPassword          string
+	MQTTSecure            bool
 }
 
 func newConfig() *config {
@@ -50,6 +52,8 @@ func newConfig() *config {
 		DBMaxOpenConns:        0,
 		DBConnMaxLifetime:     0,
 		MQTTBrokerUrl:         "",
+		MQTTPassword:          "",
+		MQTTSecure:            false,
 	}
 }
 
@@ -140,5 +144,11 @@ func Init() {
 	}
 	if val := os.Getenv("MQTT_BROKER_URL"); val != "" {
 		Config.MQTTBrokerUrl = val
+	}
+	if val := os.Getenv("MQTT_PASSWORD"); val != "" {
+		Config.MQTTPassword = val
+	}
+	if val := os.Getenv("MQTT_SECURE"); val != "" {
+		Config.MQTTSecure = val == "true"
 	}
 }

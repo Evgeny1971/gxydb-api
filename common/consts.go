@@ -17,3 +17,5 @@ const EventGatewayTokensChanged = "GATEWAY_TOKENS_CHANGED"
 
 const APIDefaultPageSize = 50
 const APIMaxPageSize = 1000
+
+const DynamicConfigMQTTAuth = "mqtt_auth"
