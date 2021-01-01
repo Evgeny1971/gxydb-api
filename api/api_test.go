@@ -1740,6 +1740,7 @@ func (s *ApiTestSuite) TestMQTTHandleServiceProtocolAudioOut() {
 		body = s.request200json(req)
 
 		if _, ok := body[strconv.Itoa(room.GatewayUID)]; ok {
+			s.T().Logf("TestMQTTHandleServiceProtocolAudioOut body ok: %+v", body)
 			break
 		}
 		time.Sleep(time.Second)
