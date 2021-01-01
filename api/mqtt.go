@@ -3,10 +3,13 @@ package api
 import (
 	"context"
 	"crypto/tls"
+	"fmt"
 	"net"
 
+	"github.com/eclipse/paho.golang/packets"
 	"github.com/eclipse/paho.golang/paho"
 	pkgerr "github.com/pkg/errors"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
 	"github.com/Bnei-Baruch/gxydb-api/common"
@@ -26,7 +29,15 @@ func NewMQTTListener(cache *AppCache, sph ServiceProtocolHandler) *MQTTListener 
 	}
 }
 
-func (l *MQTTListener) Init() error {
+func (l *MQTTListener) Start() error {
+	paho.SetDebugLogger(NewPahoLogAdapter(zerolog.InfoLevel))
+	paho.SetErrorLogger(NewPahoLogAdapter(zerolog.ErrorLevel))
+	return l.init()
+}
+
+func (l *MQTTListener) init() error {
+	log.Info().Msg("Initializing MQTT Listener")
+
 	var conn net.Conn
 	var err error
 	if common.Config.MQTTSecure {
@@ -81,6 +92,13 @@ func (l *MQTTListener) Init() error {
 		return pkgerr.Errorf("MQTT subscribe error: %d ", sa.Reasons[0])
 	}
 
+	l.client.OnDisconnect = func(p packets.Disconnect) {
+		log.Warn().Msgf("MQTT OnDisconnect: %d - %s", p.ReasonCode, p.Reason())
+		if err := l.init(); err != nil {
+			log.Error().Err(err).Msg("error initializing mqtt on disconnect")
+		}
+	}
+
 	return nil
 }
 
@@ -96,4 +114,20 @@ func (l *MQTTListener) HandleServiceProtocol(p *paho.Publish) {
 	if err := l.serviceProtocolHandler.HandleMessage(string(p.Payload)); err != nil {
 		log.Error().Err(err).Msg("service protocol error")
 	}
+}
+
+type PahoLogAdapter struct {
+	level zerolog.Level
+}
+
+func NewPahoLogAdapter(level zerolog.Level) *PahoLogAdapter {
+	return &PahoLogAdapter{level: level}
+}
+
+func (a *PahoLogAdapter) Println(v ...interface{}) {
+	log.WithLevel(a.level).Msgf("mqtt: %s\n", fmt.Sprint(v...))
+}
+
+func (a *PahoLogAdapter) Printf(format string, v ...interface{}) {
+	log.WithLevel(a.level).Msgf("mqtt: %s\n", fmt.Sprintf(format, v...))
 }
