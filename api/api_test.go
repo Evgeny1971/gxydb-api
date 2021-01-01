@@ -1738,10 +1738,12 @@ func (s *ApiTestSuite) TestMQTTHandleServiceProtocolAudioOut() {
 		req, _ := http.NewRequest("GET", "/v2/rooms_statistics", nil)
 		s.apiAuth(req)
 		body = s.request200json(req)
+		s.T().Logf("TestMQTTHandleServiceProtocolAudioOut body: %+v", body)
 
-		if _, ok := body[strconv.Itoa(room.GatewayUID)]; ok {
-			s.T().Logf("TestMQTTHandleServiceProtocolAudioOut body ok: %+v", body)
-			break
+		if stats, ok := body[strconv.Itoa(room.GatewayUID)]; ok {
+			if statsObj, ok := stats.(map[string]interface{}); ok && int(statsObj["on_air"].(float64)) == 1 {
+				break
+			}
 		}
 		time.Sleep(time.Second)
 	}
