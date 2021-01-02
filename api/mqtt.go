@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/eclipse/paho.golang/packets"
 	"github.com/eclipse/paho.golang/paho"
 	pkgerr "github.com/pkg/errors"
 	"github.com/rs/zerolog"
@@ -23,15 +22,23 @@ type MQTTListener struct {
 
 func NewMQTTListener(cache *AppCache, sph ServiceProtocolHandler) *MQTTListener {
 	return &MQTTListener{
-		client:                 paho.NewClient(),
 		cache:                  cache,
 		serviceProtocolHandler: sph,
 	}
 }
 
 func (l *MQTTListener) Start() error {
-	paho.SetDebugLogger(NewPahoLogAdapter(zerolog.InfoLevel))
-	paho.SetErrorLogger(NewPahoLogAdapter(zerolog.ErrorLevel))
+	l.client = paho.NewClient(paho.ClientConfig{
+		ClientID: "gxydb-api",
+		OnConnectionLost: func(err error) {
+			log.Warn().Msgf("MQTT OnConnectionLost: %+v", err)
+			if err := l.init(); err != nil {
+				log.Error().Err(err).Msg("error initializing mqtt on connection lost")
+			}
+		},
+	})
+	l.client.SetDebugLogger(NewPahoLogAdapter(zerolog.InfoLevel))
+	l.client.SetErrorLogger(NewPahoLogAdapter(zerolog.ErrorLevel))
 	return l.init()
 }
 
@@ -92,13 +99,6 @@ func (l *MQTTListener) init() error {
 		return pkgerr.Errorf("MQTT subscribe error: %d ", sa.Reasons[0])
 	}
 
-	l.client.OnDisconnect = func(p packets.Disconnect) {
-		log.Warn().Msgf("MQTT OnDisconnect: %d - %s", p.ReasonCode, p.Reason())
-		if err := l.init(); err != nil {
-			log.Error().Err(err).Msg("error initializing mqtt on disconnect")
-		}
-	}
-
 	return nil
 }
 
@@ -125,9 +125,9 @@ func NewPahoLogAdapter(level zerolog.Level) *PahoLogAdapter {
 }
 
 func (a *PahoLogAdapter) Println(v ...interface{}) {
-	log.WithLevel(a.level).Msgf("mqtt: %s\n", fmt.Sprint(v...))
+	log.WithLevel(a.level).Msgf("mqtt: %s", fmt.Sprint(v...))
 }
 
 func (a *PahoLogAdapter) Printf(format string, v ...interface{}) {
-	log.WithLevel(a.level).Msgf("mqtt: %s\n", fmt.Sprintf(format, v...))
+	log.WithLevel(a.level).Msgf("mqtt: %s", fmt.Sprintf(format, v...))
 }

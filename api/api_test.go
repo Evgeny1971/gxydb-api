@@ -1702,14 +1702,15 @@ func (s *ApiTestSuite) TestMQTTHandleServiceProtocolAudioOut() {
 	room := s.CreateRoom(gateway)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
-	client := paho.NewClient()
 	conn, err := net.Dial("tcp", common.Config.MQTTBrokerUrl)
 	s.Require().NoError(err)
-	client.Conn = conn
+	client := paho.NewClient(paho.ClientConfig{
+		ClientID: fmt.Sprintf("gxydb-api_%d", rand.Intn(1024)),
+		Conn:     conn,
+	})
 
 	ca, err := client.Connect(context.Background(), &paho.Connect{
 		KeepAlive:  30,
-		ClientID:   fmt.Sprintf("gxydb-api_%d", rand.Intn(1024)),
 		CleanStart: true,
 	})
 	s.Require().NoError(err)
