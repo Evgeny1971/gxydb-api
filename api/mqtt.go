@@ -110,7 +110,7 @@ func (l *MQTTListener) Close() error {
 }
 
 func (l *MQTTListener) HandleServiceProtocol(p *paho.Publish) {
-	log.Info().Str("message", p.String()).Msg("MQTT handle service protocol")
+	log.Info().Str("payload", p.String()).Msg("MQTT handle service protocol")
 	if err := l.serviceProtocolHandler.HandleMessage(string(p.Payload)); err != nil {
 		log.Error().Err(err).Msg("service protocol error")
 	}
