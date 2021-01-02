@@ -45,4 +45,4 @@ require (
 )
 
 // replace github.com/edoshor/janus-go => /Users/edoshor/projects/janus-go
-replace github.com/eclipse/paho.golang => github.com/alsm/paho.golang v0.0.0-20201213133639-d2d04570c6db
+replace github.com/eclipse/paho.golang => github.com/edoshor/paho.golang v0.9.1-0.20210102034404-01e231e293df

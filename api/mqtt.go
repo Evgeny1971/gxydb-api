@@ -37,8 +37,11 @@ func (l *MQTTListener) Start() error {
 			}
 		},
 	})
-	l.client.SetDebugLogger(NewPahoLogAdapter(zerolog.InfoLevel))
 	l.client.SetErrorLogger(NewPahoLogAdapter(zerolog.ErrorLevel))
+	debugLog := NewPahoLogAdapter(zerolog.InfoLevel)
+	l.client.SetDebugLogger(debugLog)
+	l.client.PingHandler.SetDebug(debugLog)
+	l.client.Router.SetDebug(debugLog)
 	return l.init()
 }
 
@@ -60,7 +63,6 @@ func (l *MQTTListener) init() error {
 
 	cp := &paho.Connect{
 		KeepAlive:  30,
-		ClientID:   "gxydb-api",
 		CleanStart: true,
 	}
 
