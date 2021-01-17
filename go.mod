@@ -12,7 +12,7 @@ require (
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
 	github.com/eclipse/paho.golang v0.9.0
-	github.com/edoshor/janus-go v0.0.0-20200713013352-5e00c69690bc
+	github.com/edoshor/janus-go v0.0.0-20210117023433-0fdd4703c3f0
 	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
 	github.com/gofrs/uuid v3.2.0+incompatible // indirect

@@ -48,6 +48,8 @@ github.com/docker/go-units v0.4.0 h1:3uh0PgVws3nIA0Q+MwDC8yjEPf9zjRfZZWXZYDct3Tw
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/edoshor/janus-go v0.0.0-20200713013352-5e00c69690bc h1:82Z6CDpikuuoFCCFYDRXt70nQILUdFvWYgSghmw9XMk=
 github.com/edoshor/janus-go v0.0.0-20200713013352-5e00c69690bc/go.mod h1:MtMSWgICYueR+PDTGMxVj3NdyMaI0NdMKT5x7GrSgpo=
+github.com/edoshor/janus-go v0.0.0-20210117023433-0fdd4703c3f0 h1:ORpXzYI1/5VU7Wed5v35r4WOBUCS/+QtL2b+VdtH2Tg=
+github.com/edoshor/janus-go v0.0.0-20210117023433-0fdd4703c3f0/go.mod h1:7HO8aQW5FXrcE0q+tkl8ieT88BgWh1ypHfjHgZep48s=
 github.com/edoshor/paho.golang v0.9.1-0.20210102034404-01e231e293df h1:59goZyb8rqi2VpVpAwHLSsnxMd74m34Vbe6P5+2TBx8=
 github.com/edoshor/paho.golang v0.9.1-0.20210102034404-01e231e293df/go.mod h1:BSKaf0256EbcaBhV0ZDEgXFh+U6Axj2lCMv+Gf3qeTI=
 github.com/friendsofgo/errors v0.9.2 h1:X6NYxef4efCBdwI7BgS820zFaN7Cphrmb+Pljdzjtgk=
