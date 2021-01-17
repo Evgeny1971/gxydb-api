@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"math"
 	"net"
 
 	"github.com/eclipse/paho.golang/paho"
@@ -61,9 +62,15 @@ func (l *MQTTListener) init() error {
 
 	l.client.Conn = conn
 
+	var sessionExpiryInterval = uint32(math.MaxUint32)
+
 	cp := &paho.Connect{
+		ClientID:   common.Config.MQTTClientID,
 		KeepAlive:  30,
 		CleanStart: true,
+		Properties: &paho.ConnectProperties{
+			SessionExpiryInterval: &sessionExpiryInterval,
+		},
 	}
 
 	var pwd string
