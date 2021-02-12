@@ -47,6 +47,7 @@ type GatewayTokensManager struct {
 	maxAge time.Duration
 	ticker *time.Ticker
 	wg     sync.WaitGroup
+	wip    bool
 }
 
 func NewGatewayTokensManager(db common.DBInterface, maxAge time.Duration) *GatewayTokensManager {
@@ -108,17 +109,24 @@ func (tm *GatewayTokensManager) Monitor() {
 func (tm *GatewayTokensManager) Close() {
 	log.Info().Msg("GatewayTokensManager.Close")
 	tm.ticker.Stop()
-	log.Info().Msg("Waiting for worker goroutine to finish")
+	log.Info().Msg("GatewayTokensManager.Close Waiting for worker goroutine to finish")
 	tm.wg.Wait()
 }
 
 func (tm *GatewayTokensManager) SyncAll() {
+	if tm.wip {
+		log.Info().Msg("GatewayTokensManager.SyncAll WIP, skipping.")
+		return
+	}
+	tm.wip = true
+	defer func() { tm.wip = false }()
+
 	gateways, err := models.Gateways(
 		models.GatewayWhere.Disabled.EQ(false),
 		models.GatewayWhere.RemovedAt.IsNull()).
 		All(tm.db)
 	if err != nil {
-		log.Error().Err(err).Msg("fetch gateways from DB")
+		log.Error().Err(err).Msg("GatewayTokensManager.SyncAll fetch gateways from DB")
 		return
 	}
 
@@ -126,7 +134,7 @@ func (tm *GatewayTokensManager) SyncAll() {
 	for _, gateway := range gateways {
 		changed, err := tm.syncGatewayTokens(gateway)
 		if err != nil {
-			log.Error().Err(err).Msgf("error synchronizing gateway tokens %s", gateway.Name)
+			log.Error().Err(err).Msgf("GatewayTokensManager.SyncAll synchronizing gateway tokens %s", gateway.Name)
 		}
 		if changed {
 			notify = true
@@ -174,6 +182,8 @@ func (tm *GatewayTokensManager) syncGatewayTokens(gateway *models.Gateway) (bool
 
 	// gateway doesn't support tokens
 	if !support {
+		log.Warn().Msgf("GatewayTokensManager.syncGatewayTokens %s does not support tokens", gateway.Name)
+
 		if len(tokens) == 0 { // nothing to do
 			return false, nil
 		}
@@ -258,7 +268,7 @@ func (tm *GatewayTokensManager) syncGatewayTokens(gateway *models.Gateway) (bool
 	}
 	for _, token := range removeOnGateway {
 		if err := tm.removeToken(gateway, token); err != nil {
-			log.Error().Err(err).Msgf("remove token on gateway %s", gateway.Name)
+			log.Error().Err(err).Msgf("GatewayTokensManager.syncGatewayTokens remove token on gateway %s", gateway.Name)
 		}
 	}
 
@@ -279,7 +289,7 @@ func (tm *GatewayTokensManager) syncGatewayTokens(gateway *models.Gateway) (bool
 }
 
 func (tm *GatewayTokensManager) createToken(gateway *models.Gateway, tokenStr string) (*GatewayToken, error) {
-	log.Info().Msgf("creating new token on gateway %s", gateway.Name)
+	log.Info().Msgf("GatewayTokensManager.createToken %s", gateway.Name)
 
 	token := GatewayToken{
 		Token:     tokenStr,
@@ -313,7 +323,7 @@ func (tm *GatewayTokensManager) createToken(gateway *models.Gateway, tokenStr st
 }
 
 func (tm *GatewayTokensManager) removeToken(gateway *models.Gateway, tokenStr string) error {
-	log.Info().Msgf("remove token %s from gateway %s", tokenStr, gateway.Name)
+	log.Info().Msgf("GatewayTokensManager.removeToken %s from gateway %s", tokenStr, gateway.Name)
 	api, err := GatewayAdminAPIRegistry.For(gateway)
 	if err != nil {
 		return pkgerr.WithMessage(err, "Admin API for gateway")
