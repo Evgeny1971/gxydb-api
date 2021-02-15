@@ -92,6 +92,7 @@ func (a *App) InitializeWithDeps(db common.DBInterface, tokenVerifier middleware
 			http.MethodDelete,
 		},
 		AllowedHeaders: []string{"Origin", "Accept", "Content-Type", "X-Requested-With", "Authorization"},
+		MaxAge:         3600,
 	})
 
 	// middleware post route match
