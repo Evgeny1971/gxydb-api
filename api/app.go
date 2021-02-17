@@ -138,9 +138,7 @@ func (a *App) Shutdown() {
 		a.periodicStatsCollector.Close()
 	}
 	if a.mqttListener != nil {
-		if err := a.mqttListener.Close(); err != nil {
-			log.Error().Err(err).Msg("mqttListener.Close")
-		}
+		a.mqttListener.Close()
 	}
 	a.sessionManager.Close()
 	a.cache.Close()

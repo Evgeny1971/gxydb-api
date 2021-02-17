@@ -11,7 +11,7 @@ require (
 	github.com/docker/docker v1.13.1 // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.4.0 // indirect
-	github.com/eclipse/paho.golang v0.9.0
+	github.com/eclipse/paho.mqtt.golang v1.3.2
 	github.com/edoshor/janus-go v0.0.0-20210117023433-0fdd4703c3f0
 	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/go-sql-driver/mysql v1.5.0 // indirect
@@ -45,4 +45,3 @@ require (
 )
 
 // replace github.com/edoshor/janus-go => /Users/edoshor/projects/janus-go
-replace github.com/eclipse/paho.golang => github.com/edoshor/paho.golang v0.9.1-0.20210102034404-01e231e293df

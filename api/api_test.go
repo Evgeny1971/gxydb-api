@@ -2,12 +2,10 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"fmt"
 	"math"
 	"math/rand"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -18,7 +16,7 @@ import (
 	"unsafe"
 
 	"github.com/coreos/go-oidc"
-	"github.com/eclipse/paho.golang/paho"
+	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/edoshor/janus-go"
 	janus_admin "github.com/edoshor/janus-go/admin"
 	"github.com/stretchr/testify/mock"
@@ -1702,20 +1700,13 @@ func (s *ApiTestSuite) TestMQTTHandleServiceProtocolAudioOut() {
 	room := s.CreateRoom(gateway)
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
-	conn, err := net.Dial("tcp", common.Config.MQTTBrokerUrl)
-	s.Require().NoError(err)
-	client := paho.NewClient(paho.ClientConfig{
-		ClientID: fmt.Sprintf("gxydb-api_%d", rand.Intn(1024)),
-		Conn:     conn,
-	})
+	opts := mqtt.NewClientOptions().
+		AddBroker(common.Config.MQTTBrokerUrl).
+		SetClientID(fmt.Sprintf("gxydb-api_%d", rand.Intn(1024)))
+	client := mqtt.NewClient(opts)
 
-	ca, err := client.Connect(context.Background(), &paho.Connect{
-		KeepAlive:  30,
-		CleanStart: true,
-	})
-	s.Require().NoError(err)
-	if ca.ReasonCode != 0 {
-		s.FailNowf("MQTT connect error", "%d - %s", ca.ReasonCode, ca.Properties.ReasonString)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		s.FailNow("MQTT connect error ", token.Error())
 	}
 
 	payload := map[string]interface{}{
@@ -1725,13 +1716,8 @@ func (s *ApiTestSuite) TestMQTTHandleServiceProtocolAudioOut() {
 	}
 	payloadJson, _ := json.Marshal(payload)
 
-	pr, err := client.Publish(context.Background(), &paho.Publish{
-		Topic:   "galaxy/service/shidur",
-		Payload: payloadJson,
-	})
-	s.Require().NoError(err)
-	if pr != nil && pr.ReasonCode != 0 {
-		s.FailNowf("MQTT publish error", "%d - %s", pr.ReasonCode, pr.Properties.ReasonString)
+	if token := client.Publish("galaxy/service/shidur", byte(2), false, payloadJson); token.Wait() && token.Error() != nil {
+		s.FailNow("MQTT Publish error ", token.Error())
 	}
 
 	var body map[string]interface{}
