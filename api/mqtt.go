@@ -52,7 +52,8 @@ func (l *MQTTListener) Start() error {
 	// client
 	opts := mqtt.NewClientOptions().
 		AddBroker(brokerURI.String()).
-		SetClientID(common.Config.MQTTClientID)
+		SetClientID(common.Config.MQTTClientID).
+		SetResumeSubs(true)
 	l.client = mqtt.NewClient(opts)
 
 	// connect and subscribe

@@ -37,7 +37,7 @@ func newConfig() *config {
 	return &config{
 		ListenAddress:         ":8081",
 		DBUrl:                 "postgres://user:password@localhost/galaxy?sslmode=disable",
-		AccountsUrls:          []string{"https://accounts.kbb1.com/auth/realms/main"},
+		AccountsUrls:          []string{"https://accounts.kab.info/auth/realms/main"},
 		SkipAuth:              false,
 		SkipEventsAuth:        false,
 		SkipPermissions:       false,
