@@ -53,18 +53,22 @@ func (l *MQTTListener) Start() error {
 	opts := mqtt.NewClientOptions().
 		AddBroker(brokerURI.String()).
 		SetClientID(common.Config.MQTTClientID).
-		SetResumeSubs(true)
+		SetAutoReconnect(true).
+		SetOnConnectHandler(l.Subscribe)
 	l.client = mqtt.NewClient(opts)
 
-	// connect and subscribe
+	// connect
 	if token := l.client.Connect(); token.Wait() && token.Error() != nil {
 		return pkgerr.Wrap(token.Error(), "mqtt.client Connect")
 	}
-	if token := l.client.Subscribe("galaxy/service/#", byte(2), l.HandleServiceProtocol); token.Wait() && token.Error() != nil {
-		return pkgerr.Wrap(token.Error(), "mqtt.client Subscribe")
-	}
 
 	return nil
+}
+
+func (l *MQTTListener) Subscribe(c mqtt.Client) {
+	if token := l.client.Subscribe("galaxy/service/#", byte(2), l.HandleServiceProtocol); token.Wait() && token.Error() != nil {
+		log.Error().Err(token.Error()).Msg("mqtt.client Subscribe")
+	}
 }
 
 func (l *MQTTListener) Close() {
