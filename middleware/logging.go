@@ -28,6 +28,7 @@ func init() {
 	}
 
 	zerolog.TimeFieldFormat = time.RFC3339Nano
+	zerolog.TimestampFieldName = "timestamp"
 	zerolog.ErrorStackMarshaler = pkgerrors.MarshalStack
 	log.With().Stack()
 }

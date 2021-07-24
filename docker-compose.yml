@@ -3,7 +3,7 @@ version: "3.7"
 services:
   db:
     image: postgres:12
-    restart: always
+    restart: unless-stopped
     environment:
       POSTGRES_PASSWORD: password
       POSTGRES_USER: user
@@ -12,7 +12,7 @@ services:
       - 5432:5432
   janus1:
     image: bneibaruch/janus:latest
-    restart: always
+    restart: unless-stopped
     volumes:
       - ./misc/janus/config/dev:/usr/janusgxy/etc/janus
     ports:
@@ -20,7 +20,7 @@ services:
       - 7088:7088
       - 8188:8188
   mqtt:
-    image: eclipse-mosquitto
-    restart: always
+    image: eclipse-mosquitto:1.6
+    restart: unless-stopped
     ports:
       - 1883:1883
