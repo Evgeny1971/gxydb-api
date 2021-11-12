@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/edoshor/janus-go"
@@ -324,8 +325,11 @@ func (sm *V1SessionManager) makeSession(userID int64, user *V1User) (*models.Ses
 		SelfTest:              user.SelfTest,
 		SoundTest:             user.SoundTest,
 		UserAgent:             null.StringFrom(user.System),
-		IPAddress:             null.StringFrom(user.IP),
 		UpdatedAt:             null.TimeFrom(time.Now().UTC()),
+	}
+
+	if ip := net.ParseIP(user.IP); ip != nil {
+		s.IPAddress = null.StringFrom(ip.String())
 	}
 
 	if extraB, err := json.Marshal(user.Extra); err == nil {
