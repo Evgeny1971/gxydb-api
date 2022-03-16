@@ -148,8 +148,13 @@ func (sm *V1SessionManager) onVideoroomLeaving(ctx context.Context, tx *sql.Tx, 
 
 	userID, err := sm.getInternalUserID(ctx, tx, &v1User)
 	if err != nil {
-		return pkgerr.Wrap(err, "sm.getInternalUserID")
+		// we ignore ProtocolError here so that we could close sessions for disabled users
+		var pErr *ProtocolError
+		if !errors.As(err, &pErr) {
+			return pkgerr.Wrap(err, "sm.getInternalUserID")
+		}
 	}
+
 	if userID == 0 {
 		return nil
 	}
@@ -215,8 +220,12 @@ func (sm *V1SessionManager) getInternalUserID(ctx context.Context, tx *sql.Tx, u
 		models.UserWhere.AccountsID.EQ(user.ID)).
 		One(tx)
 	if err == nil {
-		sm.cache.users.Set(u)
-		return u.ID, nil
+		if u.Disabled {
+			return u.ID, NewProtocolError(fmt.Sprintf("Disabled user: %s", user.ID))
+		} else {
+			sm.cache.users.Set(u)
+			return u.ID, nil
+		}
 	}
 
 	if !errors.Is(err, sql.ErrNoRows) {

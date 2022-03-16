@@ -246,7 +246,7 @@ func (c *UserCache) Reload(db common.DBInterface) error {
 	if c.cache != nil {
 		c.cache.Purge()
 	}
-	c.cache, _ = lru.NewARC(5_000)
+	c.cache, _ = lru.NewARC(10_000)
 	for _, user := range users {
 		c.cache.Add(user.AccountsID, user)
 	}
