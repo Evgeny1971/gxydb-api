@@ -265,7 +265,7 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 
 	err := sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
 		// create room in DB
-		if err := data.Insert(tx, boil.Whitelist("name", "default_gateway_id", "gateway_uid", "disabled")); err != nil {
+		if err := data.Insert(tx, boil.Whitelist("name", "default_gateway_id", "gateway_uid", "disabled", "region")); err != nil {
 			return pkgerr.WithStack(err)
 		}
 
