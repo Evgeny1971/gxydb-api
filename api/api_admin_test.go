@@ -395,10 +395,6 @@ func (s *ApiTestSuite) TestAdmin_CreateRoom() {
 	gRoom := s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64)))
 	s.Require().NotNil(gRoom, "gateway room")
 	s.Equal(gRoom.Description, payload.Name, "gateway room description")
-
-	gChatroom := s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64)))
-	s.Require().NotNil(gRoom, "gateway room")
-	s.Equal(gChatroom.Description, payload.Name, "gateway chatroom description")
 }
 
 func (s *ApiTestSuite) TestAdmin_UpdateRoomForbidden() {
@@ -520,10 +516,6 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 	gRoom := s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64)))
 	s.Require().NotNil(gRoom, "gateway room")
 	s.Equal(gRoom.Description, payload.Name, "gateway room description")
-
-	gChatroom := s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64)))
-	s.Require().NotNil(gRoom, "gateway room")
-	s.Equal(gChatroom.Description, payload.Name, "gateway chatroom description")
 }
 
 func (s *ApiTestSuite) TestAdmin_DeleteRoomForbidden() {
@@ -573,9 +565,8 @@ func (s *ApiTestSuite) TestAdmin_DeleteRoom() {
 	s.Require().NoError(err, "models.FindRoom")
 	s.True(room.RemovedAt.Valid, "remove_at")
 
-	// verify room does not exists on gateway
+	// verify room does not exist on gateway
 	s.Nil(s.findRoomInGateway(gateway, int(body["gateway_uid"].(float64))))
-	s.Nil(s.findChatroomInGateway(gateway, int(body["gateway_uid"].(float64))))
 }
 
 func (s *ApiTestSuite) TestAdmin_DeleteRoomsStatistics() {
@@ -943,24 +934,6 @@ func (s *ApiTestSuite) findRoomInGateway(gateway *models.Gateway, id int) *janus
 	s.Require().NoError(err, "api.MessagePlugin")
 
 	tResp, _ := resp.(*janus_plugins.VideoroomListResponse)
-	for _, x := range tResp.Rooms {
-		if x.Room == id {
-			return x
-		}
-	}
-
-	return nil
-}
-
-func (s *ApiTestSuite) findChatroomInGateway(gateway *models.Gateway, id int) *janus_plugins.TextroomRoomFromListResponse {
-	api, err := domain.GatewayAdminAPIRegistry.For(gateway)
-	s.Require().NoError(err, "Admin API for gateway")
-
-	request := janus_plugins.MakeTextroomRequestFactory(common.Config.GatewayPluginAdminKey).ListRequest()
-	resp, err := api.MessagePlugin(request)
-	s.Require().NoError(err, "api.MessagePlugin")
-
-	tResp, _ := resp.(*janus_plugins.TextroomListResponse)
 	for _, x := range tResp.Rooms {
 		if x.Room == id {
 			return x
