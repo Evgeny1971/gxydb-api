@@ -12,6 +12,7 @@ services:
       - 5432:5432
   janus1:
     image: bneibaruch/janus:latest
+#    image: janus_bb:local
     restart: unless-stopped
     volumes:
       - ./misc/janus/config/dev:/usr/janusgxy/etc/janus

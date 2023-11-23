@@ -1,4 +1,4 @@
-FROM centos:8
+FROM rockylinux:9
 
 LABEL maintainer="Edo Shor <edoshor@gmail.com>"
 LABEL description="Provides an image with BB fork of Janus Gateway for Galaxy 3"
@@ -6,9 +6,10 @@ LABEL description="Provides an image with BB fork of Janus Gateway for Galaxy 3"
 # docker build arguments
 ARG BUILD_SRC="/usr/local/src"
 
-RUN yum install -y epel* \
-    && yum upgrade -y \
-    && yum install -y \
+RUN dnf install -y epel-release \
+    && dnf upgrade -y
+RUN dnf install -y \
+    yum-utils \
     libconfig \
     libmicrohttpd \
     openssl \
@@ -25,31 +26,33 @@ RUN yum install -y epel* \
     gcc \
     git \
     make \
-    curl \
+    wget \
     golang \
-    coturn \
     glib2-devel \
-    jansson-devel \
     libcurl-devel \
-    which \
-    && dnf --enablerepo=PowerTools install -y \
+    python3-pip \
+    tuned \
+    dnf-plugins-core \
+    unzip \
+    pip \
+    xz \
+    && dnf --enablerepo=devel install -y \
+    jansson-devel \
     libconfig-devel \
     libmicrohttpd-devel \
-    # texinfo is because of https://savannah.gnu.org/bugs/?56931
+    meson \
+    opus-devel \
+    libwebsockets-devel \
+    speexdsp-devel \
     texinfo
+RUN pip3 install ninja meson
+RUN tuned-adm profile throughput-performance
+
 
 RUN /usr/sbin/groupadd -r janus \
     && /usr/sbin/useradd -r -g janus janus \
     && mkdir -p $BUILD_SRC
 
-### Jansson
-RUN cd $BUILD_SRC \
-    && curl -qL http://www.digip.org/jansson/releases/jansson-2.12.tar.gz -o jansson-2.12.tar.gz \
-    && tar xfv jansson-2.12.tar.gz \
-    && cd jansson-2.12 \
-    && ./configure --prefix=/usr --libdir=/usr/lib64 \
-    && make \
-    && make install
 
 ### getopt
 RUN cd $BUILD_SRC \
@@ -60,43 +63,14 @@ RUN cd $BUILD_SRC \
     && make \
     && make install
 
-### srtp
-RUN cd $BUILD_SRC \
-    && curl -qL https://github.com/cisco/libsrtp/archive/v2.2.0.tar.gz -o libsrtp-2.2.0.tar.gz \
-    && tar xfv libsrtp-2.2.0.tar.gz \
-    && cd libsrtp-2.2.0 \
-    && ./configure --prefix=/usr --enable-openssl --libdir=/usr/lib64 \
-    && make shared_library \
-    && make install
-
-### usrsctp
-RUN cd $BUILD_SRC \
-    && git clone https://github.com/sctplab/usrsctp \
-    && cd usrsctp \
-    && ./bootstrap \
-    && ./configure --prefix=/usr --libdir=/usr/lib64 \
-    && make \
-    && make install
-
-### libwebsockets
-RUN cd $BUILD_SRC \
-    && git clone git://git.libwebsockets.org/libwebsockets \
-    && cd libwebsockets \
-    && git checkout v2.4-stable \
-    && mkdir build \
-    && cd build \
-    && cmake -DLWS_MAX_SMP=1 -DCMAKE_INSTALL_PREFIX:PATH=/usr -DLIB_SUFFIX=64 -DCMAKE_C_FLAGS="-fpic" .. \
-    && make \
-    && make install
-
 ### nice
 RUN cd $BUILD_SRC \
-    && curl -qL https://nice.freedesktop.org/releases/libnice-0.1.16.tar.gz -o libnice-0.1.16.tar.gz \
-    && tar xvf libnice-0.1.16.tar.gz \
-    && cd libnice-0.1.16 \
-    && ./configure --prefix=/usr --libdir=/usr/lib64 \
-    && make \
-    && make install
+    && curl -qL https://gitlab.freedesktop.org/libnice/libnice/-/archive/0.1.18/libnice-0.1.18.tar.gz -o libnice-0.1.18.tar.gz \
+    && tar xvf libnice-0.1.18.tar.gz \
+    && cd libnice-0.1.18 \
+    && meson --prefix=/usr --libdir=/usr/lib64 builddir \
+    && ninja -C builddir \
+    && ninja -C builddir install
 
 #### Boring SSL
 RUN cd $BUILD_SRC \
@@ -113,12 +87,21 @@ RUN cd $BUILD_SRC \
     && cp build/ssl/libssl.a /opt/boringssl/lib/ \
     && cp build/crypto/libcrypto.a /opt/boringssl/lib/
 
+### srtp
+RUN cd $BUILD_SRC \
+    && curl -qL https://github.com/cisco/libsrtp/archive/v2.2.0.tar.gz -o libsrtp-2.2.0.tar.gz \
+    && tar xfv libsrtp-2.2.0.tar.gz \
+    && cd libsrtp-2.2.0 \
+    && ./configure --prefix=/usr --enable-openssl --libdir=/usr/lib64 \
+    && make shared_library \
+    && make install
+
 ### Janus
 RUN cd $BUILD_SRC \
     && git clone https://github.com/Bnei-Baruch/janus-gateway.git -b bb \
     && cd janus-gateway \
     && ./autogen.sh \
-    && ./configure --prefix=/usr/janusgxy --disable-rabbitmq --disable-mqtt --disable-docs --enable-websockets --enable-boringssl --enable-dtls-settimeout \
+    && ./configure --prefix=/usr/janusgxy --disable-rabbitmq --disable-docs --enable-websockets --enable-boringssl --enable-dtls-settimeout \
     && make \
     && make install \
     && make configs \
