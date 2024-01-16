@@ -1,0 +1,38 @@
+# log_format  mylog '$remote_addr $remote_user [$time_local] "$request" '
+#                      '$status $body_bytes_sent "$http_referer" '
+#                      '"$http_user_agent" $bytes_sent $upstream_response_time $request_time';
+
+# we stick with nginx var names here and prefix the exported metric with nginx_ by using "as"
+# "by" allows us to specify our labelling/grouping
+counter request_count          by nginx_method, nginx_uri, nginx_status as "nginx_request_count"
+counter bytes_sent             by nginx_method, nginx_uri, nginx_status as "nginx_bytes_sent"
+counter body_bytes_sent        by nginx_method, nginx_uri, nginx_status as "nginx_body_bytes_sent"
+counter request_time           by nginx_method, nginx_uri, nginx_status as "nginx_request_time"
+counter upstream_response_time by nginx_method, nginx_uri, nginx_status as "nginx_upstream_response_time"
+counter nginx_log_nomatch_count
+
+/^/ +
+/(?P<remote_addr>\d+(\.\d+){3}) / +
+/(?P<remote_user>\S+) / +
+/\[(?P<time_local>.*)\] / +
+/"(?P<request_method>\S+) (?P<uri>\S+) (?P<protocol>\S+)" / +
+/(?P<status>\d+) / +
+/(?P<body_bytes_sent>\d+) / +
+/"(?P<http_referer>.*)" / +
+/"(?P<http_user_agent>.*)" / +
+/(?P<bytes_sent>\d+) / +
+/(?P<upstream_response_time>\S+) / +
+/(?P<request_time>\d+\.\d+)/ +
+/$/ {
+    strptime($time_local, "02/Jan/2006:15:04:05 -0700")
+    request_count[$request_method][$uri][$status]++
+    bytes_sent[$request_method][$uri][$status] += $bytes_sent
+    body_bytes_sent[$request_method][$uri][$status] += $body_bytes_sent
+    request_time[$request_method][$uri][$status] += $request_time
+    $upstream_response_time != "-" {
+        upstream_response_time[$request_method][$uri][$status] += float($upstream_response_time)
+    }
+} else {
+    # nomatch is a bug
+    nginx_log_nomatch_count++
+}
