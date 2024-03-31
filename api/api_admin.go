@@ -247,15 +247,15 @@ func (a *App) AdminCreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if data.GatewayUID == 0 {
+	if data.GatewayUID == "0" {
 		var maxUID int
 		if err := models.NewQuery(qm.Select("coalesce(max(gateway_uid), 0) + 1"), qm.From(models.TableNames.Rooms)).
 			QueryRow(a.DB).Scan(&maxUID); err != nil {
 			httputil.NewInternalError(pkgerr.Wrap(err, "fetch max gateway_uid")).Abort(w, r)
 			return
 		}
-		data.GatewayUID = maxUID
-	} else if data.GatewayUID < 0 {
+		data.GatewayUID = strconv.Itoa(maxUID)
+	} else if (gatewayUID, _ := strconv.Atoi(data.GatewayUID)) < 0 {
 		httputil.NewBadRequestError(nil, "gateway_uid must be a positive integer").Abort(w, r)
 		return
 	} else if _, ok := a.cache.rooms.ByGatewayUID(data.GatewayUID); ok {

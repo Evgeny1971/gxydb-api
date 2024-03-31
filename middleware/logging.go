@@ -22,7 +22,7 @@ func init() {
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
 
 	zerolog.CallerFieldName = "line"
-	zerolog.CallerMarshalFunc = func(file string, line int) string {
+	zerolog.CallerMarshalFunc = func(pc uintptr, file string, line int) string {
 		rel := strings.Split(file, "gxydb-api/")
 		return fmt.Sprintf("%s:%d", rel[1], line)
 	}

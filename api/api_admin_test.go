@@ -8,6 +8,7 @@ import (
 	"math"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"time"
 
 	janus_plugins "github.com/edoshor/janus-go/plugins"
@@ -319,7 +320,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoomBadRequest() {
 	// non existing gateway
 	body := models.Room{
 		Name:       fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
-		GatewayUID: rand.Intn(math.MaxInt32),
+		GatewayUID: strconv.Itoa(rand.Intn(math.MaxInt32)),
 	}
 	b, _ := json.Marshal(body)
 	req, _ = http.NewRequest("POST", "/admin/rooms", bytes.NewBuffer(b))
@@ -332,7 +333,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoomBadRequest() {
 	s.Require().NoError(s.app.cache.ReloadAll(s.DB))
 
 	body.DefaultGatewayID = gateway.ID
-	body.GatewayUID = -8
+	body.GatewayUID = "-8"
 	b, _ = json.Marshal(body)
 	req, _ = http.NewRequest("POST", "/admin/rooms", bytes.NewBuffer(b))
 	s.apiAuthP(req, []string{common.RoleRoot})
@@ -351,7 +352,16 @@ func (s *ApiTestSuite) TestAdmin_CreateRoomBadRequest() {
 
 	// existing name
 	body.Name = room.Name
-	body.GatewayUID = room.GatewayUID + 1
+	// Convert room.GatewayUID to integer
+	gatewayUID, err := strconv.Atoi(room.GatewayUID)
+	if err != nil {
+		// Handle error if conversion fails
+		panic(err)
+	}
+	// Increment the integer value by 1
+	incrementedGatewayUID := gatewayUID + 1
+	// Convert the incremented integer back to a string
+	body.GatewayUID = strconv.Itoa(incrementedGatewayUID)
 	b, _ = json.Marshal(body)
 	req, _ = http.NewRequest("POST", "/admin/rooms", bytes.NewBuffer(b))
 	s.apiAuthP(req, []string{common.RoleRoot})
@@ -376,7 +386,7 @@ func (s *ApiTestSuite) TestAdmin_CreateRoom() {
 
 	payload := models.Room{
 		Name:             fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
-		GatewayUID:       rand.Intn(math.MaxInt32),
+		GatewayUID:       strconv.Itoa(rand.Intn(math.MaxInt32)),
 		DefaultGatewayID: gateway.ID,
 		Region:           null.StringFrom("region"),
 	}
@@ -433,7 +443,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoomBadRequest() {
 	// non existing gateway
 	body := models.Room{
 		Name:       fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
-		GatewayUID: rand.Intn(math.MaxInt32),
+		GatewayUID: strconv.Itoa(rand.Intn(math.MaxInt32)),
 	}
 	b, _ := json.Marshal(body)
 	req, _ = http.NewRequest("PUT", fmt.Sprintf("/admin/rooms/%d", room.ID), bytes.NewBuffer(b))
@@ -443,7 +453,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoomBadRequest() {
 
 	// invalid gateway uid
 	body.DefaultGatewayID = gateway.ID
-	body.GatewayUID = -8
+	body.GatewayUID = "-8"
 	b, _ = json.Marshal(body)
 	req, _ = http.NewRequest("PUT", fmt.Sprintf("/admin/rooms/%d", room.ID), bytes.NewBuffer(b))
 	s.apiAuthP(req, []string{common.RoleRoot})
@@ -486,7 +496,7 @@ func (s *ApiTestSuite) TestAdmin_UpdateRoom() {
 
 	payload := models.Room{
 		Name:             fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
-		GatewayUID:       rand.Intn(math.MaxInt16),
+		GatewayUID:       strconv.Itoa(rand.Intn(math.MaxInt16)),
 		DefaultGatewayID: gateway.ID,
 		Region:           null.StringFrom("region"),
 	}
@@ -547,7 +557,7 @@ func (s *ApiTestSuite) TestAdmin_DeleteRoom() {
 
 	payload := models.Room{
 		Name:             fmt.Sprintf("room_%s", stringutil.GenerateName(10)),
-		GatewayUID:       rand.Intn(math.MaxInt16),
+		GatewayUID:       strconv.Itoa(rand.Intn(math.MaxInt16)),
 		DefaultGatewayID: gateway.ID,
 	}
 	b, _ := json.Marshal(payload)

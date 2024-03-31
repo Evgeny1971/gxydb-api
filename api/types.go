@@ -31,11 +31,11 @@ type V1User struct {
 	Role           string                 `json:"role"`
 	System         string                 `json:"system"`
 	Username       string                 `json:"username"`
-	Room           int                    `json:"room"`
+	Room           string                 `json:"room"`
 	Timestamp      int64                  `json:"timestamp"`
 	Session        int64                  `json:"session"`
 	Handle         int64                  `json:"handle"`
-	RFID           int64                  `json:"rfid"`
+	RFID           string                 `json:"rfid"`
 	TextroomHandle int64                  `json:"textroom_handle"`
 	Camera         bool                   `json:"camera"`
 	Question       bool                   `json:"question"`
@@ -45,7 +45,7 @@ type V1User struct {
 }
 
 type V1RoomInfo struct {
-	Room        int    `json:"room"`
+	Room        string `json:"room"`
 	Janus       string `json:"janus"`
 	Description string `json:"description"`
 }
@@ -79,7 +79,7 @@ type V1ProtocolMessageText struct {
 type V1ServiceProtocolMessageText struct {
 	Type        string
 	Status      bool
-	Room        *int
+	Room        *string
 	Column      *int `json:"col"`
 	Index       *int `json:"i"`
 	Transaction *string

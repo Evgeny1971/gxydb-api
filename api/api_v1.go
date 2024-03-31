@@ -117,7 +117,7 @@ func (a *App) V1CreateGroup(w http.ResponseWriter, r *http.Request) {
 	room := models.Room{
 		Name:             data.Description,
 		DefaultGatewayID: gateway.ID,
-		GatewayUID:       id,
+		GatewayUID:       strconv.Itoa(id),
 	}
 
 	err = sqlutil.InTx(r.Context(), a.DB, func(tx *sql.Tx) error {
@@ -171,8 +171,10 @@ func (a *App) V1ListRooms(w http.ResponseWriter, r *http.Request) {
 
 func (a *App) V1GetRoom(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
+	id, ok := vars["id"]
+	var err error
+
+	if !ok {
 		httputil.NewBadRequestError(err, "malformed id").Abort(w, r)
 		return
 	}
@@ -212,8 +214,10 @@ func (a *App) V1UpdateRoom(w http.ResponseWriter, r *http.Request) {
 	}
 
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
+	id, ok := (vars["id"])
+	var err error
+
+	if !ok {
 		httputil.NewBadRequestError(err, "malformed id").Abort(w, r)
 		return
 	}
@@ -592,7 +596,7 @@ func (a *App) makeV1User(room *models.Room, session *models.Session) *V1User {
 		Timestamp:      session.CreatedAt.Unix(), // Not sure we really need this
 		Session:        session.GatewaySession.Int64,
 		Handle:         session.GatewayHandle.Int64,
-		RFID:           session.GatewayFeed.Int64,
+		RFID:           session.GatewayFeed.String,
 		TextroomHandle: session.GatewayHandleTextroom.Int64,
 		Camera:         session.Camera,
 		Question:       session.Question,

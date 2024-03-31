@@ -326,7 +326,7 @@ func (sm *V1SessionManager) makeSession(userID int64, user *V1User) (*models.Ses
 		GatewayID:             null.Int64From(gateway.ID),
 		GatewaySession:        null.Int64From(user.Session),
 		GatewayHandle:         null.Int64From(user.Handle),
-		GatewayFeed:           null.Int64From(user.RFID),
+		GatewayFeed:           null.StringFrom(user.RFID),
 		GatewayHandleTextroom: null.Int64From(user.TextroomHandle),
 		Display:               null.StringFrom(user.Display),
 		Camera:                user.Camera,
